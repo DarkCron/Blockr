@@ -1,4 +1,4 @@
-package com.KUL;
+package com.kul;
 
 import java.awt.Color;
 import java.awt.Component;
@@ -26,27 +26,13 @@ import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-/**
- * A window for custom drawing.
- *
- * To use this class, create a subclass, say MyCanvasWindow, that overrides
- * methods {@link #paint(Graphics)}, {@link #handleMouseEvent(int,int,int,int)}, and {@link #handleKeyEvent(int,int,char)}, and then launch
- * it from your main method as follows:
- * 
- * <pre>
- * public static void main(String[] args) {
- *     java.awt.EventQueue.invokeLater(() -> {
- *         new MyCanvasWindow("My Canvas Window").show();
- *     });
- * }
- * </pre>
- */
-
 abstract class RecordingItem {
 	abstract void save(String path, int itemIndex, PrintWriter writer) throws IOException;
 	abstract void replay(int itemIndex, CanvasWindow window);
 }
+
 class MouseEventItem extends RecordingItem {
+
 	int id;
 	int x;
 	int y;
@@ -77,7 +63,9 @@ class MouseEventItem extends RecordingItem {
 		window.handleMouseEvent(id, x, y, clickCount);
 	}
 }
+
 class KeyEventItem extends RecordingItem {
+
 	int id;
 	int keyCode;
 	char keyChar;
@@ -104,6 +92,7 @@ class KeyEventItem extends RecordingItem {
 		window.handleKeyEvent(id, keyCode, keyChar);
 	}
 }
+
 class PaintItem extends RecordingItem {
 	BufferedImage image;
 	
@@ -219,40 +208,55 @@ class CanvasWindowRecording {
 	
 }
 
-public class CanvasWindow {
-	
+/**
+ * A window for custom drawing.
+ *
+ * To use this class, create a subclass, say MyCanvasWindow, that overrides
+ * methods {@link #paint(Graphics)}, {@link #handleMouseEvent(int,int,int,int)}, and {@link #handleKeyEvent(int,int,char)}, and then launch
+ * it from your main method as follows:
+ *
+ * <pre>
+ * public static void main(String[] args) {
+ *     java.awt.EventQueue.invokeLater(() -> {
+ *         new MyCanvasWindow("My Canvas Window").show();
+ *     });
+ * }
+ * </pre>
+ */
+public abstract class CanvasWindow {
+
 	int width = 600;
 	int height = 600;
 	String title;
 	Panel panel;
 	private Frame frame;
-	
+
 	private String recordingPath;
 	private CanvasWindowRecording recording;
-	
+
 	void updateFrameTitle() {
 		frame.setTitle(recording == null ? title : title + " - Recording: " + recording.items.size() + " items recorded");
 	}
 
-        public void setTitle(String title) {
-            this.title = title;
-            updateFrameTitle();
-        }
-	
+	public void setTitle(String title) {
+		this.title = title;
+		updateFrameTitle();
+	}
+
 	/**
 	 * Initializes a CanvasWindow object.
-	 * 
+	 *
 	 * @param title Window title
 	 */
 	protected CanvasWindow(String title) {
 		this.title = title;
 	}
-	
+
 	public final void recordSession(String path) {
 		recordingPath = path;
 		recording = new CanvasWindowRecording();
 	}
-	
+
 	/**
 	 * Call this method if the canvas is out of date and needs to be repainted.
 	 * This will cause method {@link #paint(Graphics)} to be called after the current call of method handleMouseEvent or handleKeyEvent finishes.
@@ -261,46 +265,39 @@ public class CanvasWindow {
 		if (panel != null)
 			panel.repaint();
 	}
-	
+
 	/**
 	 * Called to allow you to paint on the canvas.
-	 * 
+	 * <p>
 	 * You should not use the Graphics object after you return from this method.
-	 * 
+	 *
 	 * @param g This object offers the methods that allow you to paint on the canvas.
 	 */
-	protected void paint(Graphics g) {
-	}
-	
+	protected abstract void paint(Graphics g);
+
 	private void handleMouseEvent_(MouseEvent e) {
-		System.out.println(e);
 		if (recording != null)
 			recording.items.add(new MouseEventItem(e.getID(), e.getX(), e.getY(), e.getClickCount()));
 		handleMouseEvent(e.getID(), e.getX(), e.getY(), e.getClickCount());
 	}
-	
+
 	/**
 	 * Called when the user presses (id == MouseEvent.MOUSE_PRESSED), releases (id == MouseEvent.MOUSE_RELEASED), or drags (id == MouseEvent.MOUSE_DRAGGED) the mouse.
-	 * 
-	 * @param e Details about the event
+	 *
 	 */
-	protected void handleMouseEvent(int id, int x, int y, int clickCount) {
-	}
-	
+	protected abstract void handleMouseEvent(int id, int x, int y, int clickCount);
+
 	private void handleKeyEvent_(KeyEvent e) {
-		System.out.println(e);
 		if (recording != null)
 			recording.items.add(new KeyEventItem(e.getID(), e.getKeyCode(), e.getKeyChar()));
 		handleKeyEvent(e.getID(), e.getKeyCode(), e.getKeyChar());
 	}
-	
+
 	/**
 	 * Called when the user presses a key (id == KeyEvent.KEY_PRESSED) or enters a character (id == KeyEvent.KEY_TYPED).
-	 * 
-	 * @param e
+	 *
 	 */
-	protected void handleKeyEvent(int id, int keyCode, char keyChar) {
-	}
+	protected abstract void handleKeyEvent(int id, int keyCode, char keyChar);
 
 	BufferedImage captureImage() {
 		BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
@@ -311,62 +308,62 @@ public class CanvasWindow {
 		CanvasWindow.this.paint(imageGraphics);
 		return image;
 	}
-	
+
 	class Panel extends JPanel {
-		
-		{
+
+		public Panel(){
 			setPreferredSize(new Dimension(width, height));
 			setBackground(Color.WHITE);
 			setFocusable(true);
-			
+
 			addMouseListener(new MouseAdapter() {
-	
+
 				@Override
 				public void mouseClicked(MouseEvent e) {
 					handleMouseEvent_(e);
 				}
-	
+
 				@Override
 				public void mousePressed(MouseEvent e) {
 					handleMouseEvent_(e);
 				}
-	
+
 				@Override
 				public void mouseReleased(MouseEvent e) {
 					handleMouseEvent_(e);
 				}
-				
+
 			});
-			
+
 			addMouseMotionListener(new MouseAdapter() {
-	
+
 				@Override
 				public void mouseDragged(MouseEvent e) {
 					handleMouseEvent_(e);
 				}
-				
+
 			});
-			
+
 			addKeyListener(new KeyAdapter() {
-	
+
 				@Override
 				public void keyTyped(KeyEvent e) {
 					handleKeyEvent_(e);
 				}
-	
+
 				@Override
 				public void keyPressed(KeyEvent e) {
 					handleKeyEvent_(e);
 				}
-				
+
 			});
 		}
-		
+
 		@Override
 		protected void paintComponent(Graphics g) {
 			System.out.println("Painting...");
 			super.paintComponent(g);
-			
+
 			if (recording != null) {
 				BufferedImage image = captureImage();
 				g.drawImage(image, 0, 0, null);
@@ -376,13 +373,12 @@ public class CanvasWindow {
 				CanvasWindow.this.paint(g);
 			}
 		}
-		
 	}
 
 	private class Frame extends JFrame {
 		Frame(String title) {
 			super(title);
-			
+
 			addWindowListener(new WindowAdapter() {
 
 				@Override
@@ -396,7 +392,7 @@ public class CanvasWindow {
 						}
 					System.exit(0);
 				}
-				
+
 			});
 			getContentPane().add(panel);
 			pack();
@@ -410,9 +406,10 @@ public class CanvasWindow {
 			throw new RuntimeException("You must call this method from the AWT dipatch thread");
 		panel = new Panel();
 		frame = new Frame(title);
+		frame.setResizable(false);
 		frame.setVisible(true);
 	}
-	
+
 	public static void replayRecording(String path, CanvasWindow window) {
 		try {
 			new CanvasWindowRecording(path).replay(window);

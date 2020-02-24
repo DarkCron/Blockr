@@ -1,1 +1,0 @@
-This package is only for KUL/Toledo provided classes, please do not put your own classes inside this folder.
