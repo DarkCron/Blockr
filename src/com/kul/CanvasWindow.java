@@ -225,8 +225,8 @@ class CanvasWindowRecording {
  */
 public abstract class CanvasWindow {
 
-	int width = 600;
-	int height = 600;
+	protected final int width = 600;
+	protected final int height = 600;
 	String title;
 	Panel panel;
 	private Frame frame;
@@ -406,7 +406,6 @@ public abstract class CanvasWindow {
 			throw new RuntimeException("You must call this method from the AWT dipatch thread");
 		panel = new Panel();
 		frame = new Frame(title);
-		frame.setResizable(false);
 		frame.setVisible(true);
 	}
 
