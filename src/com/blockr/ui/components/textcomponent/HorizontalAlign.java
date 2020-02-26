@@ -1,4 +1,4 @@
 package com.blockr.ui.components.textcomponent;
 
-public class VerticalAlign {
+public class HorizontalAlign {
 }
