@@ -1,6 +1,6 @@
-package com.blockr.ui.components;
+package com.ui;
 
-public class ScreenPosition {
+public class WindowPosition {
 
     public int getX(){
         return x;
@@ -14,9 +14,8 @@ public class ScreenPosition {
 
     private final int y;
 
-    public ScreenPosition(int x, int y){
+    public WindowPosition(int x, int y){
         this.x = x;
         this.y = y;
     }
-
 }

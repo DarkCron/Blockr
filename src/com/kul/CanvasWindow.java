@@ -225,7 +225,16 @@ class CanvasWindowRecording {
  */
 public abstract class CanvasWindow {
 
+	protected int getWidth(){
+		return panel.getWidth();
+	}
+
 	protected final int width = 600;
+
+	public int getHeight(){
+		return panel.getHeight();
+	}
+
 	protected final int height = 600;
 	String title;
 	Panel panel;
