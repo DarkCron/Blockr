@@ -1,4 +1,4 @@
-package com.blockr.ui.components.textcomponent;
+package com.ui.components.textcomponent;
 
 public enum VerticalAlign {
     Top,

@@ -1,4 +1,4 @@
-package com.blockr.ui.components.boxcomponent;
+package com.ui.components.divcomponent;
 
 import java.awt.*;
 
@@ -15,8 +15,8 @@ public class Border extends BoxProperty {
         this.color = color;
     }
 
-    public Border(Color color, int border){
-        super(border);
+    public Border(Color color, int width){
+        super(width);
         this.color = color;
     }
 }

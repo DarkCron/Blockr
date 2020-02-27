@@ -1,4 +1,4 @@
-package com.blockr.ui.components.boxcomponent;
+package com.ui.components.divcomponent;
 
 public class Padding extends BoxProperty {
 
