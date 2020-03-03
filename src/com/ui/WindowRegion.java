@@ -67,7 +67,7 @@ public class WindowRegion {
                 getMaxY() - property.getBottom());
     }
 
-    public static WindowRegion toWindowRegion(Graphics graphics){
+    public static WindowRegion fromGraphics(Graphics graphics){
         var clipRect = graphics.getClipBounds();
         return new WindowRegion((int)clipRect.getMinX(), (int)clipRect.getMinY(), (int)clipRect.getMaxX(), (int)clipRect.getMaxY());
     }

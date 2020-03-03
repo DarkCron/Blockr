@@ -7,6 +7,9 @@ import java.awt.*;
 
 public class TextComponent extends Component {
 
+    public static final int MINIMUM_FONT_SIZE = 8;
+    public static final int DEFAULT_FONT_SIZE = 12;
+
     public HorizontalAlign getHorizontalAlign(){
         return horizontalAlign;
     }
@@ -32,10 +35,34 @@ public class TextComponent extends Component {
     private int fontSize;
 
     public TextComponent(String text, int fontSize, HorizontalAlign horizontalAlign, VerticalAlign verticalAlign){
+
+        throwIfNull(text, "text");
+
+        if(fontSize < MINIMUM_FONT_SIZE){
+            throw new IllegalArgumentException("fontSize must be greater than " + MINIMUM_FONT_SIZE);
+        }
+
+        throwIfNull(horizontalAlign, "horizontalAlign");
+        throwIfNull(verticalAlign, "verticalAlign");
+
         this.text = text;
         this.fontSize = fontSize;
         this.horizontalAlign = horizontalAlign;
         this.verticalAlign = verticalAlign;
+    }
+
+    public TextComponent(String text, int fontSize){
+        this(text, fontSize, HorizontalAlign.Center, VerticalAlign.Middle);
+    }
+
+    public TextComponent(String text){
+        this(text, DEFAULT_FONT_SIZE);
+    }
+
+    private void throwIfNull(Object object, String name){
+        if(object != null)
+            return;
+        throw new IllegalArgumentException(String.format("%s must be effective", name));
     }
 
     @Override
@@ -43,7 +70,7 @@ public class TextComponent extends Component {
 
         var text = getText();
 
-        var region = WindowRegion.toWindowRegion(graphics);
+        var region = WindowRegion.fromGraphics(graphics);
 
         graphics.setFont(new Font(graphics.getFont().getName(), graphics.getFont().getStyle(), getFontSize()));
         var textWidth = graphics.getFontMetrics().stringWidth(text);

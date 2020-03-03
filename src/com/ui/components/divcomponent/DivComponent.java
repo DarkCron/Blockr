@@ -2,7 +2,6 @@ package com.ui.components.divcomponent;
 
 import com.ui.Component;
 import com.ui.Container;
-import com.ui.WindowPosition;
 import com.ui.WindowRegion;
 
 import java.awt.*;
@@ -50,11 +49,25 @@ public class DivComponent extends Container {
     private FlexAxis flexAxis;
 
     private DivComponent(List<Component> children, Margin margin, Border border, Padding padding, FlexAxis flexAxis){
-        this.children = new LinkedList<>(children);
+
+        throwIfNull(margin, "margin");
+        throwIfNull(border, "border");
+        throwIfNull(padding, "padding");
+        throwIfNull(flexAxis, "flexAxis");
+
+
+        this.children = children;
         this.margin = margin;
         this.border = border;
         this.padding = padding;
         this.flexAxis = flexAxis;
+    }
+
+    private void throwIfNull(Object object, String name){
+        if(object != null)
+            return;
+
+        throw new IllegalArgumentException(String.format("%s must be effective", name));
     }
 
     /**
@@ -115,13 +128,14 @@ public class DivComponent extends Container {
 
     public void draw(Graphics graphics) {
 
-        var region = WindowRegion.toWindowRegion(graphics);
+        var region = WindowRegion.fromGraphics(graphics);
 
         //margin
         region = region.shrinkRegion(margin);
         graphics = shrinkGraphics(graphics, region);
 
         //border
+        graphics.setColor(getBorder().getColor());
         graphics.fillRect(0, 0, region.getWidth(), getBorder().getTop());
         graphics.fillRect(region.getWidth() - getBorder().getRight(), 0, getBorder().getRight(), region.getHeight());
         graphics.fillRect(0, region.getHeight() - getBorder().getBottom(), region.getWidth(), getBorder().getBottom());
