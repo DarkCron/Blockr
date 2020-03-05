@@ -17,7 +17,7 @@ public abstract class BoxProperty {
     public int getBottom(){
         return bottom;
     }
-
+  
     private final int bottom;
 
     public int getLeft(){

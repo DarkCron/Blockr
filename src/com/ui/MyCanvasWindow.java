@@ -6,7 +6,6 @@ import com.ui.mouseevent.MouseEvent;
 import java.awt.*;
 
 public class MyCanvasWindow extends CanvasWindow {
-
     private final Component rootComponent;
     private final ViewContext viewContext;
 
@@ -60,7 +59,6 @@ public class MyCanvasWindow extends CanvasWindow {
             for(var child : container.getChildren()){
 
                 var childRegion = container.getChildRegion(windowRegion, child);
-
                 traverseComponentTree(child, childRegion, componentAction);
             }
         }

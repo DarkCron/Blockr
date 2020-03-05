@@ -2,6 +2,7 @@ package com.ui.components.divcomponent;
 
 import com.ui.Component;
 import com.ui.Container;
+import com.ui.WindowPosition;
 import com.ui.WindowRegion;
 
 import java.awt.*;
@@ -9,7 +10,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-
 
 public class DivComponent extends Container {
 
@@ -54,9 +54,9 @@ public class DivComponent extends Container {
         throwIfNull(border, "border");
         throwIfNull(padding, "padding");
         throwIfNull(flexAxis, "flexAxis");
+      
+        this.children = new LinkedList<>(children);
 
-
-        this.children = children;
         this.margin = margin;
         this.border = border;
         this.padding = padding;
@@ -69,7 +69,7 @@ public class DivComponent extends Container {
 
         throw new IllegalArgumentException(String.format("%s must be effective", name));
     }
-
+  
     /**
      * Returns the region where the given child component should be drawn
      *
@@ -127,7 +127,7 @@ public class DivComponent extends Container {
     }
 
     public void draw(Graphics graphics) {
-
+      
         var region = WindowRegion.fromGraphics(graphics);
 
         //margin
@@ -136,6 +136,7 @@ public class DivComponent extends Container {
 
         //border
         graphics.setColor(getBorder().getColor());
+
         graphics.fillRect(0, 0, region.getWidth(), getBorder().getTop());
         graphics.fillRect(region.getWidth() - getBorder().getRight(), 0, getBorder().getRight(), region.getHeight());
         graphics.fillRect(0, region.getHeight() - getBorder().getBottom(), region.getWidth(), getBorder().getBottom());

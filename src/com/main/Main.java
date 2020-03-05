@@ -1,6 +1,4 @@
 package com.main;
-
-
 import com.ui.Component;
 import com.ui.Container;
 import com.ui.MyCanvasWindow;
@@ -13,6 +11,9 @@ import com.ui.components.divcomponent.Padding;
 import javax.swing.*;
 import java.awt.*;
 
+import com.ui.MyCanvasWindow;
+
+import javax.swing.*;
 public class Main {
 
     private static Container worldDiv =

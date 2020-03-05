@@ -14,7 +14,7 @@ public class MouseEvent {
         this.type = type;
     }
 
-    public enum Type {
+    public static enum Type {
         MOUSE_DOWN(501),
         MOUSE_UP(502);
 

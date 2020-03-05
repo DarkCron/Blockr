@@ -35,7 +35,7 @@ public class TextComponent extends Component {
     private int fontSize;
 
     public TextComponent(String text, int fontSize, HorizontalAlign horizontalAlign, VerticalAlign verticalAlign){
-
+      
         throwIfNull(text, "text");
 
         if(fontSize < MINIMUM_FONT_SIZE){
@@ -44,7 +44,7 @@ public class TextComponent extends Component {
 
         throwIfNull(horizontalAlign, "horizontalAlign");
         throwIfNull(verticalAlign, "verticalAlign");
-
+      
         this.text = text;
         this.fontSize = fontSize;
         this.horizontalAlign = horizontalAlign;
