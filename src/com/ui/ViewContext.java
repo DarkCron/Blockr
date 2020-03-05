@@ -1,6 +1,6 @@
 package com.ui;
 
-public class ViewContext {
+class ViewContext {
 
     public void repaint(){
         myCanvasWindow.update();

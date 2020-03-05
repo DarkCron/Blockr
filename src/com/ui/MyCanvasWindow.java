@@ -12,6 +12,11 @@ public class MyCanvasWindow extends CanvasWindow {
 
     public MyCanvasWindow(String title, Component rootComponent) {
         super(title);
+
+        if(rootComponent == null){
+            throw new IllegalArgumentException("rootComponent must be effective");
+        }
+
         this.rootComponent = rootComponent;
         this.viewContext = new ViewContext(this);
         initializeViewContext(rootComponent);
