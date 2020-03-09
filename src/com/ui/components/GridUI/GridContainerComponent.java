@@ -4,8 +4,11 @@ import com.blockr.domain.gameworld.GameWorld;
 import com.blockr.domain.gameworld.Orientation;
 import com.blockr.domain.gameworld.Position;
 import com.blockr.domain.gameworld.TileType;
+import com.blockr.domain.handlers.HandlerBase;
+import com.blockr.domain.handlers.getworld.GetWorld;
 import com.ui.Component;
 import com.ui.Container;
+import com.ui.MyCanvasWindow;
 import com.ui.WindowRegion;
 import com.ui.components.divcomponent.Border;
 import com.ui.components.divcomponent.DivComponent;
@@ -20,7 +23,7 @@ public class GridContainerComponent extends Container {
     private GameWorld gameWorld;
     private static final GameWorld testWorld;
     static {
-        TileType[][] tempTiles = new TileType[10][10];
+        TileType[][] tempTiles = new TileType[4][4];
 
         for (int i = 0; i < tempTiles.length; i++) {
             for (int j = 0; j < tempTiles[i].length; j++) {
@@ -33,7 +36,7 @@ public class GridContainerComponent extends Container {
             }
         }
 
-        testWorld = new GameWorld(tempTiles,new Position(1,1), Orientation.NORTH,new Position(tempTiles.length-1,tempTiles.length-1));
+        testWorld = new GameWorld(tempTiles,new Position(1,1), Orientation.NORTH,new Position(tempTiles.length-2,tempTiles.length-2));
         testWorld.reset();
     }
 
@@ -70,12 +73,26 @@ public class GridContainerComponent extends Container {
                 children.add(gridColumns[i][j]);
             }
         }
+
+        children.add(new RobotTile(gameWorld.getRobotPosition(),gameWorld.getRobotOrientation()));
+        children.add(new GoalTile(gameWorld.getGoalPosition()));
     }
 
+    /*
+    Centers the "Grid-World" in this container
+     */
     @Override
     public WindowRegion getChildRegion(WindowRegion region, Component child) {
-        var childIndexX = getChildren().indexOf(child) % gameWorld.getWidth();
-        var childIndexY = getChildren().indexOf(child) / gameWorld.getWidth();
+        var childIndex = getChildren().indexOf(child);
+
+        if(child instanceof RobotTile){
+            childIndex = getChildren().indexOf(children.get(((RobotTile) child).robotPosition.getX() + ((RobotTile) child).robotPosition.getY() * gameWorld.getWidth()));
+        }else if(child instanceof GoalTile){
+            childIndex = getChildren().indexOf(children.get(((GoalTile) child).goalPosition.getX() + ((GoalTile) child).goalPosition.getY() * gameWorld.getWidth()));
+        }
+
+        var childIndexX = childIndex % gameWorld.getWidth();
+        var childIndexY = childIndex / gameWorld.getWidth();
         var width = region.getWidth() / gameWorld.getWidth();
         var height = region.getHeight() / gameWorld.getHeight();
 
@@ -94,30 +111,119 @@ public class GridContainerComponent extends Container {
 
     @Override
     protected void draw(Graphics graphics) {
-        drawRobot(gameWorld.getRobotPosition(),gameWorld.getRobotOrientation(),graphics);
+
+    }
+}
+
+/*
+TODO: instead of doing this, figure out a way to use world state via the pipeline
+ */
+class RobotTile extends Component{
+
+    Position robotPosition;
+    Orientation robotOrientation;
+
+    RobotTile(Position robotPosition, Orientation robotOrientation){
+        this.robotPosition = robotPosition;
+        this.robotOrientation = robotOrientation;
     }
 
-    private void drawRobot(Position robotPosition, Orientation robotOrientation, Graphics graphics) {
-        var windowRegion = getChildRegion(WindowRegion.fromGraphics(graphics),children.get(robotPosition.getX() + robotPosition.getY() * gameWorld.getWidth()));
+    void update(Position robotPosition, Orientation robotOrientation){
+        this.robotPosition = robotPosition;
+        this.robotOrientation = robotOrientation;
+    }
+
+    @Override
+    protected void draw(Graphics graphics) {
+        var windowRegion = WindowRegion.fromGraphics(graphics);
         graphics = graphics.create(windowRegion.getMinX(), windowRegion.getMinY(), windowRegion.getWidth(), windowRegion.getHeight());
 
-        FloatPosition antennaCenter = new FloatPosition(0.5f,0.1f);
-        float antennaCenterRadius = 0.1f;
+        float antennaCenterRadius = 0.2f;
+        FloatPosition antennaCenter = new FloatPosition(0.5f-antennaCenterRadius/2,1f-0.1f-antennaCenterRadius/2);
 
+        FloatPosition antennaPoleStart = new FloatPosition(0.5f,0.9f-antennaCenterRadius/2);
+        FloatPosition antennaPoleEnd = new FloatPosition(0.5f,0.6f);
+
+        FloatPosition robotFaceStart = new FloatPosition(0.15f,0.15f);
+        FloatPosition robotFaceEnd = new FloatPosition(0.85f,0.6f);
+        FloatPosition robotFaceSize = new FloatPosition(robotFaceEnd.x-robotFaceStart.x,robotFaceEnd.y-robotFaceStart.y);
+
+        float robotEyeSize = 0.3f;
+        FloatPosition robotLeftEye = new FloatPosition(0.35f-robotEyeSize/2,0.25f);
+        FloatPosition robotRightEye = new FloatPosition(0.65f-robotEyeSize/2,0.25f);
+
+        float innerRobotEyeSize = 0.15f;
+        FloatPosition innerRobotLeftEye = new FloatPosition(0.35f-innerRobotEyeSize/2,0.25f);
+        FloatPosition innerRobotRightEye = new FloatPosition(0.65f-innerRobotEyeSize/2,0.25f);
 
         switch (robotOrientation){
             case NORTH:
-                {
-
-                }
-                graphics.setColor(Color.BLACK);
-                graphics.drawArc((int)(windowRegion.getWidth()*antennaCenter.x),
-                        (int)(windowRegion.getHeight()*antennaCenter.y),
-                        (int)(windowRegion.getWidth()*antennaCenterRadius),
-                        (int)(windowRegion.getHeight()*antennaCenterRadius),
-                        0,360);
+                break;
+            case EAST:
+                innerRobotLeftEye = new FloatPosition(0.45f-innerRobotEyeSize/2,0.35f);
+                innerRobotRightEye = new FloatPosition(0.75f-innerRobotEyeSize/2,0.35f);
+                break;
+            case SOUTH:
+                innerRobotLeftEye = new FloatPosition(0.35f-innerRobotEyeSize/2,0.40f);
+                innerRobotRightEye = new FloatPosition(0.65f-innerRobotEyeSize/2,0.40f);
+                break;
+            case WEST:
+                innerRobotLeftEye = new FloatPosition(0.25f-innerRobotEyeSize/2,0.35f);
+                innerRobotRightEye = new FloatPosition(0.55f-innerRobotEyeSize/2,0.35f);
                 break;
         }
+        graphics.setColor(Color.ORANGE);
+        graphics.fillArc((int)(windowRegion.getWidth()*antennaCenter.x),
+                (int)(windowRegion.getHeight()*antennaCenter.y),
+                (int)(windowRegion.getWidth()*antennaCenterRadius),
+                (int)(windowRegion.getHeight()*antennaCenterRadius),
+                0,360);
+        graphics.setColor(Color.BLACK);
+        graphics.drawArc((int)(windowRegion.getWidth()*antennaCenter.x),
+                (int)(windowRegion.getHeight()*antennaCenter.y),
+                (int)(windowRegion.getWidth()*antennaCenterRadius),
+                (int)(windowRegion.getHeight()*antennaCenterRadius),
+                0,360);
+        graphics.drawLine(antennaPoleStart.getX(windowRegion.getWidth()),antennaPoleStart.getY(windowRegion.getHeight()),
+                antennaPoleEnd.getX(windowRegion.getWidth()),antennaPoleEnd.getY(windowRegion.getHeight()));
+        graphics.setColor(Color.CYAN);
+        graphics.fillRect(robotFaceStart.getX(windowRegion.getWidth()),robotFaceStart.getY(windowRegion.getHeight()),
+                robotFaceSize.getX(windowRegion.getWidth()),robotFaceSize.getY(windowRegion.getHeight()));
+        graphics.setColor(Color.BLACK);
+        graphics.drawRect(robotFaceStart.getX(windowRegion.getWidth()),robotFaceStart.getY(windowRegion.getHeight()),
+                robotFaceSize.getX(windowRegion.getWidth()),robotFaceSize.getY(windowRegion.getHeight()));
+        graphics.setColor(Color.white);
+        graphics.fillArc(robotLeftEye.getX(windowRegion.getWidth()),
+                robotLeftEye.getY(windowRegion.getHeight()),
+                (int)(windowRegion.getWidth()*robotEyeSize),
+                (int)(windowRegion.getHeight()*robotEyeSize),
+                0,360);
+        graphics.fillArc(robotRightEye.getX(windowRegion.getWidth()),
+                robotRightEye.getY(windowRegion.getHeight()),
+                (int)(windowRegion.getWidth()*robotEyeSize),
+                (int)(windowRegion.getHeight()*robotEyeSize),
+                0,360);
+        graphics.setColor(Color.black);
+        graphics.drawArc(robotLeftEye.getX(windowRegion.getWidth()),
+                robotLeftEye.getY(windowRegion.getHeight()),
+                (int)(windowRegion.getWidth()*robotEyeSize),
+                (int)(windowRegion.getHeight()*robotEyeSize),
+                0,360);
+        graphics.drawArc(robotRightEye.getX(windowRegion.getWidth()),
+                robotRightEye.getY(windowRegion.getHeight()),
+                (int)(windowRegion.getWidth()*robotEyeSize),
+                (int)(windowRegion.getHeight()*robotEyeSize),
+                0,360);
+        graphics.fillArc(innerRobotLeftEye.getX(windowRegion.getWidth()),
+                innerRobotLeftEye.getY(windowRegion.getHeight()),
+                (int)(windowRegion.getWidth()*innerRobotEyeSize),
+                (int)(windowRegion.getHeight()*innerRobotEyeSize),
+                0,360);
+        graphics.fillArc(innerRobotRightEye.getX(windowRegion.getWidth()),
+                innerRobotRightEye.getY(windowRegion.getHeight()),
+                (int)(windowRegion.getWidth()*innerRobotEyeSize),
+                (int)(windowRegion.getHeight()*innerRobotEyeSize),
+                0,360);
     }
 
     class FloatPosition{
@@ -126,8 +232,42 @@ public class GridContainerComponent extends Container {
             this.x = x;
             this.y = y;
         }
+
+        int getX(int regionWidth){
+            return ((int)(x * regionWidth));
+        }
+
+        int getY(int regionHeight){
+            return ((int)(y * regionHeight));
+        }
+    }
+}
+
+class GoalTile extends Component{
+    Position goalPosition;
+
+    GoalTile(Position goalPosition){
+        this.goalPosition = goalPosition;
     }
 
+    @Override
+    protected void draw(Graphics graphics) {
+        var windowRegion = WindowRegion.fromGraphics(graphics);
+        graphics = graphics.create(windowRegion.getMinX(), windowRegion.getMinY(), windowRegion.getWidth(), windowRegion.getHeight());
+
+        float radius = 0.9f;
+        float mod = 0.1f;
+        for (int i = 1; i < 10; i++) {
+            if(i%2 == 0){
+                graphics.setColor(Color.white);
+            }else{
+                graphics.setColor(Color.red);
+            }
+            graphics.fillArc((int)((0.5-radius/2) * windowRegion.getWidth()),(int)((0.5-radius/2)* windowRegion.getWidth()),(int)(radius* windowRegion.getWidth()),(int)(radius* windowRegion.getWidth()),0,360);
+            radius-=mod;
+        }
+
+    }
 }
 
 /*
