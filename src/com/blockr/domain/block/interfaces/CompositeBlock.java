@@ -4,4 +4,5 @@ public interface CompositeBlock {
 
     void reset();
 
+    ReadOnlyStatementBlock getActive();
 }
