@@ -1,7 +1,9 @@
 package com.blockr.domain.block.interfaces;
 
-public interface ReadOnlyStatementBlock extends ReadOnlyBlock {
+public interface ReadOnlyStatementBlock extends Block {
 
-    ReadOnlyBlock getNext();
+    ReadOnlyStatementBlock getPrevious();
+
+    ReadOnlyStatementBlock getNext();
 
 }

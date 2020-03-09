@@ -23,6 +23,10 @@ public class GameWorld implements ReadOnlyGameWorld {
         return grid[y][x];
     }
 
+    public TileType getTileType(Position position){
+        return getTileType(position.getX(), position.getY());
+    }
+
     private final TileType[][] grid;
 
     public Position getStartPosition(){

@@ -1,8 +1,9 @@
 package com.blockr.domain.block;
 
+import com.blockr.domain.block.interfaces.markers.ReadOnlyTurnBlock;
 import com.blockr.domain.gameworld.GameWorld;
 
-public class TurnBlock extends StatementBlock {
+public class TurnBlock extends StatementBlock implements ReadOnlyTurnBlock {
 
     public Direction getDirection(){
         return direction;
@@ -19,8 +20,7 @@ public class TurnBlock extends StatementBlock {
 
     private Direction direction = Direction.LEFT;
 
-    @Override
-    public Block execute(GameWorld gameWorld) {
+    public StatementBlock execute(GameWorld gameWorld) {
         if(getDirection() == Direction.LEFT)
             gameWorld.turnLeft();
         else
