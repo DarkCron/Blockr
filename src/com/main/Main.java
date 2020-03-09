@@ -1,6 +1,7 @@
 package com.main;
 import com.ui.Component;
 import com.ui.Container;
+import com.ui.components.GridUI.GridContainerComponent;
 import com.ui.MyCanvasWindow;
 import com.ui.components.TestComponent;
 import com.ui.components.divcomponent.Border;
@@ -11,15 +12,19 @@ import com.ui.components.divcomponent.Padding;
 import javax.swing.*;
 import java.awt.*;
 
-import com.ui.MyCanvasWindow;
-
-import javax.swing.*;
 public class Main {
 
     private static Container worldDiv =
             DivComponent.builder()
                     .withBorder(new Border(Color.BLUE, 4, 2, 4, 4))
                     .withPadding(new Padding(3))
+                    .addChildren(new Component[]{DivComponent.builder()
+                            .addChildren(new GridContainerComponent(null))
+                            .withBorder(new Border(Color.BLUE, 4, 2, 4, 2))
+                            .withPadding(new Padding(0))
+                            .build()
+                            , DivComponent.builder().build()})
+                    .withFlexAxis(FlexAxis.Vertical)
                     .build();
 
     private static Container palleteDiv =
