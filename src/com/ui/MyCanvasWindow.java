@@ -1,51 +1,56 @@
 package com.ui;
 
 import com.kul.CanvasWindow;
-import com.ui.components.divcomponent.Border;
-import com.ui.components.divcomponent.DivComponent;
-import com.ui.components.divcomponent.Padding;
 import com.ui.mouseevent.MouseEvent;
 
 import java.awt.*;
 
 public class MyCanvasWindow extends CanvasWindow {
+    private final Component rootComponent;
+    private final ViewContext viewContext;
 
-    private Container worldDiv =
-            DivComponent.builder()
-            .withBorder(new Border(Color.BLUE, 3))
-            .withPadding(new Padding(3))
-            .build();
-
-    private Container palleteDiv =
-            DivComponent.builder()
-            .withBorder(new Border(Color.BLUE, 3))
-            .withPadding(new Padding(3))
-            .build();
-
-    private Container programAreaDiv =
-            DivComponent.builder()
-            .withBorder(new Border(Color.BLUE, 3))
-            .withPadding(new Padding(3))
-            .build();
-
-    private Component rootComponent =
-            DivComponent
-                    .builder()
-                    .addChildren(worldDiv, palleteDiv, programAreaDiv)
-                    .build();
-
-    public MyCanvasWindow(String title) {
+    public MyCanvasWindow(String title, Component rootComponent) {
         super(title);
+
+        if(rootComponent == null){
+            throw new IllegalArgumentException("rootComponent must be effective");
+        }
+
+        this.rootComponent = rootComponent;
+        this.viewContext = new ViewContext(this);
+        initializeViewContext(rootComponent);
+    }
+
+    private void initializeViewContext(Component component){
+
+        component.setViewContext(viewContext);
+
+        if(component instanceof Container){
+
+            var container = (Container)component;
+
+            for(var child : container.getChildren()){
+                initializeViewContext(child);
+            }
+        }
     }
 
     @Override
     protected void paint(Graphics g) {
-        drawComponentTree(rootComponent, WindowRegion.toWindowRegion(g), g);
+        drawComponentTree(rootComponent, WindowRegion.fromGraphics(g), g);
+    }
+
+    public void update(){
+        this.repaint();
     }
 
     private void drawComponentTree(Component component, WindowRegion windowRegion, Graphics g){
+        traverseComponentTree(component, windowRegion, (c, w) -> c.draw(w.create(g)));
+    }
 
-        component.draw(windowRegion.create(g));
+    private void traverseComponentTree(Component component, WindowRegion windowRegion, ComponentAction componentAction){
+
+        componentAction.execute(component, windowRegion);
 
         if(component instanceof Container){
 
@@ -54,8 +59,7 @@ public class MyCanvasWindow extends CanvasWindow {
             for(var child : container.getChildren()){
 
                 var childRegion = container.getChildRegion(windowRegion, child);
-
-                drawComponentTree(child, childRegion, g);
+                traverseComponentTree(child, childRegion, componentAction);
             }
         }
     }
@@ -109,7 +113,9 @@ public class MyCanvasWindow extends CanvasWindow {
     @Override
     protected void handleKeyEvent(int id, int keyCode, char keyChar) {
 
+    }
 
-
+    interface ComponentAction {
+        void execute(Component component, WindowRegion windowRegion);
     }
 }

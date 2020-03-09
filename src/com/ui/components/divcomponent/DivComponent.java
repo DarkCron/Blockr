@@ -11,7 +11,6 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-
 public class DivComponent extends Container {
 
     public static Margin DEFAULT_MARGIN = new Margin(0);
@@ -50,13 +49,27 @@ public class DivComponent extends Container {
     private FlexAxis flexAxis;
 
     private DivComponent(List<Component> children, Margin margin, Border border, Padding padding, FlexAxis flexAxis){
+
+        throwIfNull(margin, "margin");
+        throwIfNull(border, "border");
+        throwIfNull(padding, "padding");
+        throwIfNull(flexAxis, "flexAxis");
+      
         this.children = new LinkedList<>(children);
+
         this.margin = margin;
         this.border = border;
         this.padding = padding;
         this.flexAxis = flexAxis;
     }
 
+    private void throwIfNull(Object object, String name){
+        if(object != null)
+            return;
+
+        throw new IllegalArgumentException(String.format("%s must be effective", name));
+    }
+  
     /**
      * Returns the region where the given child component should be drawn
      *
@@ -114,14 +127,16 @@ public class DivComponent extends Container {
     }
 
     public void draw(Graphics graphics) {
-
-        var region = WindowRegion.toWindowRegion(graphics);
+      
+        var region = WindowRegion.fromGraphics(graphics);
 
         //margin
         region = region.shrinkRegion(margin);
         graphics = shrinkGraphics(graphics, region);
 
         //border
+        graphics.setColor(getBorder().getColor());
+
         graphics.fillRect(0, 0, region.getWidth(), getBorder().getTop());
         graphics.fillRect(region.getWidth() - getBorder().getRight(), 0, getBorder().getRight(), region.getHeight());
         graphics.fillRect(0, region.getHeight() - getBorder().getBottom(), region.getWidth(), getBorder().getBottom());
