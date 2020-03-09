@@ -19,7 +19,7 @@ public class Position {
         this.y = y;
     }
 
-    public Position translate(Direction.Offset offset) {
+    public Position translate(Orientation.Offset offset) {
         return new Position(getX() + offset.getX(), getY() + offset.getY());
     }
 }
