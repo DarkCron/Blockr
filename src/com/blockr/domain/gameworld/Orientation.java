@@ -1,6 +1,6 @@
 package com.blockr.domain.gameworld;
 
-public enum Direction {
+public enum Orientation {
 
     NORTH(new Offset(0, -1)),
     EAST(new Offset(1, 0)),
@@ -13,21 +13,21 @@ public enum Direction {
 
     private final Offset offset;
 
-    Direction(Offset offset){
+    Orientation(Offset offset){
         this.offset = offset;
     }
 
-    public Direction turnLeft(){
-        return Direction.values()[(indexOf(this) - 1) % Direction.values().length];
+    public Orientation turnLeft(){
+        return Orientation.values()[(indexOf(this) - 1) % Orientation.values().length];
     }
 
-    public Direction turnRight(){
-        return Direction.values()[(indexOf(this) + 1) % Direction.values().length];
+    public Orientation turnRight(){
+        return Orientation.values()[(indexOf(this) + 1) % Orientation.values().length];
     }
 
-    private static int indexOf(Direction direction){
-        for(var i = 0; i < Direction.values().length; i++){
-            if(Direction.values()[i] == direction)
+    private static int indexOf(Orientation orientation){
+        for(var i = 0; i < Orientation.values().length; i++){
+            if(Orientation.values()[i] == orientation)
                 return i;
         }
 
