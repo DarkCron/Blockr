@@ -23,6 +23,10 @@ public class GameWorld implements ReadOnlyGameWorld {
         return grid[y][x];
     }
 
+    public TileType getTileType(Position position){
+        return getTileType(position.getX(), position.getY());
+    }
+
     private final TileType[][] grid;
 
     public Position getStartPosition(){
@@ -31,11 +35,11 @@ public class GameWorld implements ReadOnlyGameWorld {
 
     private final Position startPosition;
 
-    public Direction getStartDirection(){
-        return startDirection;
+    public Orientation getStartOrientation(){
+        return startOrientation;
     }
 
-    private final Direction startDirection;
+    private final Orientation startOrientation;
 
     public Position getGoalPosition(){
         return goalPosition;
@@ -49,22 +53,22 @@ public class GameWorld implements ReadOnlyGameWorld {
 
     private Position robotPosition;
 
-    public Direction getRobotDirection(){
-        return robotDirection;
+    public Orientation getRobotOrientation(){
+        return robotOrientation;
     }
 
-    private Direction robotDirection;
+    private Orientation robotOrientation;
 
-    public GameWorld(TileType[][] grid, Position startPosition, Direction startDirection, Position goalPosition){
+    public GameWorld(TileType[][] grid, Position startPosition, Orientation startOrientation, Position goalPosition){
 
         throwIfNull(grid, "grid");
         throwIfNull(startPosition, "startPosition");
-        throwIfNull(startDirection, "startDirection");
+        throwIfNull(startOrientation, "startDirection");
         throwIfNull(goalPosition, "goalPosition");
 
         this.grid = grid;
         this.startPosition = startPosition;
-        this.startDirection = startDirection;
+        this.startOrientation = startOrientation;
         this.goalPosition = goalPosition;
     }
 
@@ -77,20 +81,20 @@ public class GameWorld implements ReadOnlyGameWorld {
 
     public void reset(){
         this.robotPosition = getStartPosition();
-        this.robotDirection = getStartDirection();
+        this.robotOrientation = getStartOrientation();
     }
 
     public void turnLeft(){
-        robotDirection = robotDirection.turnLeft();
+        robotOrientation = robotOrientation.turnLeft();
     }
 
     public void turnRight(){
-        robotDirection = robotDirection.turnRight();
+        robotOrientation = robotOrientation.turnRight();
     }
 
     public void moveForward(){
 
-        var newPosition = robotPosition.translate(getRobotDirection().getOffset());
+        var newPosition = robotPosition.translate(getRobotOrientation().getOffset());
 
         if(getTileType(newPosition.getX(), newPosition.getY()) == TileType.Blocked)
             return;
