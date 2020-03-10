@@ -1,8 +1,8 @@
-package com.blockr.domain.handlers.blockprogram.getblockprogram;
+package com.blockr.handlers.blockprogram.getblockprogram;
 
 import com.blockr.domain.State;
 import com.blockr.domain.block.interfaces.ReadOnlyBlockProgram;
-import com.blockr.domain.handlers.HandlerBase;
+import com.blockr.handlers.HandlerBase;
 
 public class GetBlockProgramHandler extends HandlerBase<GetBlockProgram, ReadOnlyBlockProgram> {
 

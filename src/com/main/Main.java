@@ -2,7 +2,7 @@ package com.main;
 import an.awesome.pipelinr.Pipeline;
 import an.awesome.pipelinr.Pipelinr;
 import com.blockr.domain.State;
-import com.blockr.domain.handlers.world.GetWorldHandler;
+import com.blockr.handlers.world.GetWorldHandler;
 import com.ui.Component;
 import com.ui.Container;
 import com.ui.MyCanvasWindow;

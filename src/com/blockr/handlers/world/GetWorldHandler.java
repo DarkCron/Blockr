@@ -1,8 +1,8 @@
-package com.blockr.domain.handlers.world;
+package com.blockr.handlers.world;
 
 import com.blockr.domain.State;
 import com.blockr.domain.gameworld.ReadOnlyGameWorld;
-import com.blockr.domain.handlers.HandlerBase;
+import com.blockr.handlers.HandlerBase;
 
 public class GetWorldHandler extends HandlerBase<GetWorld   , ReadOnlyGameWorld> {
 

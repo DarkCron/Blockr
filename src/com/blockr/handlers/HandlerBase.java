@@ -1,4 +1,4 @@
-package com.blockr.domain.handlers;
+package com.blockr.handlers;
 
 import an.awesome.pipelinr.Command;
 import com.blockr.domain.State;
