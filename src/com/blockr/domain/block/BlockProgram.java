@@ -5,10 +5,7 @@ import com.blockr.domain.block.interfaces.ReadOnlyBlockProgram;
 import com.blockr.domain.block.interfaces.ReadOnlyStatementBlock;
 import com.blockr.domain.gameworld.GameWorld;
 
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class BlockProgram implements ReadOnlyBlockProgram {
@@ -21,7 +18,7 @@ public class BlockProgram implements ReadOnlyBlockProgram {
 
     @Override
     public List<? extends ReadOnlyStatementBlock> getComponents() {
-        return components;
+        return Collections.unmodifiableList(components);
     }
 
     private final List<StatementBlock> components = new LinkedList<>();
@@ -29,6 +26,9 @@ public class BlockProgram implements ReadOnlyBlockProgram {
 
     private StatementBlock currentBlock;
 
+    /**
+     * Returns whether or not the program is in a valid state and can be started
+     */
     public boolean canStart(){
 
         if(components.size() != 1)
@@ -66,30 +66,79 @@ public class BlockProgram implements ReadOnlyBlockProgram {
         currentBlock = null;
     }
 
-    public Set<CompositeBlock> getCompositeBlocks(){
+    private Set<CompositeBlock> getCompositeBlocks(){
         return blocks.stream().filter(b -> b instanceof CompositeBlock).map(b -> (CompositeBlock)b).collect(Collectors.toSet());
     }
 
+    /**
+     * Add a new block to the program, not connected to any other blocks
+     */
     public void addBlock(ReadOnlyStatementBlock statementBlock){
+
+        ensureValidStatementBlock(statementBlock, "statementBlock");
+
+        //noinspection SuspiciousMethodCalls
+        if(blocks.contains(statementBlock)){
+            throw new IllegalArgumentException("The given statementBlock already exists");
+        }
+
         components.add((StatementBlock) statementBlock);
         blocks.add((StatementBlock)statementBlock);
     }
 
+    /**
+     * Connects the plug of plugBlock to the socket of socketBlock
+     */
     public void connectToStatementSocket(ReadOnlyStatementBlock socketBlock, ReadOnlyStatementBlock plugBlock){
 
         ensureValidStatementBlock(socketBlock, "socketBlock");
         ensureValidStatementBlock(plugBlock, "plugBlock");
 
+        if(!blocks.contains(socketBlock)){
+            throw new IllegalArgumentException("The given socketBlock does not exist");
+        }
+
         var rwSocketBlock = (StatementBlock)socketBlock;
         var rwPlugBlock = (StatementBlock)plugBlock;
 
         rwSocketBlock.setNext(rwPlugBlock);
+
+        if(rwPlugBlock.getPrevious() != null){
+
+            rwPlugBlock.getPrevious().setNext(null);
+        }
+
         rwPlugBlock.setPrevious(rwSocketBlock);
 
         if(blocks.contains(plugBlock))
             return;
 
         blocks.add(rwPlugBlock);
+    }
+
+    /**
+     * Disconnects the plug of plugBlock from the socket of socketBlock
+     */
+    public void disconnectStatementBlock(ReadOnlyStatementBlock socketBlock, ReadOnlyStatementBlock plugBlock){
+
+        ensureValidStatementBlock(socketBlock, "socketBlock");
+        ensureValidStatementBlock(plugBlock, "plugBlock");
+
+        if(!blocks.contains(socketBlock)){
+            throw new IllegalArgumentException("The given socketBlock does not exist");
+        }
+
+        if(!blocks.contains(plugBlock)){
+            throw new IllegalArgumentException("The given plugBlock does not exist");
+        }
+
+        var rwSocketBlock = (StatementBlock)socketBlock;
+        var rwPlugBlock = (StatementBlock)plugBlock;
+
+        rwSocketBlock.setNext(null);
+        rwPlugBlock.setNext(null);
+
+        components.add(rwPlugBlock);
     }
 
     private static void ensureValidStatementBlock(ReadOnlyStatementBlock roBlock, String argName){
