@@ -1,4 +1,4 @@
-package com.blockr.domain.handlers.getworld;
+package com.blockr.domain.handlers.world;
 
 import an.awesome.pipelinr.Command;
 import com.blockr.domain.gameworld.ReadOnlyGameWorld;

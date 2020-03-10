@@ -3,8 +3,6 @@ package com.blockr.domain.handlers;
 import an.awesome.pipelinr.Command;
 import com.blockr.domain.State;
 
-import java.util.logging.Handler;
-
 public abstract class HandlerBase<C extends Command<R>, R> implements Command.Handler<C, R> {
 
     protected State getState(){
