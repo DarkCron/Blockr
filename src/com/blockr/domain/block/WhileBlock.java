@@ -5,7 +5,7 @@ import com.blockr.domain.block.interfaces.ReadOnlyStatementBlock;
 import com.blockr.domain.block.interfaces.markers.ReadOnlyWhileBlock;
 import com.blockr.domain.gameworld.GameWorld;
 
-public class WhileBlock extends ControlFlowBlock implements ReadOnlyWhileBlock, CompositeBlock {
+public class WhileBlock extends ControlFlowBlock implements ReadOnlyWhileBlock {
 
     @Override
     public StatementBlock execute(GameWorld gameWorld) {
