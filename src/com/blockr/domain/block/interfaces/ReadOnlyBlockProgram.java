@@ -6,4 +6,6 @@ public interface ReadOnlyBlockProgram {
 
     List<? extends ReadOnlyStatementBlock> getComponents();
 
+    ReadOnlyStatementBlock getActive();
+
 }

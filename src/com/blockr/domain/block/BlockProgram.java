@@ -21,6 +21,17 @@ public class BlockProgram implements ReadOnlyBlockProgram {
         return Collections.unmodifiableList(components);
     }
 
+    public ReadOnlyStatementBlock getActive(){
+
+        if(currentBlock != null)
+            return currentBlock.getActive();
+
+        if(canStart())
+            return components.get(0).getActive();
+
+        return null;
+    }
+
     private final List<StatementBlock> components = new LinkedList<>();
     private final Set<StatementBlock> blocks = new HashSet<>();
 
@@ -48,17 +59,6 @@ public class BlockProgram implements ReadOnlyBlockProgram {
         }
 
         currentBlock = currentBlock.execute(gameWorld);
-    }
-
-    public ReadOnlyStatementBlock getActiveBlock(){
-
-        if(currentBlock != null)
-            return currentBlock.getActive();
-
-        if(canStart())
-            return components.get(0).getActive();
-
-        return null;
     }
 
     public void reset(){
