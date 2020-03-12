@@ -1,6 +1,7 @@
 package com.main;
 import com.ui.Component;
 import com.ui.Container;
+import com.ui.areas.ProgramArea;
 import com.ui.components.GridUI.GridContainerComponent;
 import com.ui.MyCanvasWindow;
 import com.ui.components.TestComponent;
@@ -37,6 +38,7 @@ public class Main {
     private static Container programAreaDiv =
             DivComponent.builder()
                     .withBorder(new Border(Color.BLUE, 4 , 4, 4, 2))
+                    .addChildren(new ProgramArea())
                     .withPadding(new Padding(3))
                     .build();
 

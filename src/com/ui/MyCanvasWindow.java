@@ -1,6 +1,7 @@
 package com.ui;
 
 import com.kul.CanvasWindow;
+import com.ui.areas.ProgramArea;
 import com.ui.mouseevent.MouseEvent;
 
 import java.awt.*;
@@ -37,6 +38,7 @@ public class MyCanvasWindow extends CanvasWindow {
 
     @Override
     protected void paint(Graphics g) {
+        viewContext.update();
         drawComponentTree(rootComponent, WindowRegion.fromGraphics(g), g);
     }
 
@@ -57,8 +59,10 @@ public class MyCanvasWindow extends CanvasWindow {
             var container = (Container)component;
 
             for(var child : container.getChildren()){
-
                 var childRegion = container.getChildRegion(windowRegion, child);
+                if(child instanceof ProgramArea &&  ((ProgramArea) child) != null){
+                    ((ProgramArea) child).programAreaContainerPos = new WindowPosition(windowRegion.getMinX(),windowRegion.getMinY());
+                }
                 traverseComponentTree(child, childRegion, componentAction);
             }
         }
@@ -107,7 +111,7 @@ public class MyCanvasWindow extends CanvasWindow {
             return;
 
         var component = getComponentAt(new WindowPosition(x, y));
-        component.onMouseEvent(new MouseEvent(type));
+        component.onMouseEvent(new MouseEvent(type,new WindowPosition(x, y)));
     }
 
     @Override
