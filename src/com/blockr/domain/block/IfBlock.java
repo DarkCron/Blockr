@@ -11,6 +11,10 @@ public class IfBlock extends ControlFlowBlock implements ReadOnlyIfBlock, Compos
     public StatementBlock execute(GameWorld gameWorld) {
 
         if(getCurrent() == null){
+
+            if(!getCondition().evaluate(gameWorld))
+                return getNext();
+
             setCurrent(getBody());
         }
 
@@ -31,6 +35,6 @@ public class IfBlock extends ControlFlowBlock implements ReadOnlyIfBlock, Compos
 
     @Override
     public ReadOnlyStatementBlock getActive() {
-        return getCurrent() == null ? getBody() : getCurrent();
+        return getCurrent() == null ? this : getCurrent();
     }
 }
