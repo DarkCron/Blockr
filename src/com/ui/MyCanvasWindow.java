@@ -1,6 +1,7 @@
 package com.ui;
 
 import com.kul.CanvasWindow;
+import com.ui.areas.PaletteArea;
 import com.ui.areas.ProgramArea;
 import com.ui.mouseevent.MouseEvent;
 
@@ -60,9 +61,12 @@ public class MyCanvasWindow extends CanvasWindow {
 
             for(var child : container.getChildren()){
                 var childRegion = container.getChildRegion(windowRegion, child);
-                if(child instanceof ProgramArea &&  ((ProgramArea) child) != null){
-                    ((ProgramArea) child).programAreaContainerPos = new WindowPosition(windowRegion.getMinX(),windowRegion.getMinY());
+                if(child instanceof ProgramArea &&  child != null){
+                    ProgramArea.programAreaContainerPos = new WindowPosition(windowRegion.getMinX(),windowRegion.getMinY());
+                }else if(child instanceof PaletteArea &&  child != null){
+                    PaletteArea.paletteAreaContainerPos = new WindowPosition(windowRegion.getMinX(),windowRegion.getMinY());
                 }
+
                 traverseComponentTree(child, childRegion, componentAction);
             }
         }
