@@ -33,7 +33,9 @@ public class BlockProgram implements ReadOnlyBlockProgram {
         return null;
     }
 
+    //First block of every chain program
     private final List<StatementBlock> components = new LinkedList<>();
+    //All blocks in the programArea
     private final Set<StatementBlock> blocks = new HashSet<>();
 
     private StatementBlock currentBlock;
@@ -149,5 +151,21 @@ public class BlockProgram implements ReadOnlyBlockProgram {
 
         if(!(roBlock instanceof StatementBlock))
             throw new IllegalArgumentException(String.format("The given %s must be an instance of StatementBlock", argName));
+    }
+
+    public ReadOnlyStatementBlock getRootBlock(ReadOnlyStatementBlock blockOfChain){
+        ensureValidStatementBlock(blockOfChain, "block");
+
+        for(StatementBlock block : components){
+            var currentBlock = block;
+            while (currentBlock != null){
+                if(currentBlock == blockOfChain){
+                    return block;
+                }
+                currentBlock = currentBlock.getNext();
+            }
+        }
+
+        return null;
     }
 }

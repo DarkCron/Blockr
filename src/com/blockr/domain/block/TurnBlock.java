@@ -1,5 +1,6 @@
 package com.blockr.domain.block;
 
+import com.blockr.domain.block.interfaces.Block;
 import com.blockr.domain.block.interfaces.markers.ReadOnlyTurnBlock;
 import com.blockr.domain.gameworld.GameWorld;
 
@@ -27,6 +28,13 @@ public class TurnBlock extends StatementBlock implements ReadOnlyTurnBlock {
             gameWorld.turnRight();
 
         return getNext();
+    }
+
+    @Override
+    public Block getEmptyCopy() {
+        TurnBlock turnBlock = new TurnBlock();
+        turnBlock.setDirection(getDirection());
+        return turnBlock;
     }
 
     public enum Direction {
