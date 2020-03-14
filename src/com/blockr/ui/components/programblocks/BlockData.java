@@ -1,4 +1,4 @@
-package com.ui.components.programblocks;
+package com.blockr.ui.components.programblocks;
 
 import java.awt.*;
 

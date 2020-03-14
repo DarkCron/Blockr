@@ -1,4 +1,4 @@
-package com.ui;
+package com.blockr.ui;
 
 public class WindowPercentPosition {
     public float getX(){

@@ -1,4 +1,4 @@
-package com.ui.areas;
+package com.blockr.ui;
 
 import an.awesome.pipelinr.Pipeline;
 import com.blockr.domain.block.*;
@@ -6,8 +6,8 @@ import com.blockr.domain.block.interfaces.Block;
 import com.blockr.handlers.ui.GetUIInfo;
 import com.ui.Component;
 import com.ui.WindowPosition;
-import com.ui.components.programblocks.BlockInformation;
-import com.ui.components.programblocks.BlockProgram;
+import com.blockr.ui.components.programblocks.BlockInformation;
+import com.blockr.ui.components.programblocks.BlockProgram;
 import com.ui.mouseevent.MouseEvent;
 
 import java.awt.*;
