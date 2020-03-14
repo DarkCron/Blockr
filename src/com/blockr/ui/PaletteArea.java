@@ -1,7 +1,9 @@
 package com.blockr.ui;
 
+import an.awesome.pipelinr.Pipeline;
 import com.blockr.domain.block.*;
 import com.blockr.domain.block.interfaces.Block;
+import com.blockr.handlers.ui.GetUIInfo;
 import com.ui.Component;
 import com.ui.WindowPosition;
 import com.blockr.ui.components.programblocks.BlockInformation;
@@ -18,13 +20,14 @@ public class PaletteArea extends Component {
     private static final int BLOCK_OFFSET_Y = 50;
 
     private static BlockProgram selectedProgram;
+
     public static BlockProgram getSelectedProgram(){ return selectedProgram;}
     private static BlockInformation.BlockClickInfo blockClickInfo;
     public static BlockInformation.BlockClickInfo getBlockClickInfo(){ return blockClickInfo;}
 
-    public static WindowPosition paletteAreaContainerPos;
-    //TODO; temp until better fix
     public static boolean CREATE_PALETTE = true;
+
+    private final Pipeline mediator;
 
     private static final List<Block> possibleBlocks;
     static {
@@ -45,11 +48,17 @@ public class PaletteArea extends Component {
 
     List<BlockProgram> programs;
 
+    public PaletteArea(Pipeline mediator) {
+        this.mediator = mediator;
+    }
+
+
     public void init(){
         programs = new ArrayList<>();
+        WindowPosition paletteAreaContainerPos = mediator.send(new GetUIInfo()).getPalettePosition();
         WindowPosition position = new WindowPosition(paletteAreaContainerPos.getX() + BLOCK_OFFSET_X,paletteAreaContainerPos.getY() + BLOCK_OFFSET_Y);
         for(Block b : possibleBlocks){
-            programs.add(new BlockProgram(b,position));
+            programs.add(new BlockProgram(b,position, mediator));
             position = new WindowPosition(position.getX(),position.getY() + BLOCK_OFFSET_Y);
         }
         CREATE_PALETTE = false;

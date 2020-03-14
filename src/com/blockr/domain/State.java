@@ -1,8 +1,21 @@
 package com.blockr.domain;
 
+import com.blockr.domain.block.BlockProgram;
 import com.blockr.domain.gameworld.GameWorld;
+import com.blockr.handlers.ui.UIInfo;
+import com.ui.MyCanvasWindow;
 
 public class State {
+
+    public UIInfo getUiInfo() {
+        return uiInfo;
+    }
+
+    public void setUiInfo(UIInfo uiInfo) {
+        this.uiInfo = uiInfo;
+    }
+
+    private UIInfo uiInfo;
 
     public GameWorld getGameWorld(){
         return gameWorld;
@@ -19,19 +32,22 @@ public class State {
 
     private GameWorld gameWorld;
 
-    public ProgramExecutor getProgramExecutor(){
-        return programExecutor;
+    public BlockProgram getBlockProgram(){
+        return blockProgram;
     }
 
-    public void setProgramExecutor(ProgramExecutor programExecutor){
+    public void setBlockProgram(BlockProgram blockProgram){
 
-        if(programExecutor == null){
+        if(blockProgram == null){
             throw new IllegalArgumentException("programExecutor must be effective");
         }
 
-        this.programExecutor = programExecutor;
+        this.blockProgram = blockProgram;
     }
 
-    private ProgramExecutor programExecutor;
+    private BlockProgram blockProgram;
 
+    public void createBlockProgram() {
+        blockProgram = new BlockProgram(getGameWorld());
+    }
 }

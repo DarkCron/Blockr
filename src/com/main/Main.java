@@ -6,12 +6,14 @@ import com.blockr.domain.gameworld.GameWorld;
 import com.blockr.domain.gameworld.Orientation;
 import com.blockr.domain.gameworld.Position;
 import com.blockr.domain.gameworld.TileType;
-import com.blockr.domain.handlers.getworld.GetWorldHandler;
-import com.ui.Component;
-import com.ui.Container;
-import com.blockr.ui.PaletteArea;
-import com.blockr.ui.ProgramArea;
-import com.blockr.ui.components.gameworld.GameWorldComponent;
+import com.blockr.handlers.world.GetWorldHandler;
+import com.blockr.handlers.blockprogram.addblock.AddBlockHandler;
+import com.blockr.handlers.blockprogram.connectstatementblock.ConnectStatementBlockHandler;
+import com.blockr.handlers.blockprogram.createblockprogram.CreateBlockProgramHandler;
+import com.blockr.handlers.blockprogram.disconnectstatementblock.DisconnectStatementBlockHandler;
+import com.blockr.handlers.blockprogram.getblockprogram.GetBlockProgramHandler;
+import com.blockr.handlers.ui.GetUIInfoHandler;
+import com.blockr.handlers.ui.SetUIInfoHandler;
 import com.ui.MyCanvasWindow;
 import com.ui.components.divcomponent.Border;
 import com.ui.components.divcomponent.DivComponent;
@@ -23,7 +25,6 @@ import java.awt.*;
 import java.util.stream.Stream;
 
 public class Main {
-
 
     private static final State state = new State();
 
@@ -48,7 +49,7 @@ public class Main {
 
     public static void main(String[] args){
         SwingUtilities.invokeLater(
-                () -> new MyCanvasWindow("Hello World", BlockrUi.build(pipeline)).show()
+                () -> new MyCanvasWindow("Hello World", BlockrUi.build(pipeline), pipeline).show()
         );
     }
 }

@@ -1,7 +1,13 @@
 package com.blockr.ui;
 
+import an.awesome.pipelinr.Pipeline;
 import com.blockr.domain.block.*;
 import com.blockr.domain.block.interfaces.Block;
+import com.blockr.domain.block.interfaces.ReadOnlyStatementBlock;
+import com.blockr.handlers.blockprogram.addblock.AddBlock;
+import com.blockr.handlers.blockprogram.connectstatementblock.ConnectStatementBlock;
+import com.blockr.handlers.blockprogram.createblockprogram.CreateBlockProgram;
+import com.blockr.handlers.blockprogram.getblockprogram.GetBlockProgram;
 import com.ui.Component;
 import com.ui.WindowPosition;
 import com.blockr.ui.components.programblocks.BlockInformation;
@@ -15,7 +21,6 @@ import java.util.List;
 public class ProgramArea extends Component {
 
     public static ProgramArea programArea;
-    public static WindowPosition programAreaContainerPos;
 
     List<BlockProgram> programs;
 
@@ -27,10 +32,14 @@ public class ProgramArea extends Component {
     //Temp logic for mediator
     private static TempLogic blackBox = new TempLogic();
 
-    public ProgramArea(){
+    private final Pipeline mediator;
+
+    public ProgramArea(Pipeline mediator){
         super();
+        this.mediator = mediator;
         programs = new ArrayList<>();
         programArea = this;
+        mediator.send(new CreateBlockProgram());
     }
 
     public void remove(BlockProgram selectedProgram) {
@@ -51,7 +60,7 @@ public class ProgramArea extends Component {
                     break;
                 }
                 if(programs.size() == 0){
-                    programs.add(new BlockProgram(new MoveForwardBlock(),mouseEvent.getWindowPosition()));
+                    programs.add(new BlockProgram(new MoveForwardBlock(),mouseEvent.getWindowPosition(), mediator));
                     //programs.add(new BlockProgram(new WallInFrontBlock(),mouseEvent.getWindowPosition()));
                 }else{
                     /*{
@@ -96,7 +105,13 @@ public class ProgramArea extends Component {
                     }
                     //If we are on a existing program
                     if(selectedProgram != null && blockClickInfo != null){
-                        Block copy = createCopy(PaletteArea.getSelectedProgram().getRoot().getBlock());
+                        var blockCopy = createCopy(PaletteArea.getSelectedProgram().getRoot().getBlock());
+
+                        mediator.send(new ConnectStatementBlock((ReadOnlyStatementBlock) selectedProgram.getRoot().getBlock(), (ReadOnlyStatementBlock) blockCopy));
+                        var bp = mediator.send(new GetBlockProgram());
+
+
+                        Block copy = blockCopy;
                         var newRoot = blackBox.addToBlockGraph(selectedProgram.getRoot().getBlock(), blockClickInfo.getBlock() ,copy,blockClickInfo.getClickLocation());
                         newRoot = selectedProgram.getRoot().getBlock();
                         if(newRoot != null){
@@ -113,7 +128,11 @@ public class ProgramArea extends Component {
                         }
                     }
                     //If we are on a blank spot, or the spot was not compatible
-                    programs.add(new BlockProgram(createCopy(PaletteArea.getSelectedProgram().getRoot().getBlock()),mouseEvent.getWindowPosition()));
+                    var blockCopy = createCopy(PaletteArea.getSelectedProgram().getRoot().getBlock());
+                    mediator.send(new AddBlock((ReadOnlyStatementBlock)blockCopy));
+                    var bp = mediator.send(new GetBlockProgram());
+
+                    programs.add(new BlockProgram(blockCopy,mouseEvent.getWindowPosition(), mediator));
                     getViewContext().repaint();
                     break;
                 }

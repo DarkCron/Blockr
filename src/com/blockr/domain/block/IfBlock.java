@@ -5,7 +5,7 @@ import com.blockr.domain.block.interfaces.ReadOnlyStatementBlock;
 import com.blockr.domain.block.interfaces.markers.ReadOnlyIfBlock;
 import com.blockr.domain.gameworld.GameWorld;
 
-public class IfBlock extends ControlFlowBlock implements ReadOnlyIfBlock, CompositeBlock {
+public class IfBlock extends ControlFlowBlock implements ReadOnlyIfBlock {
 
     @Override
     public StatementBlock execute(GameWorld gameWorld) {
