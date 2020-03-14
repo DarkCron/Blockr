@@ -1,9 +1,17 @@
 package com.main;
+import an.awesome.pipelinr.Pipeline;
+import an.awesome.pipelinr.Pipelinr;
+import com.blockr.domain.State;
+import com.blockr.domain.gameworld.GameWorld;
+import com.blockr.domain.gameworld.Orientation;
+import com.blockr.domain.gameworld.Position;
+import com.blockr.domain.gameworld.TileType;
+import com.blockr.domain.handlers.getworld.GetWorldHandler;
 import com.ui.Component;
 import com.ui.Container;
 import com.blockr.ui.PaletteArea;
 import com.blockr.ui.ProgramArea;
-import com.blockr.ui.components.gridui.GridContainerComponent;
+import com.blockr.ui.components.gameworld.GameWorldComponent;
 import com.ui.MyCanvasWindow;
 import com.ui.components.divcomponent.Border;
 import com.ui.components.divcomponent.DivComponent;
@@ -12,47 +20,35 @@ import com.ui.components.divcomponent.Padding;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.stream.Stream;
 
 public class Main {
 
-    private static Container worldDiv =
-            DivComponent.builder()
-                    .withBorder(new Border(Color.BLUE, 4, 2, 4, 4))
-                    .withPadding(new Padding(3))
-                    .addChildren(new Component[]{DivComponent.builder()
-                            .addChildren(new GridContainerComponent(null))
-                            .withBorder(new Border(Color.BLUE, 4, 2, 4, 2))
-                            .withPadding(new Padding(0))
-                            .build()
-                            , DivComponent.builder().build()})
-                    .withFlexAxis(FlexAxis.Vertical)
-                    .build();
 
-    private static Container palleteDiv =
-            DivComponent.builder()
-                    .withBorder(new Border(Color.BLUE, 4, 2, 4, 2))
-                    .withPadding(new Padding(0))
-                    .addChildren(new PaletteArea())
-                    .build();
+    private static final State state = new State();
 
-    private static Container programAreaDiv =
-            DivComponent.builder()
-                    .withBorder(new Border(Color.BLUE, 4 , 4, 4, 2))
-                    .addChildren(new ProgramArea())
-                    .withPadding(new Padding(3))
-                    .build();
+    private static final Pipeline pipeline = new Pipelinr()
+            .with(() -> Stream.of(new GetWorldHandler(state)));
 
-    private static Component rootComponent =
-            DivComponent
-                    .builder()
-                    .addChildren(worldDiv, palleteDiv, programAreaDiv)
-                    .withFlexAxis(FlexAxis.Horizontal)
-                    .withPadding(new Padding(0))
-                    .build();
+    private static final TileType[][] GRID = {
+            {TileType.Blocked, TileType.Blocked, TileType.Blocked, TileType.Blocked, TileType.Blocked},
+            {TileType.Blocked, TileType.Free, TileType.Free, TileType.Free, TileType.Blocked},
+            {TileType.Blocked, TileType.Free, TileType.Free, TileType.Free, TileType.Blocked},
+            {TileType.Blocked, TileType.Free, TileType.Free, TileType.Free, TileType.Blocked},
+            {TileType.Blocked, TileType.Blocked, TileType.Blocked, TileType.Blocked, TileType.Blocked},
+    };
+
+    static {
+
+        var gameWorld = new GameWorld(GRID, new Position(1, 1), Orientation.SOUTH,  new Position(4, 4));
+
+        state.setGameWorld(gameWorld);
+
+    }
 
     public static void main(String[] args){
         SwingUtilities.invokeLater(
-                () -> new MyCanvasWindow("Hello World", rootComponent).show()
+                () -> new MyCanvasWindow("Hello World", BlockrUi.build(pipeline)).show()
         );
     }
 }
