@@ -18,4 +18,12 @@ public class WindowPosition {
         this.x = x;
         this.y = y;
     }
+
+    public WindowPosition plus(WindowPosition other){
+        return new WindowPosition(x + other.getX(), y + other.getY());
+    }
+
+    public WindowPosition minus(WindowPosition other){
+        return new WindowPosition(x - other.getX(), y - other.getY());
+    }
 }

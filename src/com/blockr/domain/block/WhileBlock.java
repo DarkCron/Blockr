@@ -1,5 +1,6 @@
 package com.blockr.domain.block;
 
+import com.blockr.domain.block.interfaces.Block;
 import com.blockr.domain.block.interfaces.CompositeBlock;
 import com.blockr.domain.block.interfaces.ReadOnlyStatementBlock;
 import com.blockr.domain.block.interfaces.markers.ReadOnlyWhileBlock;
@@ -33,5 +34,10 @@ public class WhileBlock extends ControlFlowBlock implements ReadOnlyWhileBlock {
     @Override
     public ReadOnlyStatementBlock getActive() {
         return getCurrent() == null ? getBody() : getCurrent();
+    }
+
+    @Override
+    public Block getEmptyCopy() {
+        return new WhileBlock();
     }
 }

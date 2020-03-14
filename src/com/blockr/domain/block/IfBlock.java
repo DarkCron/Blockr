@@ -1,5 +1,6 @@
 package com.blockr.domain.block;
 
+import com.blockr.domain.block.interfaces.Block;
 import com.blockr.domain.block.interfaces.CompositeBlock;
 import com.blockr.domain.block.interfaces.ReadOnlyStatementBlock;
 import com.blockr.domain.block.interfaces.markers.ReadOnlyIfBlock;
@@ -36,5 +37,10 @@ public class IfBlock extends ControlFlowBlock implements ReadOnlyIfBlock {
     @Override
     public ReadOnlyStatementBlock getActive() {
         return getCurrent() == null ? this : getCurrent();
+    }
+
+    @Override
+    public Block getEmptyCopy() {
+        return new IfBlock();
     }
 }
