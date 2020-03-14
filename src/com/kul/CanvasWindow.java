@@ -5,12 +5,7 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Graphics;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -225,17 +220,17 @@ class CanvasWindowRecording {
  */
 public abstract class CanvasWindow {
 
-	protected int getWidth(){
-		return panel.getWidth();
+	public int getWidth(){
+		return width;
 	}
 
-	protected final int width = 600;
+	protected int width = 600;
 
 	public int getHeight(){
-		return panel.getHeight();
+		return height;
 	}
 
-	protected final int height = 600;
+	protected int height = 600;
 	String title;
 	Panel panel;
 	private Frame frame;
@@ -325,6 +320,7 @@ public abstract class CanvasWindow {
 			setBackground(Color.WHITE);
 			setFocusable(true);
 
+
 			addMouseListener(new MouseAdapter() {
 
 				@Override
@@ -402,6 +398,13 @@ public abstract class CanvasWindow {
 					System.exit(0);
 				}
 
+			});
+			addComponentListener(new ComponentAdapter() {
+				public void componentResized(ComponentEvent componentEvent) {
+					// do stuff
+					height = panel.getHeight();
+					width = panel.getWidth();
+				}
 			});
 			getContentPane().add(panel);
 			pack();

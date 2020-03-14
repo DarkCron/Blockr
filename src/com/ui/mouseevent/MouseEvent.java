@@ -1,5 +1,7 @@
 package com.ui.mouseevent;
 
+import com.ui.WindowPosition;
+
 import java.util.Arrays;
 
 public class MouseEvent {
@@ -9,14 +11,22 @@ public class MouseEvent {
     }
 
     private final Type type;
-
-    public MouseEvent(Type type){
-        this.type = type;
+    private final WindowPosition windowPosition;
+    public WindowPosition getWindowPosition() {
+        return windowPosition;
     }
+
+    public MouseEvent(Type type, WindowPosition windowPosition){
+        this.type = type;
+        this.windowPosition = windowPosition;
+    }
+
+
 
     public static enum Type {
         MOUSE_DOWN(501),
-        MOUSE_UP(502);
+        MOUSE_UP(502),
+        MOUSE_DRAG(506);
 
         public int getId(){
             return id;
