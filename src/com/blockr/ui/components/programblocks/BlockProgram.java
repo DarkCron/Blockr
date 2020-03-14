@@ -1,7 +1,8 @@
-package com.ui.components.programblocks;
+package com.blockr.ui.components.programblocks;
 
 import com.blockr.domain.block.StatementBlock;
 import com.blockr.domain.block.interfaces.Block;
+import com.blockr.ui.WindowPercentPosition;
 import com.ui.Component;
 import com.ui.*;
 

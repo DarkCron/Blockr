@@ -1,8 +1,8 @@
 package com.ui;
 
 import com.kul.CanvasWindow;
-import com.ui.areas.PaletteArea;
-import com.ui.areas.ProgramArea;
+import com.blockr.ui.PaletteArea;
+import com.blockr.ui.ProgramArea;
 import com.ui.mouseevent.MouseEvent;
 
 import java.awt.*;

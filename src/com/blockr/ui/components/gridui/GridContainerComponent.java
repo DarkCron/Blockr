@@ -1,14 +1,11 @@
-package com.ui.components.GridUI;
+package com.blockr.ui.components.gridui;
 
 import com.blockr.domain.gameworld.GameWorld;
 import com.blockr.domain.gameworld.Orientation;
 import com.blockr.domain.gameworld.Position;
 import com.blockr.domain.gameworld.TileType;
-import com.blockr.domain.handlers.HandlerBase;
-import com.blockr.domain.handlers.getworld.GetWorld;
 import com.ui.Component;
 import com.ui.Container;
-import com.ui.MyCanvasWindow;
 import com.ui.WindowRegion;
 import com.ui.components.divcomponent.Border;
 import com.ui.components.divcomponent.DivComponent;

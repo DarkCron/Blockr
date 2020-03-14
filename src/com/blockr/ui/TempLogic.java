@@ -1,12 +1,8 @@
-package com.ui.areas;
+package com.blockr.ui;
 
-import com.blockr.domain.State;
 import com.blockr.domain.block.*;
 import com.blockr.domain.block.interfaces.Block;
-import com.ui.components.programblocks.BlockInformation;
-import com.ui.components.programblocks.BlockProgram;
-
-import java.sql.Statement;
+import com.blockr.ui.components.programblocks.BlockInformation;
 
 public class TempLogic {
     //Should return the new block graph's root

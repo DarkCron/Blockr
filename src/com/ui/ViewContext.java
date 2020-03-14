@@ -1,5 +1,7 @@
 package com.ui;
 
+import com.blockr.ui.WindowPercentPosition;
+
 public class ViewContext {
 
     private static WindowPosition windowSize;

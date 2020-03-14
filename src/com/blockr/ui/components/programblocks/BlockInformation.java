@@ -1,21 +1,21 @@
-package com.ui.components.programblocks;
+package com.blockr.ui.components.programblocks;
 
 
 import com.blockr.domain.block.*;
 import com.blockr.domain.block.interfaces.Block;
 import com.ui.ViewContext;
-import com.ui.WindowPercentPosition;
+import com.blockr.ui.WindowPercentPosition;
 import com.ui.WindowPosition;
 import com.ui.WindowRegion;
-import com.ui.areas.PaletteArea;
-import com.ui.areas.ProgramArea;
+import com.blockr.ui.PaletteArea;
+import com.blockr.ui.ProgramArea;
 import com.ui.components.textcomponent.HorizontalAlign;
 import com.ui.components.textcomponent.TextComponent;
 import com.ui.components.textcomponent.VerticalAlign;
 
 import java.awt.*;
 
-public class BlockInformation{
+public class BlockInformation {
 
     public static class BlockClickInfo{
         private final BlockClickLocation clickLocation;

@@ -1,11 +1,10 @@
 package com.main;
 import com.ui.Component;
 import com.ui.Container;
-import com.ui.areas.PaletteArea;
-import com.ui.areas.ProgramArea;
-import com.ui.components.GridUI.GridContainerComponent;
+import com.blockr.ui.PaletteArea;
+import com.blockr.ui.ProgramArea;
+import com.blockr.ui.components.gridui.GridContainerComponent;
 import com.ui.MyCanvasWindow;
-import com.ui.components.TestComponent;
 import com.ui.components.divcomponent.Border;
 import com.ui.components.divcomponent.DivComponent;
 import com.ui.components.divcomponent.FlexAxis;
