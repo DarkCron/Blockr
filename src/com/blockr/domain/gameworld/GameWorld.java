@@ -70,6 +70,8 @@ public class GameWorld implements ReadOnlyGameWorld {
         this.startPosition = startPosition;
         this.startOrientation = startOrientation;
         this.goalPosition = goalPosition;
+        this.robotPosition = startPosition;
+        this.robotOrientation = startOrientation;
     }
 
     private void throwIfNull(Object object, String name){
