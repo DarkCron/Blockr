@@ -6,7 +6,7 @@ import com.blockr.domain.block.interfaces.Block;
 import com.blockr.handlers.ui.GetUIInfo;
 import com.blockr.handlers.ui.UIInfo;
 import com.blockr.ui.PaletteArea;
-import com.blockr.ui.WindowPercentPosition;
+import com.ui.WindowPercentPosition;
 import com.ui.WindowPosition;
 import com.ui.WindowRegion;
 import com.ui.components.textcomponent.HorizontalAlign;

@@ -1,7 +1,5 @@
 package com.ui;
 
-import com.blockr.ui.WindowPercentPosition;
-
 public class ViewContext {
     public void repaint(){
         myCanvasWindow.update();
