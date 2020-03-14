@@ -30,13 +30,13 @@ public class BlockrUi {
                 DivComponent.builder()
                         .withBorder(new Border(Color.BLUE, 4, 2, 4, 2))
                         .withPadding(new Padding(0))
-                        .addChildren(new PaletteArea())
+                        .addChildren(new PaletteArea(pipeline))
                         .build();
 
         Container programAreaDiv =
                 DivComponent.builder()
                         .withBorder(new Border(Color.BLUE, 4 , 4, 4, 2))
-                        .addChildren(new ProgramArea())
+                        .addChildren(new ProgramArea(pipeline))
                         .withPadding(new Padding(3))
                         .build();
 

@@ -5,7 +5,7 @@ import com.blockr.domain.gameworld.Orientation;
 import com.blockr.domain.gameworld.Position;
 import com.blockr.domain.gameworld.ReadOnlyGameWorld;
 import com.blockr.domain.gameworld.TileType;
-import com.blockr.domain.handlers.getworld.GetWorld;
+import com.blockr.handlers.world.GetWorld;
 import com.ui.Component;
 import com.ui.WindowRegion;
 
