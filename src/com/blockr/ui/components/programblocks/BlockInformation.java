@@ -1,16 +1,14 @@
-package com.ui.components.programblocks;
-
+package com.blockr.ui.components.programblocks;
 
 import an.awesome.pipelinr.Pipeline;
 import com.blockr.domain.block.*;
 import com.blockr.domain.block.interfaces.Block;
 import com.blockr.handlers.ui.GetUIInfo;
 import com.blockr.handlers.ui.UIInfo;
-import com.ui.WindowPercentPosition;
+import com.blockr.ui.PaletteArea;
+import com.blockr.ui.WindowPercentPosition;
 import com.ui.WindowPosition;
 import com.ui.WindowRegion;
-import com.ui.areas.PaletteArea;
-import com.ui.areas.ProgramArea;
 import com.ui.components.textcomponent.HorizontalAlign;
 import com.ui.components.textcomponent.TextComponent;
 import com.ui.components.textcomponent.VerticalAlign;

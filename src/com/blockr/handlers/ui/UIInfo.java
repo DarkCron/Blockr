@@ -1,7 +1,6 @@
 package com.blockr.handlers.ui;
 
-import com.ui.MyCanvasWindow;
-import com.ui.WindowPercentPosition;
+import com.blockr.ui.WindowPercentPosition;
 import com.ui.WindowPosition;
 import com.ui.WindowRegion;
 

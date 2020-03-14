@@ -18,7 +18,6 @@ import com.ui.Component;
 import com.ui.Container;
 import com.blockr.ui.PaletteArea;
 import com.blockr.ui.ProgramArea;
-import com.blockr.ui.components.gridui.GridContainerComponent;
 import com.ui.MyCanvasWindow;
 import com.ui.components.divcomponent.Border;
 import com.ui.components.divcomponent.DivComponent;
@@ -72,7 +71,7 @@ public class Main {
                     .withBorder(new Border(Color.BLUE, 4, 2, 4, 4))
                     .withPadding(new Padding(3))
                     .addChildren(DivComponent.builder()
-                            .addChildren(new GridContainerComponent(pipeline))
+                            .addChildren(new com.ui.components.GridUI.GridContainerComponent(pipeline))
                             .withBorder(new Border(Color.BLUE, 4, 2, 4, 2))
                             .withPadding(new Padding(0))
                             .build()
