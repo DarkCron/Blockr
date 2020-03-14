@@ -1,9 +1,8 @@
 package com.ui.components.GridUI;
 
-import com.blockr.domain.gameworld.GameWorld;
-import com.blockr.domain.gameworld.Orientation;
-import com.blockr.domain.gameworld.Position;
-import com.blockr.domain.gameworld.TileType;
+import an.awesome.pipelinr.Pipeline;
+import com.blockr.domain.gameworld.*;
+import com.blockr.handlers.world.GetWorld;
 import com.ui.Component;
 import com.ui.Container;
 import com.ui.WindowRegion;
@@ -17,25 +16,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class GridContainerComponent extends Container {
-    private GameWorld gameWorld;
-    private static final GameWorld testWorld;
-    static {
-        TileType[][] tempTiles = new TileType[4][4];
 
-        for (int i = 0; i < tempTiles.length; i++) {
-            for (int j = 0; j < tempTiles[i].length; j++) {
-                if(i == 0 || j == 0 || i == tempTiles.length-1 || j == tempTiles[i].length-1){
-                    tempTiles[i][j] = TileType.Blocked;
-                    //System.out.println("X: "+j + " , Y: "+i);
-                }else{
-                    tempTiles[i][j] = TileType.Free;
-                }
-            }
-        }
-
-        testWorld = new GameWorld(tempTiles,new Position(1,1), Orientation.NORTH,new Position(tempTiles.length-2,tempTiles.length-2));
-        testWorld.reset();
-    }
+    private final Pipeline mediator;
 
     private List<Component> children;
     @Override
@@ -43,18 +25,15 @@ public class GridContainerComponent extends Container {
         return children;
     }
 
-    public GameWorld getGameWorld() {
-        return gameWorld;
-    }
-
-    public GridContainerComponent(GameWorld gameWorld){
-        this.gameWorld = gameWorld == null ? testWorld : gameWorld;
+    public GridContainerComponent(Pipeline mediator){
+        this.mediator = mediator;
         children = new ArrayList<>();
 
         generateInternalComponents();
     }
 
     private void generateInternalComponents() {
+        ReadOnlyGameWorld gameWorld = mediator.send(new GetWorld());
         Component[][] gridColumns = new Component[gameWorld.getHeight()][gameWorld.getWidth()];
 
         for (int i = 0; i < gameWorld.getHeight(); i++) {
@@ -80,6 +59,8 @@ public class GridContainerComponent extends Container {
      */
     @Override
     public WindowRegion getChildRegion(WindowRegion region, Component child) {
+        ReadOnlyGameWorld gameWorld = mediator.send(new GetWorld());
+
         var childIndex = getChildren().indexOf(child);
 
         if(child instanceof RobotTile){
@@ -113,7 +94,7 @@ public class GridContainerComponent extends Container {
 }
 
 /*
-TODO: instead of doing this, figure out a way to use world state via the pipeline
+Draws the actual robot
  */
 class RobotTile extends Component{
 
@@ -240,6 +221,9 @@ class RobotTile extends Component{
     }
 }
 
+/*
+Draws the bulls-eye on the goal position
+ */
 class GoalTile extends Component{
     Position goalPosition;
 

@@ -1,9 +1,11 @@
 package com.ui.components.programblocks;
 
 
+import an.awesome.pipelinr.Pipeline;
 import com.blockr.domain.block.*;
 import com.blockr.domain.block.interfaces.Block;
-import com.ui.ViewContext;
+import com.blockr.handlers.ui.GetUIInfo;
+import com.blockr.handlers.ui.UIInfo;
 import com.ui.WindowPercentPosition;
 import com.ui.WindowPosition;
 import com.ui.WindowRegion;
@@ -111,29 +113,35 @@ public class BlockInformation{
     private int height = 0;
     private boolean createdInPalette = false;
 
-    public BlockInformation(Block block, WindowPosition position) {
+    final private Pipeline mediator;
+
+    public BlockInformation(Block block, WindowPosition position, Pipeline mediator) {
         this.block = block;
-        upperLeft = ViewContext.screenSpaceToPercent(position);
+        upperLeft = UIInfo.screenSpaceToPercent(position);
+        this.mediator = mediator;
 
         if(PaletteArea.CREATE_PALETTE){
             createdInPalette = true;
-            drawPosition = new WindowPercentPosition(upperLeft.getX() - ViewContext.screenSpaceToPercent(PaletteArea.paletteAreaContainerPos).getX(),
-                    upperLeft.getY() - ViewContext.screenSpaceToPercent(PaletteArea.paletteAreaContainerPos).getY());
+            WindowPosition paletteAreaContainerPos = mediator.send(new GetUIInfo()).getPalettePosition();
+            drawPosition = new WindowPercentPosition(upperLeft.getX() - UIInfo.screenSpaceToPercent(paletteAreaContainerPos).getX(),
+                    upperLeft.getY() - UIInfo.screenSpaceToPercent(paletteAreaContainerPos).getY());
         }else{
-            drawPosition = new WindowPercentPosition(upperLeft.getX() - ViewContext.screenSpaceToPercent(ProgramArea.programAreaContainerPos).getX(),
-                    upperLeft.getY() - ViewContext.screenSpaceToPercent(ProgramArea.programAreaContainerPos).getY());
+            WindowPosition programAreaContainerPos = mediator.send(new GetUIInfo()).getGameAreaPosition();
+            drawPosition = new WindowPercentPosition(upperLeft.getX() - UIInfo.screenSpaceToPercent(programAreaContainerPos).getX(),
+                    upperLeft.getY() - UIInfo.screenSpaceToPercent(programAreaContainerPos).getY());
         }
 
         processBlock(block);
     }
 
-    public BlockInformation(Block block, BlockInformation blockInformation) {
+    public BlockInformation(Block block, BlockInformation blockInformation, Pipeline mediator) {
         var pos = blockInformation.getScreenPosition();
         var thisPos = new WindowPosition(pos.getX(),pos.getY() + blockInformation.getHeight());
+        this.mediator = mediator;
 
         this.block = block;
-        upperLeft = ViewContext.screenSpaceToPercent(thisPos);
-        drawPosition = new WindowPercentPosition(blockInformation.getDrawPosition().getX(),blockInformation.getDrawPosition().getY() + ViewContext.heightToPercent(blockInformation.getHeight()));
+        upperLeft = UIInfo.screenSpaceToPercent(thisPos);
+        drawPosition = new WindowPercentPosition(blockInformation.getDrawPosition().getX(),blockInformation.getDrawPosition().getY() + UIInfo.heightToPercent(blockInformation.getHeight()));
 
         processBlock(block);
     }
@@ -141,8 +149,8 @@ public class BlockInformation{
     public void updatePos( BlockInformation previous){
         var pos = previous.getScreenPosition();
         var thisPos = new WindowPosition(pos.getX(),pos.getY() + previous.getHeight());
-        upperLeft = ViewContext.screenSpaceToPercent(thisPos);
-        drawPosition = new WindowPercentPosition(previous.getDrawPosition().getX(),previous.getDrawPosition().getY() + ViewContext.heightToPercent(previous.getHeight()));
+        upperLeft = UIInfo.screenSpaceToPercent(thisPos);
+        drawPosition = new WindowPercentPosition(previous.getDrawPosition().getX(),previous.getDrawPosition().getY() + UIInfo.heightToPercent(previous.getHeight()));
     }
 
     private void processBlock(Block block) {
@@ -205,10 +213,10 @@ public class BlockInformation{
     /*Region of the entire program*/
     public WindowRegion getScreenRegion(){
         return new WindowRegion(
-                ViewContext.percentToScreenSpace(upperLeft).getX(),
-                ViewContext.percentToScreenSpace(upperLeft).getY(),
-                ViewContext.percentToScreenSpace(upperLeft).getX() + getWidth(),
-                ViewContext.percentToScreenSpace(upperLeft).getY() + getHeight());
+                UIInfo.percentToScreenSpace(upperLeft).getX(),
+                UIInfo.percentToScreenSpace(upperLeft).getY(),
+                UIInfo.percentToScreenSpace(upperLeft).getX() + getWidth(),
+                UIInfo.percentToScreenSpace(upperLeft).getY() + getHeight());
     }
 
     public int getHeight() {
@@ -219,11 +227,11 @@ public class BlockInformation{
     }
 
     public int getX2(){
-        return ViewContext.percentToScreenSpace(upperLeft).getX() + width;
+        return UIInfo.percentToScreenSpace(upperLeft).getX() + width;
     }
 
     public WindowPosition getScreenPosition(){
-        return ViewContext.percentToScreenSpace(upperLeft);
+        return UIInfo.percentToScreenSpace(upperLeft);
     }
 
     public boolean contains(WindowPosition position){
@@ -373,9 +381,11 @@ public class BlockInformation{
     public void move(WindowPercentPosition diff) {
         this.upperLeft = new WindowPercentPosition(upperLeft.getX() + diff.getX(), upperLeft.getY() + diff.getY());
         if(createdInPalette){
-            drawPosition = new WindowPercentPosition(upperLeft.getX() - ViewContext.widthToPercent(PaletteArea.paletteAreaContainerPos.getX()), upperLeft.getY() - ViewContext.heightToPercent(PaletteArea.paletteAreaContainerPos.getY()));
+            WindowPosition paletteAreaContainerPos = mediator.send(new GetUIInfo()).getPalettePosition();
+            drawPosition = new WindowPercentPosition(upperLeft.getX() - UIInfo.widthToPercent(paletteAreaContainerPos.getX()), upperLeft.getY() - UIInfo.heightToPercent(paletteAreaContainerPos.getY()));
         }else{
-            drawPosition = new WindowPercentPosition(upperLeft.getX() - ViewContext.widthToPercent(ProgramArea.programAreaContainerPos.getX()), upperLeft.getY() - ViewContext.heightToPercent(ProgramArea.programAreaContainerPos.getY()));
+            WindowPosition programAreaContainerPos = mediator.send(new GetUIInfo()).getGameAreaPosition();
+            drawPosition = new WindowPercentPosition(upperLeft.getX() - UIInfo.widthToPercent(programAreaContainerPos.getX()), upperLeft.getY() - UIInfo.heightToPercent(programAreaContainerPos.getY()));
         }
     }
 
@@ -401,10 +411,10 @@ public class BlockInformation{
 
     public void draw(Graphics graphics) {
         var cw = new WindowRegion(
-                ViewContext.percentToWidth(getDrawPosition().getX()),
-                ViewContext.percentToHeight(getDrawPosition().getY()),
-                ViewContext.percentToWidth(getDrawPosition().getX())+getWidth(),
-                ViewContext.percentToHeight(getDrawPosition().getY()) + getHeight());
+                UIInfo.percentToWidth(getDrawPosition().getX()),
+                UIInfo.percentToHeight(getDrawPosition().getY()),
+                UIInfo.percentToWidth(getDrawPosition().getX())+getWidth(),
+                UIInfo.percentToHeight(getDrawPosition().getY()) + getHeight());
         graphics.setColor(Color.green);
         if(block instanceof ControlFlowBlock){
             graphics.setColor(Color.yellow);

@@ -1,5 +1,6 @@
 package com.blockr.domain.block;
 
+import com.blockr.domain.block.interfaces.Block;
 import com.blockr.domain.block.interfaces.CompositeBlock;
 import com.blockr.domain.block.interfaces.ReadOnlyBlockProgram;
 import com.blockr.domain.block.interfaces.ReadOnlyStatementBlock;
@@ -136,7 +137,6 @@ public class BlockProgram implements ReadOnlyBlockProgram {
         var rwPlugBlock = (StatementBlock)plugBlock;
 
         rwSocketBlock.setNext(null);
-        rwPlugBlock.setNext(null);
 
         components.add(rwPlugBlock);
     }

@@ -1,5 +1,7 @@
 package com.ui;
 
+import an.awesome.pipelinr.Pipeline;
+import com.blockr.handlers.ui.SetUIInfo;
 import com.kul.CanvasWindow;
 import com.ui.areas.PaletteArea;
 import com.ui.areas.ProgramArea;
@@ -10,14 +12,16 @@ import java.awt.*;
 public class MyCanvasWindow extends CanvasWindow {
     private final Component rootComponent;
     private final ViewContext viewContext;
+    private final Pipeline mediator;
 
-    public MyCanvasWindow(String title, Component rootComponent) {
+    public MyCanvasWindow(String title, Component rootComponent, Pipeline mediator) {
         super(title);
 
         if(rootComponent == null){
             throw new IllegalArgumentException("rootComponent must be effective");
         }
 
+        this.mediator = mediator;
         this.rootComponent = rootComponent;
         this.viewContext = new ViewContext(this);
         initializeViewContext(rootComponent);
@@ -39,7 +43,6 @@ public class MyCanvasWindow extends CanvasWindow {
 
     @Override
     protected void paint(Graphics g) {
-        viewContext.update();
         drawComponentTree(rootComponent, WindowRegion.fromGraphics(g), g);
     }
 
@@ -55,18 +58,40 @@ public class MyCanvasWindow extends CanvasWindow {
 
         componentAction.execute(component, windowRegion);
 
+        if(component == rootComponent && component instanceof Container){
+            WindowRegion programAreaRegion = null;
+            WindowRegion paletteAreaRegion = null;
+            WindowRegion canvasRegion = windowRegion;
+
+            for(var child : ((Container) component).getChildren()){
+                if(programAreaRegion != null && paletteAreaRegion != null){
+                    break;
+                }
+                var containerRegion = ((Container)component).getChildRegion(windowRegion, child);
+                if(child instanceof Container){
+                    for(var c : ((Container)child).getChildren()) {
+                        var childRegion = ((Container)child).getChildRegion(containerRegion, c);
+                        if(programAreaRegion != null && paletteAreaRegion != null){
+                            break;
+                        }
+                        if (c instanceof ProgramArea && c != null) {
+                            programAreaRegion = childRegion;
+                        } else if (c instanceof PaletteArea && c != null) {
+                            paletteAreaRegion = childRegion;
+                        }
+                    }
+                }
+            }
+
+            mediator.send(new SetUIInfo(canvasRegion,paletteAreaRegion,programAreaRegion));
+        }
+
         if(component instanceof Container){
 
             var container = (Container)component;
 
             for(var child : container.getChildren()){
                 var childRegion = container.getChildRegion(windowRegion, child);
-                if(child instanceof ProgramArea &&  child != null){
-                    ProgramArea.programAreaContainerPos = new WindowPosition(windowRegion.getMinX(),windowRegion.getMinY());
-                }else if(child instanceof PaletteArea &&  child != null){
-                    PaletteArea.paletteAreaContainerPos = new WindowPosition(windowRegion.getMinX(),windowRegion.getMinY());
-                }
-
                 traverseComponentTree(child, childRegion, componentAction);
             }
         }

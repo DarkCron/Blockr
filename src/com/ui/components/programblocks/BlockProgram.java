@@ -1,7 +1,9 @@
 package com.ui.components.programblocks;
 
+import an.awesome.pipelinr.Pipeline;
 import com.blockr.domain.block.StatementBlock;
 import com.blockr.domain.block.interfaces.Block;
+import com.blockr.handlers.ui.UIInfo;
 import com.ui.Component;
 import com.ui.*;
 
@@ -11,20 +13,21 @@ import java.util.List;
 
 public class BlockProgram extends Component {
 
-
     private BlockInformation root;
     public BlockInformation getRoot(){return root;}
 
-    private List<BlockInformation> blockInformationList;
+    private final List<BlockInformation> blockInformationList;
+    private final Pipeline mediator;
 
-    public BlockProgram(Block block, WindowPosition position){
+    public BlockProgram(Block block, WindowPosition position, Pipeline mediator){
         blockInformationList = new ArrayList<>();
-        root = new BlockInformation(block,position);
+        this.mediator = mediator;
+        root = new BlockInformation(block,position,mediator);
         blockInformationList.add(root);
     }
 
     public void addBlock(Block block){
-        blockInformationList.add(new BlockInformation(block, blockInformationList.get(blockInformationList.size()-1)));
+        blockInformationList.add(new BlockInformation(block, blockInformationList.get(blockInformationList.size()-1), mediator));
     }
 
     @Override
@@ -60,14 +63,10 @@ public class BlockProgram extends Component {
     }
 
     public boolean contains(WindowPosition windowPosition) {
-        //TODO: debug why, but offset y of +/-10 pixels gives more accurate results, may be because of the "divcomponent" padding
-        WindowPosition pos = new WindowPosition(windowPosition.getX()-5,windowPosition.getY()-8);
-
-        return blockInformationList.stream().anyMatch(info -> info.contains(pos));
+        return blockInformationList.stream().anyMatch(info -> info.contains(windowPosition));
     }
 
     public BlockInformation.BlockClickInfo clickedBlock(WindowPosition windowPosition) {
-        //TODO: debug why, but offset y of +/-10 pixels gives more accurate results, may be because of the "divcomponent" padding
         windowPosition = new WindowPosition(windowPosition.getX()-5,windowPosition.getY()-8);
         for (BlockInformation bi : blockInformationList){
             var result = bi.getDeepestBlock(windowPosition);
@@ -79,10 +78,7 @@ public class BlockProgram extends Component {
     }
 
     public void move(WindowPosition windowPosition) {
-        //TODO: debug why, but offset y of +/-10 pixels gives more accurate results, may be because of the "divcomponent" padding
-        windowPosition = new WindowPosition(windowPosition.getX() -5,windowPosition.getY()-8);
-
-        var n = ViewContext.screenSpaceToPercent(windowPosition);
+        var n = UIInfo.screenSpaceToPercent(windowPosition);
         var diff = new WindowPercentPosition(n.getX() - root.getUpperLeft().getX(), n.getY() - root.getUpperLeft().getY());
         for (BlockInformation info: blockInformationList){
             info.move(diff);
@@ -99,7 +95,7 @@ public class BlockProgram extends Component {
 
     public void createFromGraph(Block newRoot) {
         blockInformationList.clear();
-        root = new BlockInformation(newRoot,root.getScreenPosition());
+        root = new BlockInformation(newRoot,root.getScreenPosition(), mediator);
         blockInformationList.add(root);
 
         if(newRoot instanceof StatementBlock){
