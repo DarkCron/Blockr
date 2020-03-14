@@ -22,8 +22,8 @@ public abstract class UIBlockComponent extends Component {
         this.source = source;
         this.mediator = mediator;
         this.upperLeft = rootPosition;
-        this.title = getName(source);
-        this.titleComponent = new TextComponent(this.title, BlockData.FONT_SIZE, HorizontalAlign.Left, VerticalAlign.Top);
+        this.title = BlockData.getName(source);
+        this.titleComponent = new TextComponent(this.title, BlockData.FONT_SIZE, HorizontalAlign.Center, VerticalAlign.Top);
     }
 
     public static int getHeight(Block source) {
@@ -80,40 +80,36 @@ public abstract class UIBlockComponent extends Component {
 
     private void drawControlFlow(Graphics graphics) {
         var c = graphics.getClipBounds();
+        Polygon flowShape = new Polygon(new int[]{ 0, BlockData.BLOCK_WIDTH, BlockData.BLOCK_WIDTH, BlockData.CONTROL_FLOW_INNER_START,BlockData.CONTROL_FLOW_INNER_START, BlockData.BLOCK_WIDTH, BlockData.BLOCK_WIDTH,0}
+        , new int[]{0,0,BlockData.CONDITION_BLOCK_HEIGHT,BlockData.CONDITION_BLOCK_HEIGHT,getHeight(source)-(BlockData.BLOCK_HEIGHT - BlockData.CONDITION_BLOCK_HEIGHT),getHeight(source)-(BlockData.BLOCK_HEIGHT - BlockData.CONDITION_BLOCK_HEIGHT), getHeight(source), getHeight(source)},8);
+        graphics.setClip(flowShape);
         graphics.setColor(Color.green);
         graphics.fillRect(0, 0, getWidth(source), getHeight(source));
+
+        flowShape = new Polygon(new int[]{ 0, BlockData.BLOCK_WIDTH-1, BlockData.BLOCK_WIDTH-1, BlockData.CONTROL_FLOW_INNER_START,BlockData.CONTROL_FLOW_INNER_START, BlockData.BLOCK_WIDTH-1, BlockData.BLOCK_WIDTH-1,0}
+                , new int[]{0,0,BlockData.CONDITION_BLOCK_HEIGHT,BlockData.CONDITION_BLOCK_HEIGHT,getHeight(source)-(BlockData.BLOCK_HEIGHT - BlockData.CONDITION_BLOCK_HEIGHT),getHeight(source)-(BlockData.BLOCK_HEIGHT - BlockData.CONDITION_BLOCK_HEIGHT), getHeight(source)-1, getHeight(source)-1},8);
+
+        graphics.setColor(Color.black);
+        graphics.drawPolygon(flowShape);
     }
 
     private void drawCondition(Graphics graphics) {
         var c = graphics.getClipBounds();
         graphics.setColor(Color.pink);
         graphics.fillRect(0, 0, getWidth(source), getHeight(source));
+        graphics.setColor(Color.black);
+        graphics.drawRect(0, 0, getWidth(source)-1, getHeight(source)-1);
     }
 
     private void drawNormalStatement(Graphics graphics) {
         var c = graphics.getClipBounds();
         graphics.setColor(Color.yellow);
         graphics.fillRect(0, 0, getWidth(source), getHeight(source));
+        graphics.setColor(Color.black);
+        graphics.drawRect(0, 0, getWidth(source)-1, getHeight(source)-1);
     }
 
     public Block getSource(){return source;}
 
     public WindowPosition getUpperLeft(){ return upperLeft;}
-
-    public static String getName(Block block){
-        if(block instanceof NotBlock){
-            return "Not";
-        }else if(block instanceof WallInFrontBlock){
-            return "Wall in F.";
-        }else if(block instanceof MoveForwardBlock){
-            return "Move Forward";
-        }else if(block instanceof TurnBlock){
-            return "Turn "+(((TurnBlock) block).getDirection() == TurnBlock.Direction.LEFT ? "Left" : "Right");
-        }else if(block instanceof IfBlock){
-            return "If";
-        }else if(block instanceof WhileBlock){
-            return "While";
-        }
-        return "";
-    }
 }

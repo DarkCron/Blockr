@@ -24,6 +24,7 @@ public class ProgramBlockComponent extends UIBlockComponent {
             case MOUSE_DRAG:
                 break;
             case MOUSE_DOWN:
+                System.out.println(BlockData.getName(source));
                 break;
         }
 

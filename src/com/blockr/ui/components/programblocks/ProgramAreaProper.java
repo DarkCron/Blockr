@@ -83,10 +83,10 @@ public class ProgramAreaProper extends Container {
             return;
         }
         if(root instanceof ControlFlowBlock){
-            programBlockComponents.add(new ProgramBlockComponent(root,mediator,rootPosition));
             buildProgramBlockComponentFromRoot(((ControlFlowBlock) root).getBody(),rootPosition.plus(new WindowPosition(BlockData.CONTROL_FLOW_INNER_START,BlockData.CONDITION_BLOCK_HEIGHT)));
             buildProgramBlockComponentFromRoot(((ControlFlowBlock) root).getCondition(),rootPosition.plus(new WindowPosition(BlockData.BLOCK_WIDTH,0)));
             buildProgramBlockComponentFromRoot(((ControlFlowBlock) root).getNext(),rootPosition.plus(new WindowPosition(0,ProgramBlockComponent.getHeight(root))));
+            programBlockComponents.add(new ProgramBlockComponent(root,mediator,rootPosition));
         }else if(root instanceof StatementBlock){
             programBlockComponents.add(new ProgramBlockComponent(root,mediator,rootPosition));
             buildProgramBlockComponentFromRoot(((StatementBlock)root).getNext(),rootPosition.plus(new WindowPosition(0,ProgramBlockComponent.getHeight(root))));
@@ -124,11 +124,11 @@ public class ProgramAreaProper extends Container {
                 }else{
                     MoveForwardBlock root = new MoveForwardBlock();
                     WhileBlock whileBlock = new WhileBlock();
-                    whileBlock.setNext(new TurnBlock());
+                    whileBlock.setNext(new MoveForwardBlock());
                     whileBlock.setBody(new MoveForwardBlock());
                     IfBlock ifBlock = new IfBlock();
                     ifBlock.setBody(new MoveForwardBlock());
-                    ifBlock.getBody().setNext(new MoveForwardBlock());
+                    ifBlock.getBody().setNext(new TurnBlock());
                     ifBlock.setNext(new WhileBlock());
                     ((ControlFlowBlock)ifBlock.getNext()).setCondition(new NotBlock());
                     whileBlock.getBody().setNext(ifBlock);
