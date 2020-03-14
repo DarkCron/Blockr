@@ -1,8 +1,8 @@
 package com.main;
 
 import an.awesome.pipelinr.Pipeline;
-import com.blockr.ui.components.programblocks.PaletteAreaProper;
-import com.blockr.ui.components.programblocks.ProgramAreaProper;
+import com.blockr.ui.components.programblocks.PaletteArea;
+import com.blockr.ui.components.programblocks.ProgramArea;
 import com.blockr.ui.components.gameworld.GameWorldComponent;
 import com.ui.Component;
 import com.ui.Container;
@@ -30,13 +30,13 @@ public class BlockrUi {
                 DivComponent.builder()
                         .withBorder(new Border(Color.BLUE, 4, 2, 4, 2))
                         .withPadding(new Padding(0))
-                        .addChildren(new PaletteAreaProper(pipeline))
+                        .addChildren(new PaletteArea(pipeline))
                         .build();
 
         Container programAreaDiv =
                 DivComponent.builder()
                         .withBorder(new Border(Color.BLUE, 4 , 4, 4, 2))
-                        .addChildren(new ProgramAreaProper(pipeline))
+                        .addChildren(new ProgramArea(pipeline))
                         .withPadding(new Padding(4))
                         .build();
 

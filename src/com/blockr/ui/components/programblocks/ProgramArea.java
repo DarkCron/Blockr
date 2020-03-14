@@ -22,14 +22,14 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ProgramAreaProper extends Container {
+public class ProgramArea extends Container {
 
     private final List<ProgramBlockComponent> programBlockComponents = new ArrayList<>();
     //private static final List<WindowPosition> regionPositions = new ArrayList<>();
 
     private final Pipeline mediator;
 
-    public ProgramAreaProper(Pipeline mediator) {
+    public ProgramArea(Pipeline mediator) {
         this.mediator = mediator;
     }
 

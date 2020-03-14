@@ -14,7 +14,7 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PaletteAreaProper extends Container {
+public class PaletteArea extends Container {
 
     private static final List<PaletteBlockComponent> programBlockComponents = new ArrayList<>();
     private static final List<WindowPosition> regionPositions = new ArrayList<>();
@@ -58,7 +58,7 @@ public class PaletteAreaProper extends Container {
         regionPositions.add(rootPos);
     }
 
-    public PaletteAreaProper(Pipeline mediator) {
+    public PaletteArea(Pipeline mediator) {
         this.mediator = mediator;
         init(mediator);
     }
