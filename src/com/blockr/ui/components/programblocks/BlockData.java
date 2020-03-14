@@ -1,5 +1,8 @@
 package com.blockr.ui.components.programblocks;
 
+import com.blockr.domain.block.*;
+import com.blockr.domain.block.interfaces.Block;
+
 import java.awt.*;
 
 public class BlockData {
@@ -17,4 +20,21 @@ public class BlockData {
     static final Color HIGHLIGHT_COLOR = Color.GREEN;
     static final Color CONNECTION_COLOR = Color.orange;
     static final Color FONT_COLOR = Color.BLACK;
+
+    public static String getName(Block block){
+        if(block instanceof NotBlock){
+            return "Not";
+        }else if(block instanceof WallInFrontBlock){
+            return "Wall in F.";
+        }else if(block instanceof MoveForwardBlock){
+            return "Move Forward";
+        }else if(block instanceof TurnBlock){
+            return "Turn "+(((TurnBlock) block).getDirection() == TurnBlock.Direction.LEFT ? "Left" : "Right");
+        }else if(block instanceof IfBlock){
+            return "If";
+        }else if(block instanceof WhileBlock){
+            return "While";
+        }
+        return "";
+    }
 }
