@@ -1,7 +1,5 @@
 package com.ui;
 
-import com.blockr.domain.block.TurnBlock;
-import com.blockr.ui.components.programblocks.ProgramBlockComponent;
 import com.kul.CanvasWindow;
 import com.ui.mouseevent.MouseEvent;
 
