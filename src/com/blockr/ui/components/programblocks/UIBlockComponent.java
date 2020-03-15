@@ -52,7 +52,8 @@ public abstract class UIBlockComponent extends Component {
             return 0;
         }
         if(source instanceof ControlFlowBlock){
-            return Math.max(BlockData.BLOCK_WIDTH + getWidth(((ControlFlowBlock) source).getCondition()), BlockData.CONTROL_FLOW_INNER_START + getWidth(((ControlFlowBlock) source).getBody()));
+            return BlockData.BLOCK_WIDTH;
+            //return Math.max(BlockData.BLOCK_WIDTH + getWidth(((ControlFlowBlock) source).getCondition()), BlockData.CONTROL_FLOW_INNER_START + getWidth(((ControlFlowBlock) source).getBody()));
         }else if(source instanceof StatementBlock){
             return BlockData.BLOCK_WIDTH;
         }else if(source instanceof ConditionBlock){
