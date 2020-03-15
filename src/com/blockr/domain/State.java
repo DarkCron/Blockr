@@ -5,41 +5,58 @@ import com.blockr.domain.gameworld.GameWorld;
 import com.blockr.handlers.ui.input.PaletteSelection;
 import com.ui.WindowPosition;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 public class State {
+
     public GameWorld getGameWorld(){
-        return gameWorld;
+        return activeLevel.getGameWorld();
     }
 
-    public void setGameWorld(GameWorld gameWorld){
-
-        if(gameWorld == null){
-            throw new IllegalArgumentException("gameWorld must be effective");
-        }
-
-        this.gameWorld = gameWorld;
-        //TODO: this is temp
-        this.blockProgram = new BlockProgram(gameWorld);
-    }
-
-    private GameWorld gameWorld;
 
     public BlockProgram getBlockProgram(){
         return blockProgram;
     }
 
-    public void setBlockProgram(BlockProgram blockProgram){
-
-        if(blockProgram == null){
-            throw new IllegalArgumentException("programExecutor must be effective");
-        }
-
-        this.blockProgram = blockProgram;
+    public void resetBlockProgram(){
+        this.blockProgram = new BlockProgram(getGameWorld());
     }
 
     private BlockProgram blockProgram;
 
-    public void createBlockProgram() {
-        blockProgram = new BlockProgram(getGameWorld());
+    public List<Level> getLevels(){
+        return Collections.unmodifiableList(levels);
+    }
+
+    private final List<Level> levels;
+
+    public Level getActiveLevel(){
+        return activeLevel;
+    }
+
+    public void setActiveLevel(Level level){
+
+        if(level == null){
+            throw new IllegalArgumentException("level must be effective");
+        }
+
+        this.activeLevel = level;
+    }
+
+    private Level activeLevel;
+
+    public State(List<Level> levels){
+
+        if(levels.size() == 0){
+            throw new IllegalArgumentException("There must be at least one level");
+        }
+
+        this.levels = new ArrayList<>(levels);
+        this.activeLevel = levels.get(0);
+
+        this.blockProgram = new BlockProgram(getActiveLevel().getGameWorld());
     }
 
     /*UI STUFF*/
