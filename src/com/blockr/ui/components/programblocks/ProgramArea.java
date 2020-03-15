@@ -10,8 +10,6 @@ import com.blockr.handlers.ui.input.GetPaletteSelection;
 import com.blockr.handlers.ui.input.SetPaletteSelection;
 import com.blockr.handlers.ui.input.recordMousePos.GetMouseRecord;
 import com.blockr.handlers.ui.input.recordMousePos.SetRecordMouse;
-import com.blockr.ui.components.programblocks.ProgramBlockComponent;
-import com.blockr.ui.components.programblocks.UIBlockComponent;
 import com.ui.Component;
 import com.ui.Container;
 import com.ui.WindowPosition;

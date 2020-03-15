@@ -5,6 +5,7 @@ import com.blockr.domain.block.*;
 import com.blockr.domain.block.interfaces.Block;
 import com.ui.Component;
 import com.ui.WindowPosition;
+import com.ui.WindowRegion;
 import com.ui.components.textcomponent.HorizontalAlign;
 import com.ui.components.textcomponent.TextComponent;
 import com.ui.components.textcomponent.VerticalAlign;
@@ -79,18 +80,38 @@ public abstract class UIBlockComponent extends Component {
     }
 
     private void drawControlFlow(Graphics graphics) {
-        var c = graphics.getClipBounds();
-        Polygon flowShape = new Polygon(new int[]{ 0, BlockData.BLOCK_WIDTH, BlockData.BLOCK_WIDTH, BlockData.CONTROL_FLOW_INNER_START,BlockData.CONTROL_FLOW_INNER_START, BlockData.BLOCK_WIDTH, BlockData.BLOCK_WIDTH,0}
-        , new int[]{0,0,BlockData.CONDITION_BLOCK_HEIGHT,BlockData.CONDITION_BLOCK_HEIGHT,getHeight(source)-(BlockData.BLOCK_HEIGHT - BlockData.CONDITION_BLOCK_HEIGHT),getHeight(source)-(BlockData.BLOCK_HEIGHT - BlockData.CONDITION_BLOCK_HEIGHT), getHeight(source), getHeight(source)},8);
-        graphics.setClip(flowShape);
-        graphics.setColor(Color.green);
-        graphics.fillRect(0, 0, getWidth(source), getHeight(source));
+        var w = WindowRegion.fromGraphics(graphics);
 
-        flowShape = new Polygon(new int[]{ 0, BlockData.BLOCK_WIDTH-1, BlockData.BLOCK_WIDTH-1, BlockData.CONTROL_FLOW_INNER_START,BlockData.CONTROL_FLOW_INNER_START, BlockData.BLOCK_WIDTH-1, BlockData.BLOCK_WIDTH-1,0}
-                , new int[]{0,0,BlockData.CONDITION_BLOCK_HEIGHT,BlockData.CONDITION_BLOCK_HEIGHT,getHeight(source)-(BlockData.BLOCK_HEIGHT - BlockData.CONDITION_BLOCK_HEIGHT),getHeight(source)-(BlockData.BLOCK_HEIGHT - BlockData.CONDITION_BLOCK_HEIGHT), getHeight(source)-1, getHeight(source)-1},8);
+        {
+            int x0 = 0;
+            int x1 = Math.min(BlockData.BLOCK_WIDTH,w.getWidth());
+            int x2 = x1;
+            int x3 = Math.min(BlockData.CONTROL_FLOW_INNER_START, w.getWidth());
+            int x4 = x3;
+            int x5 = x1;
+            int x6 = x1;
+            int x7 = x0;
 
-        graphics.setColor(Color.black);
-        graphics.drawPolygon(flowShape);
+            int y0 = 0;
+            int y1 = y0;
+            int y2 = Math.min(BlockData.CONDITION_BLOCK_HEIGHT, w.getHeight());
+            int y3 = Math.min(BlockData.CONDITION_BLOCK_HEIGHT, w.getHeight());
+            int y4 = Math.min(getHeight(source)-(BlockData.BLOCK_HEIGHT - BlockData.CONDITION_BLOCK_HEIGHT), w.getHeight());
+            int y5 = y4;
+            int y6 = Math.min(getHeight(source), w.getHeight());
+            int y7 = y6;
+
+            Polygon flowShape = new Polygon(new int[]{x0,x1,x2,x3,x4,x5,x6,x7}, new int[]{y0,y1,y2,y3,y4,y5,y6,y7},8);
+
+            graphics.setClip(flowShape);
+            graphics.setColor(Color.green);
+            graphics.fillRect(0, 0, getWidth(source), getHeight(source));
+
+            flowShape = new Polygon(new int[]{Math.max(0,x0),Math.max(0,x1-1),Math.max(0,x2-1),Math.max(0,x3-1),Math.max(0,x4-1),Math.max(0,x5-1),Math.max(0,x6-1),Math.max(0,x7)}
+            , new int[]{Math.max(0,y0),Math.max(0,y1),Math.max(0,y2-1),Math.max(0,y3-1),Math.max(0,y4-1),Math.max(0,y5-1),Math.max(0,y6-1),Math.max(0,y7-1)},8);
+            graphics.setColor(Color.black);
+            graphics.drawPolygon(flowShape);
+        }
     }
 
     private void drawCondition(Graphics graphics) {
