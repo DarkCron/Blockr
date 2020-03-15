@@ -58,4 +58,9 @@ public class State {
     public WindowPosition getRecordMouse() {
         return recordMouse;
     }
+
+    public void resetUIState() {
+        paletteSelection = null;
+        recordMouse = null;
+    }
 }

@@ -9,6 +9,7 @@ import com.ui.WindowRegion;
 import com.ui.components.textcomponent.HorizontalAlign;
 import com.ui.components.textcomponent.TextComponent;
 import com.ui.components.textcomponent.VerticalAlign;
+import javafx.util.Pair;
 
 import java.awt.*;
 
@@ -18,6 +19,7 @@ public abstract class UIBlockComponent extends Component {
     protected final WindowPosition upperLeft;
     private final String title;
     private final TextComponent titleComponent;
+    private enum ClickLocations {PREVIOUS, NEXT, CFB_BODY, CFB_CONDITION, C_LEFT, C_RIGHT, INVALID}
 
     public UIBlockComponent(Block source, Pipeline mediator, WindowPosition rootPosition) {
         this.source = source;
@@ -66,6 +68,89 @@ public abstract class UIBlockComponent extends Component {
         return BlockData.BLOCK_WIDTH;
     }
 
+    //TODO: Write some unit tests, can be tested nicely
+    public ProgramBlockInsertInfo getSocketAndPlug(WindowPosition mousePosition, Block blockToAdd){
+        var clickLocation = getClickLocation(mousePosition,blockToAdd);
+
+        switch (clickLocation){
+            case INVALID:
+                return null;
+            case NEXT:
+                return new ProgramBlockInsertInfo(source,blockToAdd, ProgramBlockInsertInfo.PlugLocation.OTHER);
+            case PREVIOUS:
+                return new ProgramBlockInsertInfo(blockToAdd, source, ProgramBlockInsertInfo.PlugLocation.OTHER);
+            case C_RIGHT:
+                return new ProgramBlockInsertInfo(source,blockToAdd, ProgramBlockInsertInfo.PlugLocation.OTHER);
+            case C_LEFT:
+                return new ProgramBlockInsertInfo(blockToAdd, source, ProgramBlockInsertInfo.PlugLocation.OTHER);
+            case CFB_BODY:
+                return new ProgramBlockInsertInfo(source,blockToAdd, ProgramBlockInsertInfo.PlugLocation.BODY);
+            case CFB_CONDITION:
+                return new ProgramBlockInsertInfo(source,blockToAdd, ProgramBlockInsertInfo.PlugLocation.OTHER);
+        }
+
+        return null;
+    }
+
+    //TODO: Write some unit tests, can be tested nicely
+    private ClickLocations getClickLocation(WindowPosition mousePostion, Block blockToAdd){
+        var relativePosition = mousePostion.minus(upperLeft);
+        relativePosition = relativePosition.minus(new WindowPosition(-4,7));
+        if(source instanceof ControlFlowBlock){
+            if(blockToAdd instanceof ConditionBlock){
+                var region = new WindowRegion(BlockData.BLOCK_WIDTH - BlockData.CONDITION_BLOCK_WIDTH, 0, BlockData.BLOCK_WIDTH,BlockData.CONDITION_BLOCK_HEIGHT);
+                if(region.contains(relativePosition)){
+                    //TODO: this if clause prevents certain problems with wallinfront
+                    if(((ControlFlowBlock) source).getCondition() != null && blockToAdd instanceof WallInFrontBlock){
+                        return ClickLocations.INVALID;
+                    }
+                    return ClickLocations.CFB_CONDITION;
+                }
+            }else if(blockToAdd instanceof StatementBlock){
+                var region = new WindowRegion(BlockData.CONTROL_FLOW_INNER_START,BlockData.CONDITION_BLOCK_HEIGHT/2,BlockData.BLOCK_WIDTH,BlockData.CONDITION_BLOCK_HEIGHT);
+                if(region.contains(relativePosition)){
+                    return ClickLocations.CFB_BODY;
+                }
+                region = new WindowRegion(0,0,BlockData.BLOCK_WIDTH,BlockData.CONDITION_BLOCK_HEIGHT/2);
+                if(region.contains(relativePosition)){
+                    return ClickLocations.PREVIOUS;
+                }
+                region = new WindowRegion(0,getHeight(source) - (BlockData.BLOCK_HEIGHT - BlockData.CONDITION_BLOCK_HEIGHT),BlockData.BLOCK_WIDTH,getHeight(source));
+                if(region.contains(relativePosition)){
+                    return ClickLocations.NEXT;
+                }
+            }
+        }else if(source instanceof StatementBlock){
+            var region = new WindowRegion(0,0,BlockData.BLOCK_WIDTH,BlockData.BLOCK_HEIGHT/2);
+            if(region.contains(relativePosition)){
+                return ClickLocations.PREVIOUS;
+            }
+            region = new WindowRegion(0,BlockData.BLOCK_HEIGHT/2,BlockData.BLOCK_WIDTH,BlockData.BLOCK_HEIGHT);
+            if(region.contains(relativePosition)){
+                return ClickLocations.NEXT;
+            }
+        }else if(source instanceof ConditionBlock){
+            if(source instanceof WallInFrontBlock){
+                var region = new WindowRegion(0,0,BlockData.CONDITION_BLOCK_WIDTH/2,BlockData.CONDITION_BLOCK_HEIGHT);
+                if(blockToAdd instanceof NotBlock && region.contains(relativePosition)){
+                    return ClickLocations.C_LEFT;
+                }else{
+                    return ClickLocations.INVALID;
+                }
+            }else if(source instanceof NotBlock){
+                var region = new WindowRegion(0,0,BlockData.CONDITION_BLOCK_WIDTH/2,BlockData.CONDITION_BLOCK_HEIGHT);
+                if(blockToAdd instanceof NotBlock && region.contains(relativePosition)){
+                    return ClickLocations.C_LEFT;
+                }
+                region = new WindowRegion(BlockData.CONDITION_BLOCK_WIDTH/2,0,BlockData.CONDITION_BLOCK_WIDTH,BlockData.CONDITION_BLOCK_HEIGHT);
+                if(region.contains(relativePosition)){
+                    return ClickLocations.C_RIGHT;
+                }
+            }
+        }
+        return ClickLocations.INVALID;
+    }
+
     @Override
     protected void draw(Graphics graphics) {
         if(source instanceof ControlFlowBlock){
@@ -96,6 +181,7 @@ public abstract class UIBlockComponent extends Component {
     private void drawControlFlow(Graphics graphics) {
         var w = WindowRegion.fromGraphics(graphics);
 
+        //Since I technically draw the CFB on 'TOP' of it's body I only draw the part that is supposed to be below it thanks to a custom poly shape.
         {
             int x0 = 0;
             int x1 = Math.min(BlockData.BLOCK_WIDTH,w.getWidth());
@@ -122,14 +208,13 @@ public abstract class UIBlockComponent extends Component {
             graphics.fillRect(0, 0, getWidth(source), getHeight(source));
 
             flowShape = new Polygon(new int[]{Math.max(0,x0),Math.max(0,x1-1),Math.max(0,x2-1),Math.max(0,x3-1),Math.max(0,x4-1),Math.max(0,x5-1),Math.max(0,x6-1),Math.max(0,x7)}
-            , new int[]{Math.max(0,y0),Math.max(0,y1),Math.max(0,y2-1),Math.max(0,y3-1),Math.max(0,y4-1),Math.max(0,y5-1),Math.max(0,y6-1),Math.max(0,y7-1)},8);
+            , new int[]{Math.max(0,y0),Math.max(0,y1),Math.max(0,y2-1),Math.max(0,y3-1),Math.max(0,y4),Math.max(0,y5),Math.max(0,y6-1),Math.max(0,y7-1)},8);
             graphics.setColor(Color.black);
             graphics.drawPolygon(flowShape);
         }
     }
 
     private void drawCondition(Graphics graphics) {
-        var c = graphics.getClipBounds();
         graphics.setColor(Color.pink);
         graphics.fillRect(0, 0, getWidth(source), getHeight(source));
         graphics.setColor(Color.black);
@@ -137,7 +222,6 @@ public abstract class UIBlockComponent extends Component {
     }
 
     private void drawNormalStatement(Graphics graphics) {
-        var c = graphics.getClipBounds();
         graphics.setColor(Color.yellow);
         graphics.fillRect(0, 0, getWidth(source), getHeight(source));
         graphics.setColor(Color.black);

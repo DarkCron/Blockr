@@ -10,6 +10,7 @@ import com.blockr.handlers.ui.input.GetPaletteSelection;
 import com.blockr.handlers.ui.input.SetPaletteSelection;
 import com.blockr.handlers.ui.input.recordMousePos.GetMouseRecord;
 import com.blockr.handlers.ui.input.recordMousePos.SetRecordMouse;
+import com.blockr.handlers.ui.input.resetuistate.ResetUIState;
 import com.ui.Component;
 import com.ui.Container;
 import com.ui.WindowPosition;
@@ -104,9 +105,10 @@ public class ProgramArea extends Container {
             case MOUSE_UP:
                 var paletteSelection = mediator.send(new GetPaletteSelection());
                 if(paletteSelection!=null){
-                    var copy = (ReadOnlyStatementBlock) paletteSelection.getBlockType().getSource().getEmptyCopy();
-                    mediator.send(new AddBlock(copy));
-                    var rootBlock = mediator.send(new GetRootBlock(copy));
+                    var copy = paletteSelection.getBlockType().getSource().getEmptyCopy();
+                    //mediator.send(new AddBlock(copy));
+                   // var rootBlock = mediator.send(new GetRootBlock(copy));
+                    var rootBlock = copy;
 
                     var recordedMouse = mediator.send(new GetMouseRecord());
                     if(recordedMouse == null){
@@ -116,33 +118,6 @@ public class ProgramArea extends Container {
                     }
                     programBlockComponents.add(new ProgramBlockComponent(rootBlock,mediator, recordedMouse));
                     this.getViewContext().repaint();
-
-                    mediator.send(new SetPaletteSelection(null,null));
-                    mediator.send(new SetRecordMouse(null));
-                }else{
-                    if(programBlockComponents.size() != 0){
-                        var root = programBlockComponents.get(0).source;
-                        root = getRootFrom(root);
-                        removeProgramBlockComponentsBaseOnRoot(root);
-                        this.getViewContext().repaint();
-                    }else{
-                        MoveForwardBlock root = new MoveForwardBlock();
-                        WhileBlock whileBlock = new WhileBlock();
-                        whileBlock.setNext(new MoveForwardBlock());
-                        whileBlock.setBody(new MoveForwardBlock());
-                        IfBlock ifBlock = new IfBlock();
-                        ifBlock.setBody(new MoveForwardBlock());
-                        ifBlock.getBody().setNext(new TurnBlock());
-                        ifBlock.setNext(new WhileBlock());
-                        ((ControlFlowBlock)ifBlock.getNext()).setCondition(new NotBlock());
-                        whileBlock.getBody().setNext(ifBlock);
-                        NotBlock notBlock = new NotBlock();
-                        notBlock.setCondition(new WallInFrontBlock());
-                        ifBlock.setCondition(notBlock);
-                        root.setNext(whileBlock);
-                        buildProgramBlockComponentFromRoot(root, new WindowPosition(20,20));
-                        this.getViewContext().repaint();
-                    }
                 }
                 break;
             case MOUSE_DRAG:
@@ -157,6 +132,7 @@ public class ProgramArea extends Container {
 
         switch (mouseEvent.getType()){
             case MOUSE_UP:
+                mediator.send(new ResetUIState());
                 break;
             case MOUSE_DRAG:
                 break;
