@@ -3,11 +3,7 @@ package com.blockr.ui.components.programblocks;
 import an.awesome.pipelinr.Pipeline;
 import com.blockr.domain.block.*;
 import com.blockr.domain.block.interfaces.Block;
-import com.blockr.domain.block.interfaces.ReadOnlyStatementBlock;
-import com.blockr.handlers.blockprogram.addblock.AddBlock;
-import com.blockr.handlers.blockprogram.getrootblock.GetRootBlock;
 import com.blockr.handlers.ui.input.GetPaletteSelection;
-import com.blockr.handlers.ui.input.SetPaletteSelection;
 import com.blockr.handlers.ui.input.recordMousePos.GetMouseRecord;
 import com.blockr.handlers.ui.input.recordMousePos.SetRecordMouse;
 import com.blockr.handlers.ui.input.resetuistate.ResetUIState;
@@ -141,6 +137,7 @@ public class ProgramArea extends Container {
         }
     }
 
+    //TODO: Add unit tests
     public Block getRootFrom(Block b){
         if(b instanceof ControlFlowBlock){
             //If we can travel up, do so
