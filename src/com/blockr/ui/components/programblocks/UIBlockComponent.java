@@ -76,8 +76,21 @@ public abstract class UIBlockComponent extends Component {
             drawCondition(graphics);
         }
 
-        graphics.setColor(BlockData.FONT_COLOR);
-        this.titleComponent.draw(graphics);
+        drawTextComponent(graphics);
+    }
+
+    private void drawTextComponent(Graphics graphics) {
+        //The code below fixes the text position since it's based on the Clip Region of Graphics
+        var w = WindowRegion.fromGraphics(graphics);
+        int width = source instanceof ConditionBlock ? BlockData.CONDITION_BLOCK_WIDTH : BlockData.BLOCK_WIDTH;
+        {
+            Polygon poly = new Polygon(new int[]{0,width,width,Math.min(w.getWidth(),width),Math.min(w.getWidth(),width),0},
+                    new int[]{0,0,1,1,w.getHeight(),w.getHeight()}, 6);
+
+            graphics.setClip(poly);
+            graphics.setColor(BlockData.FONT_COLOR);
+            this.titleComponent.draw(graphics);
+        }
     }
 
     private void drawControlFlow(Graphics graphics) {
