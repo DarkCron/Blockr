@@ -29,6 +29,7 @@ public abstract class UIBlockComponent extends Component {
         this.titleComponent = new TextComponent(this.title, BlockData.FONT_SIZE, HorizontalAlign.Center, VerticalAlign.Top);
     }
 
+    //TODO: Write some unit tests
     public static int getHeight(Block source) {
         if(source == null){
             return 0;
@@ -49,6 +50,7 @@ public abstract class UIBlockComponent extends Component {
         return BlockData.BLOCK_HEIGHT;
     }
 
+    //TODO: Write some unit tests
     public static int getWidth(Block source) {
         if(source == null){
             return 0;
@@ -68,8 +70,11 @@ public abstract class UIBlockComponent extends Component {
         return BlockData.BLOCK_WIDTH;
     }
 
-    //TODO: Write some unit tests, can be tested nicely
     public ProgramBlockInsertInfo getSocketAndPlug(WindowPosition mousePosition, Block blockToAdd){
+        if(blockToAdd == null || mousePosition == null){
+            return null;
+        }
+
         var clickLocation = getClickLocation(mousePosition,blockToAdd);
 
         switch (clickLocation){
@@ -92,7 +97,6 @@ public abstract class UIBlockComponent extends Component {
         return null;
     }
 
-    //TODO: Write some unit tests, can be tested nicely
     private ClickLocations getClickLocation(WindowPosition mousePostion, Block blockToAdd){
         var relativePosition = mousePostion.minus(upperLeft);
         relativePosition = relativePosition.minus(new WindowPosition(-4,7));
