@@ -7,10 +7,12 @@ import com.blockr.domain.gameworld.Orientation;
 import com.blockr.domain.gameworld.Position;
 import com.blockr.domain.gameworld.TileType;
 import com.blockr.handlers.blockprogram.getrootblock.GetRootBlockHandler;
+import com.blockr.handlers.blockprogram.insertBlockInProgram.InsertBlockInProgramHandler;
 import com.blockr.handlers.ui.input.GetPaletteSelectionHandler;
 import com.blockr.handlers.ui.input.SetPaletteSelectionHandler;
 import com.blockr.handlers.ui.input.recordMousePos.GetMouseRecordHandler;
 import com.blockr.handlers.ui.input.recordMousePos.SetRecordMouseHandler;
+import com.blockr.handlers.ui.input.resetuistate.ResetUIStateHandler;
 import com.blockr.handlers.world.GetWorldHandler;
 import com.blockr.handlers.blockprogram.addblock.AddBlockHandler;
 import com.blockr.handlers.blockprogram.createblockprogram.CreateBlockProgramHandler;
@@ -31,6 +33,8 @@ public class Main {
                     , new AddBlockHandler(state)
                     , new GetMouseRecordHandler(state)
                     , new SetRecordMouseHandler(state)
+                    , new InsertBlockInProgramHandler(state)
+                    , new ResetUIStateHandler(state)
                     , new CreateBlockProgramHandler(state)));
 
     private static final TileType[][] GRID = {

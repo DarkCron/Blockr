@@ -2,6 +2,7 @@ package com.blockr.ui.components.programblocks;
 
 import an.awesome.pipelinr.Pipeline;
 import com.blockr.domain.block.*;
+import com.blockr.handlers.ui.input.resetuistate.ResetUIState;
 import com.blockr.ui.components.programblocks.PaletteBlockComponent;
 import com.blockr.ui.components.programblocks.UIBlockComponent;
 import com.ui.Component;
@@ -49,11 +50,11 @@ public class PaletteArea extends Container {
         programBlockComponents.add(new PaletteBlockComponent(new WhileBlock(), mediator, rootPos));
         regionPositions.add(rootPos);
 
-        rootPos = rootPos.plus(new WindowPosition(0,spaceBetween + block_height));
+        rootPos = rootPos.plus(new WindowPosition(0,spaceBetween/2 + block_height));
         programBlockComponents.add(new PaletteBlockComponent(new NotBlock(), mediator, rootPos));
         regionPositions.add(rootPos);
 
-        rootPos = rootPos.plus(new WindowPosition(0,spaceBetween + block_height));
+        rootPos = rootPos.plus(new WindowPosition(0,spaceBetween/2 + block_height));
         programBlockComponents.add(new PaletteBlockComponent(new WallInFrontBlock(), mediator, rootPos));
         regionPositions.add(rootPos);
     }
@@ -96,12 +97,12 @@ public class PaletteArea extends Container {
             case MOUSE_DRAG:
                 break;
             case MOUSE_DOWN:
-                System.out.println("YO!");
                 break;
         }
 
         switch (mouseEvent.getType()){
             case MOUSE_UP:
+                mediator.send(new ResetUIState());
                 break;
             case MOUSE_DRAG:
                 break;

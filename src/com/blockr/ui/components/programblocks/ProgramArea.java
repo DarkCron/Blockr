@@ -10,8 +10,7 @@ import com.blockr.handlers.ui.input.GetPaletteSelection;
 import com.blockr.handlers.ui.input.SetPaletteSelection;
 import com.blockr.handlers.ui.input.recordMousePos.GetMouseRecord;
 import com.blockr.handlers.ui.input.recordMousePos.SetRecordMouse;
-import com.blockr.ui.components.programblocks.ProgramBlockComponent;
-import com.blockr.ui.components.programblocks.UIBlockComponent;
+import com.blockr.handlers.ui.input.resetuistate.ResetUIState;
 import com.ui.Component;
 import com.ui.Container;
 import com.ui.WindowPosition;
@@ -61,18 +60,18 @@ public class ProgramArea extends Container {
             return;
         }
         if(root instanceof ControlFlowBlock){
-            programBlockComponents.remove(root);
+            programBlockComponents.removeIf(pbc -> pbc.getSource() == root);
             removeProgramBlockComponentsBaseOnRoot(((ControlFlowBlock) root).getCondition());
             removeProgramBlockComponentsBaseOnRoot(((ControlFlowBlock) root).getBody());
             removeProgramBlockComponentsBaseOnRoot(((ControlFlowBlock) root).getNext());
         }else if(root instanceof StatementBlock){
-            programBlockComponents.remove(root);
+            programBlockComponents.removeIf(pbc -> pbc.getSource() == root);
             removeProgramBlockComponentsBaseOnRoot(((StatementBlock) root).getNext());
         }else if(root instanceof ConditionBlock){
             if(root instanceof WallInFrontBlock){
-                programBlockComponents.remove(root);
+                programBlockComponents.removeIf(pbc -> pbc.getSource() == root);
             }else if(root instanceof NotBlock){
-                programBlockComponents.remove(root);
+                programBlockComponents.removeIf(pbc -> pbc.getSource() == root);
                 removeProgramBlockComponentsBaseOnRoot(((NotBlock) root).getCondition());
             }
         }
@@ -106,9 +105,10 @@ public class ProgramArea extends Container {
             case MOUSE_UP:
                 var paletteSelection = mediator.send(new GetPaletteSelection());
                 if(paletteSelection!=null){
-                    var copy = (ReadOnlyStatementBlock) paletteSelection.getBlockType().getSource().getEmptyCopy();
-                    mediator.send(new AddBlock(copy));
-                    var rootBlock = mediator.send(new GetRootBlock(copy));
+                    var copy = paletteSelection.getBlockType().getSource().getEmptyCopy();
+                    //mediator.send(new AddBlock(copy));
+                   // var rootBlock = mediator.send(new GetRootBlock(copy));
+                    var rootBlock = copy;
 
                     var recordedMouse = mediator.send(new GetMouseRecord());
                     if(recordedMouse == null){
@@ -117,26 +117,6 @@ public class ProgramArea extends Container {
                         recordedMouse = (mouseEvent.getWindowPosition().minus(recordedMouse));
                     }
                     programBlockComponents.add(new ProgramBlockComponent(rootBlock,mediator, recordedMouse));
-                    this.getViewContext().repaint();
-
-                    mediator.send(new SetPaletteSelection(null,null));
-                    mediator.send(new SetRecordMouse(null));
-                }else{
-                    MoveForwardBlock root = new MoveForwardBlock();
-                    WhileBlock whileBlock = new WhileBlock();
-                    whileBlock.setNext(new MoveForwardBlock());
-                    whileBlock.setBody(new MoveForwardBlock());
-                    IfBlock ifBlock = new IfBlock();
-                    ifBlock.setBody(new MoveForwardBlock());
-                    ifBlock.getBody().setNext(new TurnBlock());
-                    ifBlock.setNext(new WhileBlock());
-                    ((ControlFlowBlock)ifBlock.getNext()).setCondition(new NotBlock());
-                    whileBlock.getBody().setNext(ifBlock);
-                    NotBlock notBlock = new NotBlock();
-                    notBlock.setCondition(new WallInFrontBlock());
-                    ifBlock.setCondition(notBlock);
-                    root.setNext(whileBlock);
-                    buildProgramBlockComponentFromRoot(root, new WindowPosition(20,20));
                     this.getViewContext().repaint();
                 }
                 break;
@@ -152,12 +132,65 @@ public class ProgramArea extends Container {
 
         switch (mouseEvent.getType()){
             case MOUSE_UP:
+                mediator.send(new ResetUIState());
                 break;
             case MOUSE_DRAG:
                 break;
             case MOUSE_DOWN:
                 break;
         }
+    }
+
+    public Block getRootFrom(Block b){
+        if(b instanceof ControlFlowBlock){
+            //If we can travel up, do so
+            if(((ControlFlowBlock) b).getPrevious() != null){
+                return getRootFrom(((ControlFlowBlock) b).getPrevious());
+            }
+            //If we can't travel up check if we're inside the body of another CFB
+            for(ProgramBlockComponent pbc : programBlockComponents){
+                if(pbc.getSource() instanceof ControlFlowBlock){
+                    if(((ControlFlowBlock) pbc.getSource()).getBody() == b){
+                        return getRootFrom(((ControlFlowBlock) pbc.getSource()).getPrevious());
+                    }
+                }
+            }
+            //If we can't travel up and this block isn't part of another CFB body, then this is root
+            return b;
+        }else if(b instanceof StatementBlock){
+            if(((StatementBlock) b).getPrevious() != null){
+                return getRootFrom(((StatementBlock) b).getPrevious());
+            }else{
+                return b;
+            }
+        }else if(b instanceof ConditionBlock){
+            //First check if this condition is connected to a CFB, if so, then CFB is the start of root chain
+            for(ProgramBlockComponent pbc : programBlockComponents){
+                if(pbc.getSource() instanceof ControlFlowBlock){
+                    if(((ControlFlowBlock) pbc.getSource()).getCondition() == b){
+                        return getRootFrom(pbc.getSource());
+                    }
+                }
+            }
+
+            if(b instanceof WallInFrontBlock){
+                //If the given block is a WallInFront block. search for a possible NOT connection, else this is the root
+                for(ProgramBlockComponent pbc : programBlockComponents){
+                    if(pbc.getSource() instanceof NotBlock){
+                        if(((NotBlock) pbc.getSource()).getCondition() == b){
+                            return getRootFrom(((NotBlock) pbc.getSource()).getCondition());
+                        }
+                    }
+                }
+                return b;
+            }else if(b instanceof NotBlock){
+                if(((NotBlock) b).getCondition() != null){
+                    return getRootFrom(((NotBlock) b).getCondition());
+                }
+                return b;
+            }
+        }
+        return null;
     }
 
     @Override

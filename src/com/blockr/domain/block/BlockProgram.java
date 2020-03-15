@@ -5,6 +5,7 @@ import com.blockr.domain.block.interfaces.CompositeBlock;
 import com.blockr.domain.block.interfaces.ReadOnlyBlockProgram;
 import com.blockr.domain.block.interfaces.ReadOnlyStatementBlock;
 import com.blockr.domain.gameworld.GameWorld;
+import com.blockr.ui.components.programblocks.ProgramBlockInsertInfo;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -166,6 +167,19 @@ public class BlockProgram implements ReadOnlyBlockProgram {
             }
         }
 
+        return null;
+    }
+
+    /*
+    Function that inserts a given plug block into a socket block, at least 1 of these 2 blocks already exists in the blocks
+    set (don't know which). PlugLocation returns the location where the socket should be plugged if it can't be inferred.
+    @return Should return the root component of the program that was modified so the visual graph can be rebuild
+     */
+    public Block processInsertBlock(ProgramBlockInsertInfo programBlockInsertInfo){
+        Block plug = programBlockInsertInfo.getPlug();
+        Block socket = programBlockInsertInfo.getSocket();
+        var location = programBlockInsertInfo.getPlugLocation();
+        //TODO: rest
         return null;
     }
 }
