@@ -23,7 +23,7 @@ public class BlockProgram implements ReadOnlyBlockProgram {
         return Collections.unmodifiableList(components);
     }
 
-    public ReadOnlyStatementBlock getActive(){
+    public ReadOnlyStatementBlock getActive() {
 
         if(currentBlock != null)
             return currentBlock.getActive();
@@ -63,6 +63,11 @@ public class BlockProgram implements ReadOnlyBlockProgram {
         }
 
         currentBlock = currentBlock.execute(gameWorld);
+    }
+
+    public void clear(){
+        blocks.clear();
+        components.clear();
     }
 
     public void reset(){
