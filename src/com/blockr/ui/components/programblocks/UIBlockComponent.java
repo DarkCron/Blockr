@@ -9,7 +9,6 @@ import com.ui.WindowRegion;
 import com.ui.components.textcomponent.HorizontalAlign;
 import com.ui.components.textcomponent.TextComponent;
 import com.ui.components.textcomponent.VerticalAlign;
-import javafx.util.Pair;
 
 import java.awt.*;
 
