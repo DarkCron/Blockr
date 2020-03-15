@@ -1,4 +1,4 @@
-package tests;
+package test;
 
 import an.awesome.pipelinr.Pipeline;
 import an.awesome.pipelinr.Pipelinr;
