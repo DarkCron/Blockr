@@ -126,6 +126,36 @@ public class BlockProgram implements ReadOnlyBlockProgram {
     }
 
     /**
+     * Example overload for Simon
+     */
+    public void connectToStatementSocket(ControlFlowBlock socketBlock, ConditionBlock plugBlock){
+
+        ensureValidStatementBlock(socketBlock, "socketBlock");
+        ensureValidStatementBlock(plugBlock, "plugBlock");
+
+        if(!blocks.contains(socketBlock)){
+            throw new IllegalArgumentException("The given socketBlock does not exist");
+        }
+
+        var rwSocketBlock = (StatementBlock)socketBlock;
+        var rwPlugBlock = (StatementBlock)plugBlock;
+
+        rwSocketBlock.setNext(rwPlugBlock);
+
+        if(rwPlugBlock.getPrevious() != null){
+
+            rwPlugBlock.getPrevious().setNext(null);
+        }
+
+        rwPlugBlock.setPrevious(rwSocketBlock);
+
+        if(blocks.contains(plugBlock))
+            return;
+
+        blocks.add(rwPlugBlock);
+    }
+
+    /**
      * Disconnects the plug of plugBlock from the socket of socketBlock
      */
     public void disconnectStatementBlock(ReadOnlyStatementBlock socketBlock, ReadOnlyStatementBlock plugBlock){
