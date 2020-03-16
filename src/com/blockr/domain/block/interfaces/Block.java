@@ -1,4 +1,5 @@
 package com.blockr.domain.block.interfaces;
 
-public interface Block {
+public interface Block extends ReadOnlyBlock {
+
 }
