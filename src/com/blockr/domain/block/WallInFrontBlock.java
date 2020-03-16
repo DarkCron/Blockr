@@ -10,9 +10,4 @@ public class WallInFrontBlock extends ConditionBlock {
     public boolean evaluate(GameWorld gameWorld) {
         return gameWorld.getTileType(gameWorld.getRobotPosition().translate(gameWorld.getRobotOrientation().getOffset())) == TileType.Blocked;
     }
-
-    @Override
-    public Block getEmptyCopy() {
-        return new WallInFrontBlock();
-    }
 }

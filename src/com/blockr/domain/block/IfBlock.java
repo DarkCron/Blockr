@@ -38,9 +38,4 @@ public class IfBlock extends ControlFlowBlock implements ReadOnlyIfBlock {
     public ReadOnlyStatementBlock getActive() {
         return getCurrent() == null ? this : getCurrent();
     }
-
-    @Override
-    public Block getEmptyCopy() {
-        return new IfBlock();
-    }
 }

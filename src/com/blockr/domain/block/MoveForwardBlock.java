@@ -9,9 +9,4 @@ public class MoveForwardBlock extends StatementBlock implements ReadOnlyMoveForw
         gameWorld.moveForward();
         return getNext();
     }
-
-    @Override
-    public Block getEmptyCopy() {
-        return new MoveForwardBlock();
-    }
 }
