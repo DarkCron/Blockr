@@ -30,13 +30,6 @@ public class TurnBlock extends StatementBlock implements ReadOnlyTurnBlock {
         return getNext();
     }
 
-    @Override
-    public Block getEmptyCopy() {
-        TurnBlock turnBlock = new TurnBlock();
-        turnBlock.setDirection(getDirection());
-        return turnBlock;
-    }
-
     public enum Direction {
         LEFT,
         RIGHT

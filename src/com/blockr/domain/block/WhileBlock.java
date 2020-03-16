@@ -35,9 +35,4 @@ public class WhileBlock extends ControlFlowBlock implements ReadOnlyWhileBlock {
     public ReadOnlyStatementBlock getActive() {
         return getCurrent() == null ? getBody() : getCurrent();
     }
-
-    @Override
-    public Block getEmptyCopy() {
-        return new WhileBlock();
-    }
 }

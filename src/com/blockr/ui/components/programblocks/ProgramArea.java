@@ -101,7 +101,7 @@ public class ProgramArea extends Container {
             case MOUSE_UP:
                 var paletteSelection = mediator.send(new GetPaletteSelection());
                 if(paletteSelection!=null){
-                    var copy = paletteSelection.getBlockType().getSource().getEmptyCopy();
+                    var copy = BlockCreator.build(BlockCreator.BlockType.getType(paletteSelection.getBlockType().getSource()));
                     //mediator.send(new AddBlock(copy));
                    // var rootBlock = mediator.send(new GetRootBlock(copy));
                     var rootBlock = copy;
