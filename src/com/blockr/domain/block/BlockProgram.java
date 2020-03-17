@@ -23,6 +23,10 @@ public class BlockProgram implements ReadOnlyBlockProgram {
         return Collections.unmodifiableList(components);
     }
 
+    public int getBlockCount(){
+        return blocks.size();
+    }
+
     public ReadOnlyStatementBlock getActive() {
 
         if(currentBlock != null)
