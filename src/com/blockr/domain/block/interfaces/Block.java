@@ -1,5 +1,5 @@
 package com.blockr.domain.block.interfaces;
 
-public interface Block {
-    Block getEmptyCopy();
+public interface Block extends ReadOnlyBlock {
+
 }

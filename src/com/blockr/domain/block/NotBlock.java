@@ -20,9 +20,4 @@ public class NotBlock extends ConditionBlock implements ReadOnlyNotBlock {
     public boolean evaluate(GameWorld gameWorld) {
         return !getCondition().evaluate(gameWorld);
     }
-
-    @Override
-    public Block getEmptyCopy() {
-        return new NotBlock();
-    }
 }
