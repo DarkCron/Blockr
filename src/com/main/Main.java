@@ -10,7 +10,9 @@ import com.blockr.domain.gameworld.TileType;
 import com.blockr.handlers.blockprogram.getrootblock.GetRootBlockHandler;
 import com.blockr.handlers.blockprogram.insertBlockInProgram.InsertBlockInProgramHandler;
 import com.blockr.handlers.ui.input.GetPaletteSelectionHandler;
+import com.blockr.handlers.ui.input.GetProgramSelectionHandler;
 import com.blockr.handlers.ui.input.SetPaletteSelectionHandler;
+import com.blockr.handlers.ui.input.SetProgramSelectionHandler;
 import com.blockr.handlers.ui.input.recordMousePos.GetMouseRecordHandler;
 import com.blockr.handlers.ui.input.recordMousePos.SetRecordMouseHandler;
 import com.blockr.handlers.ui.input.resetuistate.ResetUIStateHandler;
@@ -39,6 +41,8 @@ public class Main {
                     new GetWorldHandler(state)
                     , new SetPaletteSelectionHandler(state)
                     , new GetPaletteSelectionHandler(state)
+                    , new SetProgramSelectionHandler(state)
+                    , new GetProgramSelectionHandler(state)
                     , new GetRootBlockHandler(state)
                     , new AddBlockHandler(state)
                     , new GetMouseRecordHandler(state)

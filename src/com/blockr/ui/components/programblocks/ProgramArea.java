@@ -4,6 +4,8 @@ import an.awesome.pipelinr.Pipeline;
 import com.blockr.domain.block.*;
 import com.blockr.domain.block.interfaces.Block;
 import com.blockr.handlers.ui.input.GetPaletteSelection;
+import com.blockr.handlers.ui.input.GetProgramSelection;
+import com.blockr.handlers.ui.input.SetProgramSelection;
 import com.blockr.handlers.ui.input.recordMousePos.GetMouseRecord;
 import com.blockr.handlers.ui.input.recordMousePos.SetRecordMouse;
 import com.blockr.handlers.ui.input.resetuistate.ResetUIState;
@@ -121,6 +123,8 @@ public class ProgramArea extends Container {
                 if(recordedMouse == null){
                     mediator.send(new SetRecordMouse(new WindowPosition(mouseEvent.getWindowPosition().getX(),0)));
                 }
+
+                handleProgramMove(mouseEvent);
                 break;
             case MOUSE_DOWN:
                 break;
@@ -137,65 +141,37 @@ public class ProgramArea extends Container {
         }
     }
 
-    //TODO: Add unit tests
-    public Block getRootFrom(Block b){
-        if(b instanceof ControlFlowBlock){
-            //If we can travel up, do so
-            if(((ControlFlowBlock) b).getPrevious() != null){
-                return getRootFrom(((ControlFlowBlock) b).getPrevious());
-            }
-            //If we can't travel up check if we're inside the body of another CFB
-            for(ProgramBlockComponent pbc : programBlockComponents){
-                if(pbc.getSource() instanceof ControlFlowBlock){
-                    if(((ControlFlowBlock) pbc.getSource()).getBody() == b){
-                        return getRootFrom(((ControlFlowBlock) pbc.getSource()).getPrevious());
-                    }
-                }
-            }
-            //If we can't travel up and this block isn't part of another CFB body, then this is root
-            return b;
-        }else if(b instanceof StatementBlock){
-            if(((StatementBlock) b).getPrevious() != null){
-                return getRootFrom(((StatementBlock) b).getPrevious());
+    public void handleProgramMove(MouseEvent mouseEvent){
+        //TODO: break up in smaller functions
+        var programSelection = mediator.send(new GetProgramSelection());
+        if(programSelection != null){
+            var recordedMouse = mediator.send(new GetMouseRecord());
+            if(recordedMouse == null){
+                recordedMouse = (new WindowPosition(50,50));
             }else{
-                return b;
-            }
-        }else if(b instanceof ConditionBlock){
-            //First check if this condition is connected to a CFB, if so, then CFB is the start of root chain
-            for(ProgramBlockComponent pbc : programBlockComponents){
-                if(pbc.getSource() instanceof ControlFlowBlock){
-                    if(((ControlFlowBlock) pbc.getSource()).getCondition() == b){
-                        return getRootFrom(pbc.getSource());
-                    }
-                }
+                recordedMouse = (mouseEvent.getWindowPosition().minus(recordedMouse));
             }
 
-            if(b instanceof WallInFrontBlock){
-                //If the given block is a WallInFront block. search for a possible NOT connection, else this is the root
-                for(ProgramBlockComponent pbc : programBlockComponents){
-                    if(pbc.getSource() instanceof NotBlock){
-                        if(((NotBlock) pbc.getSource()).getCondition() == b){
-                            return getRootFrom(((NotBlock) pbc.getSource()).getCondition());
-                        }
-                    }
-                }
-                return b;
-            }else if(b instanceof NotBlock){
-                if(((NotBlock) b).getCondition() != null){
-                    return getRootFrom(((NotBlock) b).getCondition());
-                }
-                return b;
-            }
+            programBlockComponents.remove(programSelection.getBlockType());
+            removeProgramBlockComponentsBaseOnRoot(programSelection.getBlockType().getSource());
+            buildProgramBlockComponentFromRoot(programSelection.getBlockType().getSource(),recordedMouse);
+            var temp = programBlockComponents.stream().filter(pbc -> pbc.getSource() == programSelection.getBlockType().getSource()).findFirst().orElse(null);
+            mediator.send(new SetProgramSelection(recordedMouse,temp));
         }
-        return null;
     }
 
     @Override
     protected void draw(Graphics graphics) {
-
+        //TODO: proper place for this
+        graphics = getViewContext().getGraphicsDevice();
+        var selection = mediator.send(new GetPaletteSelection());
+        if(selection != null){
+            selection.getBlockType().drawAt(graphics,getViewContext().getMousePosition());
+        }
     }
 
     public void rebuild(Block newRoot) {
+        //TODO: keep this for testing purposes for now
         if(newRoot == null || ((StatementBlock)newRoot).getPrevious() != null){
             System.out.println();
         }
@@ -209,5 +185,9 @@ public class ProgramArea extends Container {
         removeProgramBlockComponentsBaseOnRoot(newRoot);
         buildProgramBlockComponentFromRoot(newRoot,pos);
         getViewContext().repaint();
+    }
+
+    public void cleanUp(ProgramBlockComponent programBlockComponent) {
+        removeProgramBlockComponentsBaseOnRoot(programBlockComponent.getSource());
     }
 }

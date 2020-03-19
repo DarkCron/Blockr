@@ -18,6 +18,7 @@ public abstract class UIBlockComponent extends Component {
     protected final WindowPosition upperLeft;
     private final String title;
     private final TextComponent titleComponent;
+
     private enum ClickLocations {PREVIOUS, NEXT, CFB_BODY, CFB_CONDITION, C_LEFT, C_RIGHT, INVALID}
 
     public UIBlockComponent(Block source, Pipeline mediator, WindowPosition rootPosition) {
@@ -70,6 +71,7 @@ public abstract class UIBlockComponent extends Component {
     }
 
     public ProgramBlockInsertInfo getSocketAndPlug(WindowPosition mousePosition, Block blockToAdd){
+        //TODO FIX UP LEFT SOCKET OF WALLINFRONT
         if(blockToAdd == null || mousePosition == null){
             return null;
         }
@@ -234,4 +236,10 @@ public abstract class UIBlockComponent extends Component {
     public Block getSource(){return source;}
 
     public WindowPosition getUpperLeft(){ return upperLeft;}
+
+    public void drawAt(Graphics graphics, WindowPosition mousePosition) {
+        WindowRegion windowRegion = new WindowRegion(mousePosition.getX(), mousePosition.getY(),mousePosition.getX() + getWidth(source),mousePosition.getY() +  getHeight(source));
+        graphics = graphics.create(windowRegion.getMinX(),windowRegion.getMinY(), windowRegion.getWidth(),windowRegion.getHeight());
+        draw(graphics);
+    }
 }

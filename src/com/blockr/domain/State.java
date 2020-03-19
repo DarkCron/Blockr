@@ -3,6 +3,8 @@ package com.blockr.domain;
 import com.blockr.domain.block.BlockProgram;
 import com.blockr.domain.gameworld.GameWorld;
 import com.blockr.handlers.ui.input.PaletteSelection;
+import com.blockr.handlers.ui.input.ProgramAreaSelection;
+import com.blockr.ui.components.programblocks.ProgramArea;
 import com.ui.WindowPosition;
 
 import java.util.ArrayList;
@@ -68,6 +70,14 @@ public class State {
         return paletteSelection;
     }
 
+    private ProgramAreaSelection programAreaSelection;
+    public ProgramAreaSelection getProgramAreaSelection() {
+        return programAreaSelection;
+    }
+    public void setProgramAreaSelection(ProgramAreaSelection programAreaSelection) {
+        this.programAreaSelection = programAreaSelection;
+    }
+
     private WindowPosition recordMouse = null;
     public void setRecordMouse(WindowPosition recordMouse) {
         this.recordMouse = recordMouse;
@@ -79,5 +89,8 @@ public class State {
     public void resetUIState() {
         paletteSelection = null;
         recordMouse = null;
+        programAreaSelection = null;
     }
+
+
 }

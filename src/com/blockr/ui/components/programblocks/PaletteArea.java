@@ -2,6 +2,7 @@ package com.blockr.ui.components.programblocks;
 
 import an.awesome.pipelinr.Pipeline;
 import com.blockr.domain.block.*;
+import com.blockr.handlers.ui.input.GetProgramSelection;
 import com.blockr.handlers.ui.input.resetuistate.ResetUIState;
 import com.ui.Component;
 import com.ui.Container;
@@ -91,6 +92,12 @@ public class PaletteArea extends Container {
         super.onMouseEvent(mouseEvent);
         switch (mouseEvent.getType()){
             case MOUSE_UP:
+
+                var programSelection = mediator.send(new GetProgramSelection());
+                if(programSelection != null){
+                    programSelection.getBlockType().callForCleanUp();
+                    getViewContext().repaint();
+                }
                 break;
             case MOUSE_DRAG:
                 break;
