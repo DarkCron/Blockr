@@ -13,8 +13,11 @@ import com.ui.mouseevent.MouseEvent;
 
 public class ProgramBlockComponent extends UIBlockComponent {
 
-    public ProgramBlockComponent(Block source, Pipeline mediator, WindowPosition rootPosition) {
+    private final ProgramArea programArea;
+
+    public ProgramBlockComponent(Block source, Pipeline mediator, WindowPosition rootPosition, ProgramArea parent) {
         super(source, mediator, rootPosition);
+        programArea = parent;
     }
 
     @Override
@@ -37,6 +40,7 @@ public class ProgramBlockComponent extends UIBlockComponent {
                     var info = getSocketAndPlug(recordedMouse,copy);
                     if(info != null){
                         var newRoot = mediator.send(new InsertBlockInProgram(info));
+                        programArea.rebuild(newRoot);
                     }
                 }
                 break;

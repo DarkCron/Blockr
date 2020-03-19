@@ -81,15 +81,15 @@ public class ProgramArea extends Container {
             buildProgramBlockComponentFromRoot(((ControlFlowBlock) root).getBody(),rootPosition.plus(new WindowPosition(BlockData.CONTROL_FLOW_INNER_START,BlockData.CONDITION_BLOCK_HEIGHT)));
             buildProgramBlockComponentFromRoot(((ControlFlowBlock) root).getCondition(),rootPosition.plus(new WindowPosition(BlockData.BLOCK_WIDTH,0)));
             buildProgramBlockComponentFromRoot(((ControlFlowBlock) root).getNext(),rootPosition.plus(new WindowPosition(0,ProgramBlockComponent.getHeight(root))));
-            programBlockComponents.add(new ProgramBlockComponent(root,mediator,rootPosition));
+            programBlockComponents.add(new ProgramBlockComponent(root,mediator,rootPosition,this));
         }else if(root instanceof StatementBlock){
-            programBlockComponents.add(new ProgramBlockComponent(root,mediator,rootPosition));
+            programBlockComponents.add(new ProgramBlockComponent(root,mediator,rootPosition,this));
             buildProgramBlockComponentFromRoot(((StatementBlock)root).getNext(),rootPosition.plus(new WindowPosition(0,ProgramBlockComponent.getHeight(root))));
         }else if(root instanceof ConditionBlock){
             if(root instanceof WallInFrontBlock){
-                programBlockComponents.add(new ProgramBlockComponent(root,mediator,rootPosition));
+                programBlockComponents.add(new ProgramBlockComponent(root,mediator,rootPosition,this));
             }else if(root instanceof NotBlock){
-                programBlockComponents.add(new ProgramBlockComponent(root,mediator,rootPosition));
+                programBlockComponents.add(new ProgramBlockComponent(root,mediator,rootPosition,this));
                 buildProgramBlockComponentFromRoot(((NotBlock) root).getCondition(),rootPosition.plus(new WindowPosition(BlockData.CONDITION_BLOCK_WIDTH,0)));
             }
         }
@@ -112,7 +112,7 @@ public class ProgramArea extends Container {
                     }else{
                         recordedMouse = (mouseEvent.getWindowPosition().minus(recordedMouse));
                     }
-                    programBlockComponents.add(new ProgramBlockComponent(rootBlock,mediator, recordedMouse));
+                    programBlockComponents.add(new ProgramBlockComponent(rootBlock,mediator, recordedMouse,this));
                     this.getViewContext().repaint();
                 }
                 break;
@@ -193,5 +193,21 @@ public class ProgramArea extends Container {
     @Override
     protected void draw(Graphics graphics) {
 
+    }
+
+    public void rebuild(Block newRoot) {
+        if(newRoot == null || ((StatementBlock)newRoot).getPrevious() != null){
+            System.out.println();
+        }
+        var programBlockComponent = programBlockComponents.stream().filter(pbc -> pbc.getSource() == newRoot).findFirst().orElse(null);
+        var pos = programBlockComponent == null? null : programBlockComponent.getUpperLeft();
+        var temp = ((StatementBlock) newRoot).getNext();
+        while (pos == null && temp != null){
+            programBlockComponent = programBlockComponents.stream().filter(pbc -> pbc.getSource() == temp).findFirst().orElse(null);
+            pos = programBlockComponent == null? null : programBlockComponent.getUpperLeft();
+        }
+        removeProgramBlockComponentsBaseOnRoot(newRoot);
+        buildProgramBlockComponentFromRoot(newRoot,pos);
+        getViewContext().repaint();
     }
 }

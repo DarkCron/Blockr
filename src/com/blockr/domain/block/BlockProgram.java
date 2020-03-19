@@ -5,6 +5,7 @@ import com.blockr.domain.block.interfaces.markers.ReadOnlyConditionBlock;
 import com.blockr.domain.gameworld.GameWorld;
 import com.blockr.ui.components.programblocks.ProgramBlockInsertInfo;
 
+import javax.management.RuntimeErrorException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -109,7 +110,8 @@ public class BlockProgram implements ReadOnlyBlockProgram {
         }
 
         if(!blocks.contains(socketBlock)){
-            throw new IllegalArgumentException("The given socketBlock does not exist");
+            addBlock(socketBlock);
+            //throw new IllegalArgumentException("The given socketBlock does not exist");
         }
 
         var rwSocketBlock = (StatementBlock)socketBlock;
@@ -160,7 +162,8 @@ public class BlockProgram implements ReadOnlyBlockProgram {
         ensureValidCondition(plugBlock, "plugBlock");
 
         if(!blocks.contains(socketBlock)){
-            throw new IllegalArgumentException("The given socketBlock does not exist");
+            addBlock(socketBlock);
+            //throw new IllegalArgumentException("The given socketBlock does not exist");
         }
 
         var rwSocketBlock = (ControlFlowBlock)socketBlock;
@@ -198,7 +201,8 @@ public class BlockProgram implements ReadOnlyBlockProgram {
         }
 
         if(!blocks.contains(socketBlock)){
-            throw new IllegalArgumentException("The given socketBlock does not exist");
+            addBlock(socketBlock);
+            //throw new IllegalArgumentException("The given socketBlock does not exist");
         }
 
         var rwSocketBlock = (ControlFlowBlock)socketBlock;
@@ -218,6 +222,45 @@ public class BlockProgram implements ReadOnlyBlockProgram {
         blocks.add(rwPlugBlock);
     }
 
+    private void connectToConditionBlock(ReadOnlyConditionBlock socket, ReadOnlyConditionBlock plug) {
+        ensureValidCondition((ReadOnlyConditionBlock) socket,"socket");
+        ensureValidCondition((ReadOnlyConditionBlock) plug,"plug");
+
+        var socketCondition = (ConditionBlock)socket;
+        var plugCondition = (ConditionBlock)plug;
+
+        if(socketCondition instanceof NotBlock){
+            //Check if the plug is the condition of anything else:
+            var conditionFor = blocks.stream().filter(b ->
+                    (b instanceof ControlFlowBlock && ((ControlFlowBlock) b).getCondition() == plugCondition)
+                         || ((b instanceof NotBlock) && ((NotBlock) b).getCondition() == plugCondition)  ).findFirst().orElse(null);
+            if(conditionFor != null){
+                if(conditionFor instanceof ControlFlowBlock){
+                    ((ControlFlowBlock) conditionFor).setCondition( socketCondition);
+                    ((NotBlock) socketCondition).setCondition(plugCondition);
+                }else if(conditionFor instanceof NotBlock){
+                    ((NotBlock) conditionFor).setCondition(socketCondition);
+                    ((NotBlock) socketCondition).setCondition(plugCondition);
+                }
+            }else{
+                if(plug instanceof NotBlock){
+                    ((NotBlock) plug).setCondition(((NotBlock) socket).getCondition());
+                    ((NotBlock) socket).setCondition((ConditionBlock) plug);
+                }else{
+                    ((NotBlock) socket).setCondition((ConditionBlock) plug);
+                }
+            }
+        }else{
+            throw new IllegalArgumentException("Cannot connect with this condition socket.");
+        }
+
+        if(!blocks.contains(socketCondition)){
+            blocks.add(socketCondition);
+        }
+        if(!blocks.contains(plugCondition)){
+            blocks.add(plugCondition);
+        }
+    }
 
     /**
      * Disconnects the plug of plugBlock from the socket of socketBlock
@@ -271,20 +314,42 @@ public class BlockProgram implements ReadOnlyBlockProgram {
             throw new IllegalArgumentException(String.format("The given %s must be an instance of StatementBlock", argName));
     }
 
-    public ReadOnlyStatementBlock getRootBlock(ReadOnlyStatementBlock blockOfChain){
-        ensureValidStatementBlock(blockOfChain, "block");
-
-        for(StatementBlock block : components){
-            var currentBlock = block;
-            while (currentBlock != null){
-                if(currentBlock == blockOfChain){
-                    return block;
+    public ReadOnlyStatementBlock getRootBlock(Block blockOfChain){
+        //ensureValidStatementBlock(blockOfChain, "block");
+        if(blockOfChain instanceof ConditionBlock){
+            for(Block b : blocks){
+                if(b instanceof ControlFlowBlock){
+                    if(((ControlFlowBlock) b).getCondition() == blockOfChain){
+                        return getRootBlock(b);
+                    }
+                }else if(b instanceof NotBlock){
+                    if(((NotBlock) b).getCondition() == blockOfChain){
+                        return getRootBlock(b);
+                    }
                 }
-                currentBlock = currentBlock.getNext();
             }
         }
 
+        if(blockOfChain instanceof ConditionBlock){
+            System.out.println();
+        }
+        for(StatementBlock block : components){
+            if(containsRoot(block, (ReadOnlyStatementBlock) blockOfChain)){
+                return block;
+            }
+        }
         return null;
+    }
+
+    private boolean containsRoot(ReadOnlyStatementBlock block ,ReadOnlyStatementBlock blockOfChain){
+        if(block == null){
+            return false;
+        }
+        if(block instanceof ControlFlowBlock){
+            return containsRoot(((ControlFlowBlock) block).getBody(),blockOfChain) || (block == blockOfChain) || containsRoot(block.getNext(), blockOfChain);
+        }else{
+            return (block == blockOfChain) || containsRoot(block.getNext(), blockOfChain);
+        }
     }
 
     /*
@@ -296,7 +361,36 @@ public class BlockProgram implements ReadOnlyBlockProgram {
         Block plug = programBlockInsertInfo.getPlug();
         Block socket = programBlockInsertInfo.getSocket();
         var location = programBlockInsertInfo.getPlugLocation();
-        //TODO: rest
-        return null;
+        if(location == ProgramBlockInsertInfo.PlugLocation.BODY){
+            ensureValidCFB((ReadOnlyControlFlowBlock) socket,"socket");
+            ensureValidStatementBlock((ReadOnlyStatementBlock) plug,"plug");
+            connectToStatementSocket((ReadOnlyControlFlowBlock) socket, (ReadOnlyStatementBlock) plug,true);
+        }else{
+            if(socket instanceof ReadOnlyControlFlowBlock){
+                ensureValidCFB((ReadOnlyControlFlowBlock) socket,"socket");
+                if(plug instanceof ReadOnlyConditionBlock){
+                    ensureValidCondition((ReadOnlyConditionBlock) plug,"plug");
+                    connectToStatementSocket((ReadOnlyControlFlowBlock)socket, (ReadOnlyConditionBlock) plug);
+                }else{
+                    ensureValidStatementBlock((ReadOnlyStatementBlock) plug,"plug");
+                    connectToStatementSocket((ReadOnlyStatementBlock) socket, (ReadOnlyStatementBlock) plug);
+                }
+            }else if(socket instanceof ReadOnlyStatementBlock){
+                ensureValidStatementBlock((ReadOnlyStatementBlock) socket,"socket");
+                ensureValidStatementBlock((ReadOnlyStatementBlock) plug,"plug");
+                connectToStatementSocket((ReadOnlyStatementBlock)socket,(ReadOnlyStatementBlock)plug);
+            }
+            if(socket instanceof ConditionBlock && plug instanceof ConditionBlock){
+                ensureValidCondition((ReadOnlyConditionBlock) socket,"socket");
+                ensureValidCondition((ReadOnlyConditionBlock) plug,"plug");
+                connectToConditionBlock((ReadOnlyConditionBlock)socket,(ReadOnlyConditionBlock)plug);
+            }
+        }
+
+        if(blocks.contains(socket) && blocks.contains(plug)){
+            return getRootBlock(socket);
+        }else{
+            throw new RuntimeException("Error adding plug to socket.");
+        }
     }
 }

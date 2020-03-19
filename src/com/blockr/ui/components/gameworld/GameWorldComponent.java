@@ -205,7 +205,7 @@ class GoalTile {
             }else{
                 graphics.setColor(Color.red);
             }
-            graphics.fillArc((int)((0.5-radius/2) * min),(int)((0.5-radius/2) * min),(int)(radius * min),(int)(radius * min),0,360);
+            graphics.fillArc((int)((0.5-radius/2) * windowRegion.getWidth()),(int)((0.5-radius/2) * windowRegion.getHeight()),(int)(radius * windowRegion.getWidth()),(int)(radius * windowRegion.getHeight()),0,360);
             radius -= mod;
         }
     }
