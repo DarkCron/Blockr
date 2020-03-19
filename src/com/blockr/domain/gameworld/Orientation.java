@@ -18,11 +18,11 @@ public enum Orientation {
     }
 
     public Orientation turnLeft(){
-        return Orientation.values()[(indexOf(this) - 1) % Orientation.values().length];
+        return Orientation.values()[Math.floorMod((indexOf(this) - 1), Orientation.values().length)];
     }
 
     public Orientation turnRight(){
-        return Orientation.values()[(indexOf(this) + 1) % Orientation.values().length];
+        return Orientation.values()[Math.floorMod((indexOf(this) + 1), Orientation.values().length)];
     }
 
     private static int indexOf(Orientation orientation){
