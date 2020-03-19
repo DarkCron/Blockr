@@ -6,6 +6,7 @@ import com.blockr.domain.block.interfaces.Block;
 import java.awt.*;
 
 public class BlockData {
+
     static final int BLOCK_WIDTH = 100;
     static final int BLOCK_HEIGHT = 40;
     static final int CONTROL_FLOW_INNER_START = (int)(BLOCK_WIDTH * 0.45f);

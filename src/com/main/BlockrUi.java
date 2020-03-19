@@ -1,6 +1,7 @@
 package com.main;
 
 import an.awesome.pipelinr.Pipeline;
+import com.blockr.ui.components.executeprogrambutton.ExecuteProgramButton;
 import com.blockr.ui.components.programblocks.PaletteArea;
 import com.blockr.ui.components.programblocks.ProgramArea;
 import com.blockr.ui.components.gameworld.GameWorldComponent;
@@ -22,7 +23,7 @@ public class BlockrUi {
                         .withPadding(new Padding(0))
                         .addChildren(
                                 new GameWorldComponent(pipeline),
-                                DivComponent.builder().build())
+                                new ExecuteProgramButton(pipeline))
                         .withFlexAxis(FlexAxis.Vertical)
                         .build();
 

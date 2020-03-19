@@ -7,6 +7,7 @@ import com.blockr.domain.gameworld.GameWorld;
 import com.blockr.domain.gameworld.Orientation;
 import com.blockr.domain.gameworld.Position;
 import com.blockr.domain.gameworld.TileType;
+import com.blockr.handlers.blockprogram.canstart.CanStartHandler;
 import com.blockr.handlers.blockprogram.getrootblock.GetRootBlockHandler;
 import com.blockr.handlers.blockprogram.insertBlockInProgram.InsertBlockInProgramHandler;
 import com.blockr.handlers.ui.input.GetPaletteSelectionHandler;
@@ -38,7 +39,8 @@ public class Main {
 
     private static final Pipeline pipeline = new Pipelinr()
             .with(() -> Stream.of(
-                    new GetWorldHandler(state)
+                      new GetWorldHandler(state)
+                    , new CanStartHandler(state)
                     , new SetPaletteSelectionHandler(state)
                     , new GetPaletteSelectionHandler(state)
                     , new SetProgramSelectionHandler(state)

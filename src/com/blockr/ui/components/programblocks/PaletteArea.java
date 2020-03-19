@@ -22,6 +22,7 @@ public class PaletteArea extends Container {
     private final Pipeline mediator;
 
     private static void init(Pipeline mediator) {
+
         int spaceBetween = 30;
         int block_height = 40;
 

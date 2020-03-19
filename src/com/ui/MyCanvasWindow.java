@@ -100,19 +100,23 @@ public class MyCanvasWindow extends CanvasWindow {
 
     @Override
     protected void handleMouseEvent(int id, int x, int y, int clickCount) {
+
         viewContext.setMousePosition(new WindowPosition(x,y));
+
         var type = MouseEvent.Type.getTypeById(id);
 
         if(type == null)
             return;
 
         var component = getComponentAt(new WindowPosition(x, y));
+
         var mouseEvent = new MouseEvent(type,new WindowPosition(x, y));
+
         component.onMouseEvent(mouseEvent);
+
         if(mouseEvent.getType() == MouseEvent.Type.MOUSE_DRAG){
             repaint();
         }
-
     }
 
     @Override

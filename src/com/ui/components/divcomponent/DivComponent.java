@@ -48,7 +48,7 @@ public class DivComponent extends Container {
 
     private FlexAxis flexAxis;
 
-    private DivComponent(List<Component> children, Margin margin, Border border, Padding padding, FlexAxis flexAxis){
+    protected DivComponent(List<Component> children, Margin margin, Border border, Padding padding, FlexAxis flexAxis){
 
         throwIfNull(margin, "margin");
         throwIfNull(border, "border");
@@ -110,7 +110,7 @@ public class DivComponent extends Container {
         );
     }
 
-    private WindowRegion getContentRegion(WindowRegion region){
+    protected WindowRegion getContentRegion(WindowRegion region){
 
         var props = Arrays.asList(getMargin(), getBorder(), getPadding());
 

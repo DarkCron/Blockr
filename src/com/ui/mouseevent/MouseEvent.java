@@ -26,6 +26,7 @@ public class MouseEvent {
     public static enum Type {
         MOUSE_DOWN(501),
         MOUSE_UP(502),
+        MOUSE_CLICKED(500),
         MOUSE_DRAG(506);
 
         public int getId(){
