@@ -1,9 +1,7 @@
 package com.blockr.domain.block;
 
-import com.blockr.domain.block.interfaces.Block;
-import com.blockr.domain.block.interfaces.CompositeBlock;
-import com.blockr.domain.block.interfaces.ReadOnlyBlockProgram;
-import com.blockr.domain.block.interfaces.ReadOnlyStatementBlock;
+import com.blockr.domain.block.interfaces.*;
+import com.blockr.domain.block.interfaces.markers.ReadOnlyConditionBlock;
 import com.blockr.domain.gameworld.GameWorld;
 import com.blockr.ui.components.programblocks.ProgramBlockInsertInfo;
 
@@ -41,7 +39,7 @@ public class BlockProgram implements ReadOnlyBlockProgram {
     //First block of every chain program
     private final List<StatementBlock> components = new LinkedList<>();
     //All blocks in the programArea
-    private final Set<StatementBlock> blocks = new HashSet<>();
+    private final Set<Block> blocks = new HashSet<>();
 
     private StatementBlock currentBlock;
 
@@ -103,9 +101,12 @@ public class BlockProgram implements ReadOnlyBlockProgram {
      * Connects the plug of plugBlock to the socket of socketBlock
      */
     public void connectToStatementSocket(ReadOnlyStatementBlock socketBlock, ReadOnlyStatementBlock plugBlock){
-
         ensureValidStatementBlock(socketBlock, "socketBlock");
         ensureValidStatementBlock(plugBlock, "plugBlock");
+
+        if(components.contains(plugBlock)){
+            components.remove(plugBlock);
+        }
 
         if(!blocks.contains(socketBlock)){
             throw new IllegalArgumentException("The given socketBlock does not exist");
@@ -113,6 +114,28 @@ public class BlockProgram implements ReadOnlyBlockProgram {
 
         var rwSocketBlock = (StatementBlock)socketBlock;
         var rwPlugBlock = (StatementBlock)plugBlock;
+
+        //Check if the socketBlock was part of a CFB's body
+        {
+            for(Block b : blocks){
+                if(b instanceof ControlFlowBlock){
+                    if(((ControlFlowBlock) b).getBody() == rwPlugBlock){
+                        ((ControlFlowBlock) b).setBody(rwSocketBlock);
+                        rwSocketBlock.setPrevious((StatementBlock) b);
+                    }
+                }
+            }
+        }
+
+        if(rwSocketBlock.getNext() != null){
+            var tempPlugNext = rwPlugBlock;
+            while (tempPlugNext.getNext() != null){
+                tempPlugNext = tempPlugNext.getNext();
+            }
+            rwSocketBlock.getNext().setPrevious(tempPlugNext);
+            tempPlugNext.setNext(rwSocketBlock.getNext());
+            rwSocketBlock.setNext(null);
+        }
 
         rwSocketBlock.setNext(rwPlugBlock);
 
@@ -128,29 +151,65 @@ public class BlockProgram implements ReadOnlyBlockProgram {
 
         blocks.add(rwPlugBlock);
     }
-
     /**
-     * Example overload for Simon
+     * Connect CFB with Condition
      */
-    public void connectToStatementSocket(ControlFlowBlock socketBlock, ConditionBlock plugBlock){
+    public void connectToStatementSocket(ReadOnlyControlFlowBlock socketBlock, ReadOnlyConditionBlock plugBlock){
 
-        ensureValidStatementBlock(socketBlock, "socketBlock");
-        ensureValidStatementBlock(plugBlock, "plugBlock");
+        ensureValidCFB(socketBlock, "socketBlock");
+        ensureValidCondition(plugBlock, "plugBlock");
 
         if(!blocks.contains(socketBlock)){
             throw new IllegalArgumentException("The given socketBlock does not exist");
         }
 
-        var rwSocketBlock = (StatementBlock)socketBlock;
-        var rwPlugBlock = (StatementBlock)plugBlock;
+        var rwSocketBlock = (ControlFlowBlock)socketBlock;
+        var rwPlugBlock = (ConditionBlock)plugBlock;
 
-        rwSocketBlock.setNext(rwPlugBlock);
-
-        if(rwPlugBlock.getPrevious() != null){
-
-            rwPlugBlock.getPrevious().setNext(null);
+        if(rwPlugBlock instanceof NotBlock){
+            if(rwSocketBlock.getCondition() != null){
+                ((NotBlock) rwPlugBlock).setCondition(rwSocketBlock.getCondition());
+                rwSocketBlock.setCondition(null);
+            }
+        }else if(rwPlugBlock instanceof WallInFrontBlock){
+            if(rwSocketBlock.getCondition() != null){
+                return; //We should not connect this new condition
+            }
         }
 
+        rwSocketBlock.setCondition(rwPlugBlock);
+
+        if(blocks.contains(plugBlock))
+            return;
+
+        blocks.add(rwPlugBlock);
+    }
+    /**
+     * Connect Statement to CFB Body, the boolean is a marker to indicate we need to connect the body
+     * @param socketBlock
+     * @param plugBlock
+     */
+    public void connectToStatementSocket(ReadOnlyControlFlowBlock socketBlock, ReadOnlyStatementBlock plugBlock, boolean bIsBody){
+        ensureValidCFB(socketBlock, "socketBlock");
+        ensureValidStatementBlock(plugBlock, "plugBlock");
+
+        if(components.contains(plugBlock)){
+            components.remove(plugBlock);
+        }
+
+        if(!blocks.contains(socketBlock)){
+            throw new IllegalArgumentException("The given socketBlock does not exist");
+        }
+
+        var rwSocketBlock = (ControlFlowBlock)socketBlock;
+        var rwPlugBlock = (StatementBlock)plugBlock;
+
+        if(rwSocketBlock.getBody() != null){
+            rwPlugBlock.setNext(rwSocketBlock);
+            rwSocketBlock.setBody(null);
+        }
+
+        rwSocketBlock.setBody(rwPlugBlock);
         rwPlugBlock.setPrevious(rwSocketBlock);
 
         if(blocks.contains(plugBlock))
@@ -158,6 +217,7 @@ public class BlockProgram implements ReadOnlyBlockProgram {
 
         blocks.add(rwPlugBlock);
     }
+
 
     /**
      * Disconnects the plug of plugBlock from the socket of socketBlock
@@ -190,6 +250,24 @@ public class BlockProgram implements ReadOnlyBlockProgram {
         }
 
         if(!(roBlock instanceof StatementBlock))
+            throw new IllegalArgumentException(String.format("The given %s must be an instance of StatementBlock", argName));
+    }
+    private static void ensureValidCFB(ReadOnlyControlFlowBlock roBlock, String argName){
+
+        if(roBlock == null){
+            throw new IllegalArgumentException(String.format("The given %s must be effective", argName));
+        }
+
+        if(!(roBlock instanceof ReadOnlyControlFlowBlock))
+            throw new IllegalArgumentException(String.format("The given %s must be an instance of StatementBlock", argName));
+    }
+    private static void ensureValidCondition(ReadOnlyConditionBlock roBlock, String argName){
+
+        if(roBlock == null){
+            throw new IllegalArgumentException(String.format("The given %s must be effective", argName));
+        }
+
+        if(!(roBlock instanceof ReadOnlyConditionBlock))
             throw new IllegalArgumentException(String.format("The given %s must be an instance of StatementBlock", argName));
     }
 
