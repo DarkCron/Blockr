@@ -22,6 +22,7 @@ public class TurnBlock extends StatementBlock implements ReadOnlyTurnBlock {
     private Direction direction = Direction.LEFT;
 
     public StatementBlock execute(GameWorld gameWorld) {
+
         if(getDirection() == Direction.LEFT)
             gameWorld.turnLeft();
         else

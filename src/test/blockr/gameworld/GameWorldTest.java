@@ -31,7 +31,7 @@ public class GameWorldTest {
     private static GameWorld gameWorld;
 
     @BeforeEach
-    public void initialGameWorld(){
+    public void initializeGameWorld(){
         gameWorld = new GameWorld(GRID, new Position(1, 1), Orientation.SOUTH,  new Position(3, 3));
     }
 
@@ -41,11 +41,24 @@ public class GameWorldTest {
         Assertions.assertThrows(IllegalArgumentException.class, () -> gameWorld.getTileType(position));
     }
 
+    private static Stream<Position> getPositionsOutsideOfGrid(){
+        return Stream.of(
+                new Position(-1, 0),
+                new Position(WIDTH, 0),
+                new Position(0, -1),
+                new Position(0, HEIGHT)
+        );
+    }
+
     @ParameterizedTest
     @MethodSource("getPositionsInsideGrid")
     public void getTileType_InsideGrid(Position position){
         var tileType = gameWorld.getTileType(position);
         Assertions.assertEquals(GRID[position.getX()][position.getY()], tileType);
+    }
+
+    public static Stream<Position> getPositionsInsideGrid(){
+        return IntStream.range(0, WIDTH).mapToObj(x -> IntStream.range(0, HEIGHT).mapToObj(y -> new Position(x, y))).flatMap(Function.identity());
     }
 
     @ParameterizedTest
@@ -98,7 +111,7 @@ public class GameWorldTest {
     }
 
     @Test
-    public void reset(){
+    public void reset() {
 
         gameWorld.moveForward();
         gameWorld.turnLeft();
@@ -108,18 +121,4 @@ public class GameWorldTest {
         Assertions.assertEquals(gameWorld.getStartPosition(), gameWorld.getRobotPosition());
         Assertions.assertEquals(gameWorld.getStartOrientation(), gameWorld.getRobotOrientation());
     }
-
-    public static Stream<Position> getPositionsInsideGrid(){
-        return IntStream.range(0, WIDTH).mapToObj(x -> IntStream.range(0, HEIGHT).mapToObj(y -> new Position(x, y))).flatMap(Function.identity());
-    }
-
-    private static Stream<Position> getPositionsOutsideOfGrid(){
-        return Stream.of(
-          new Position(-1, 0),
-          new Position(WIDTH, 0),
-          new Position(0, -1),
-          new Position(0, HEIGHT)
-        );
-    }
-
 }
