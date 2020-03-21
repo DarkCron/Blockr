@@ -19,6 +19,7 @@ public class WhileBlock extends ControlFlowBlock implements ReadOnlyWhileBlock {
                 return getNext();
 
             setCurrent(getBody());
+            return this;
         }
 
         setCurrent(getCurrent().execute(gameWorld));
@@ -33,7 +34,7 @@ public class WhileBlock extends ControlFlowBlock implements ReadOnlyWhileBlock {
 
     @Override
     public ReadOnlyStatementBlock getActive() {
-        return getCurrent() == null ? getBody() : getCurrent();
+        return getCurrent() == null ? this : getCurrent();
     }
 
     @Override
