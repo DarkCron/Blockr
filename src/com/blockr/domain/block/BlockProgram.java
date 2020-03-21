@@ -55,6 +55,29 @@ public class BlockProgram implements ReadOnlyBlockProgram {
         return getCompositeBlocks().stream().allMatch(CompositeBlock::isReady);
     }
 
+
+    public ReadOnlyBlockProgram startExecute() {
+        //TODO: add exception message
+        if(!canStart())
+            throw new RuntimeException("");
+
+        return this;
+    }
+
+    @Override
+    public ReadOnlyStatementBlock executeNextFromThread(ReadOnlyStatementBlock currentBlock){
+
+        //TODO: add exception message
+        if(!canStart())
+            throw new RuntimeException("");
+
+        if(currentBlock == null){
+            currentBlock = components.get(0);
+        }
+
+        return ((StatementBlock)currentBlock).execute(gameWorld);
+    }
+
     public void executeNext(){
 
         //TODO: add exception message

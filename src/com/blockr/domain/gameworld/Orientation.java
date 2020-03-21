@@ -18,7 +18,7 @@ public enum Orientation {
     }
 
     public Orientation turnLeft(){
-        return Orientation.values()[(indexOf(this) - 1) % Orientation.values().length];
+        return Orientation.values()[indexOf(this) == 0? Orientation.values().length-1 : (indexOf(this) - 1) % Orientation.values().length];
     }
 
     public Orientation turnRight(){

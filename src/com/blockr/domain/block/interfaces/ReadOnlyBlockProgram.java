@@ -8,4 +8,6 @@ public interface ReadOnlyBlockProgram {
 
     ReadOnlyStatementBlock getActive();
 
+    ReadOnlyStatementBlock executeNextFromThread(ReadOnlyStatementBlock currentBlock);
+
 }

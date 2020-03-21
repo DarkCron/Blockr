@@ -1,6 +1,7 @@
 package com.blockr.ui.components.executeprogrambutton;
 
 import an.awesome.pipelinr.Pipeline;
+import com.blockr.executelogic.ExecutableThread;
 import com.blockr.handlers.blockprogram.canstart.CanStart;
 import com.blockr.handlers.blockprogram.executeprogram.ExecuteProgram;
 import com.ui.Component;
@@ -10,6 +11,7 @@ import com.ui.components.textcomponent.TextComponent;
 import com.ui.mouseevent.MouseEvent;
 
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.Collections;
 
 public class ExecuteProgramButton extends DivComponent {
@@ -27,8 +29,14 @@ public class ExecuteProgramButton extends DivComponent {
 
     private boolean enabled = false;
 
+    private static final TextComponent TEXT = new TextComponent("Execute program", 12);
+
+    private ExecutableThread executableThread;
+
+
     public ExecuteProgramButton(Pipeline pipeline) {
-        super(Collections.singletonList(TEXT), Margin.NONE, new Border(BUTTON_BORDER_COLOR, BUTTON_BORDER_WIDTH), Padding.NONE, FlexAxis.Horizontal);
+        //super(Collections.singletonList(TEXT), Margin.NONE, new Border(BUTTON_BORDER_COLOR, BUTTON_BORDER_WIDTH), Padding.NONE, FlexAxis.Horizontal);
+        super(new ArrayList<>(), Margin.NONE, new Border(BUTTON_BORDER_COLOR, BUTTON_BORDER_WIDTH), Padding.NONE, FlexAxis.Horizontal);
         this.pipeline = pipeline;
     }
 
@@ -57,12 +65,14 @@ public class ExecuteProgramButton extends DivComponent {
 
         graphics.setColor(color);
         graphics.fillRect(contentRegion.getMinX(), contentRegion.getMinY(), contentRegion.getWidth(), contentRegion.getHeight());
-    }
 
-    private static final Component TEXT = new TextComponent("Execute program", 12);
+        graphics.setColor(Color.black);
+        TEXT.draw(graphics);
+    }
 
     @Override
     public void onMouseEvent(MouseEvent mouseEvent) {
+        enabled = pipeline.send(new CanStart());
 
         if(!enabled){
             //optionally do something here
@@ -70,8 +80,13 @@ public class ExecuteProgramButton extends DivComponent {
         }
 
         if(mouseEvent.getType() == MouseEvent.Type.MOUSE_CLICKED){
-            pipeline.send(new ExecuteProgram());
+            if(executableThread == null || !executableThread.isAlive()){
+                executableThread = new ExecutableThread(pipeline.send(new ExecuteProgram()), this.getViewContext());
+                executableThread.start();
+            }
         }
+
+        getViewContext().repaint();
 
     }
 }

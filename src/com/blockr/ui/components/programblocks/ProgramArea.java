@@ -3,6 +3,7 @@ package com.blockr.ui.components.programblocks;
 import an.awesome.pipelinr.Pipeline;
 import com.blockr.domain.block.*;
 import com.blockr.domain.block.interfaces.Block;
+import com.blockr.handlers.blockprogram.addblock.AddBlock;
 import com.blockr.handlers.ui.input.GetPaletteSelection;
 import com.blockr.handlers.ui.input.GetProgramSelection;
 import com.blockr.handlers.ui.input.SetProgramSelection;
@@ -104,7 +105,8 @@ public class ProgramArea extends Container {
                 var paletteSelection = mediator.send(new GetPaletteSelection());
                 if(paletteSelection!=null){
                     var copy = BlockCreator.build(BlockCreator.BlockType.getType(paletteSelection.getBlockType().getSource()));
-                    //mediator.send(new AddBlock(copy));
+
+                    mediator.send(new AddBlock((StatementBlock)copy));
                    // var rootBlock = mediator.send(new GetRootBlock(copy));
                     var rootBlock = copy;
 
