@@ -74,7 +74,8 @@ public class GameWorld implements ReadOnlyGameWorld {
         this.robotOrientation = startOrientation;
     }
 
-    private void throwIfNull(Object object, String name){
+    private void throwIfNull(Object object, String name)
+    {
         if(object != null)
             return;
 
@@ -98,9 +99,16 @@ public class GameWorld implements ReadOnlyGameWorld {
 
         var newPosition = robotPosition.translate(getRobotOrientation().getOffset());
 
+        if(!isInsideGameWorld(newPosition))
+            return;
+
         if(getTileType(newPosition.getX(), newPosition.getY()) == TileType.Blocked)
             return;
 
         robotPosition = newPosition;
+    }
+
+    private boolean isInsideGameWorld(Position position){
+        return position.getX() > 0 && position.getX() < getWidth() && position.getY() > 0 && position.getY() < getHeight();
     }
 }
