@@ -105,6 +105,21 @@ public class BlockProgram implements ReadOnlyBlockProgram {
         return blocks.stream().filter(b -> b instanceof CompositeBlock).map(b -> (CompositeBlock)b).collect(Collectors.toSet());
     }
 
+    //TODO: conditions
+    public void removeBlock(ReadOnlyStatementBlock statementBlock){
+        ensureValidStatementBlock(statementBlock, "statementBlock");
+        if(!blocks.contains(statementBlock)){
+            throw new IllegalArgumentException("The given statementBlock doesn't exist");
+        }
+
+        blocks.remove(statementBlock);
+        components.remove(statementBlock);
+
+        if(statementBlock.getNext() != null){
+            removeBlock(statementBlock.getNext());
+        }
+    }
+
     /**
      * Add a new block to the program, not connected to any other blocks
      */
@@ -285,10 +300,14 @@ public class BlockProgram implements ReadOnlyBlockProgram {
         }
     }
 
+    //TODO: conditions and bodies
     /**
      * Disconnects the plug of plugBlock from the socket of socketBlock
      */
     public void disconnectStatementBlock(ReadOnlyStatementBlock socketBlock, ReadOnlyStatementBlock plugBlock){
+        if(socketBlock == plugBlock){
+            return;
+        }
 
         ensureValidStatementBlock(socketBlock, "socketBlock");
         ensureValidStatementBlock(plugBlock, "plugBlock");
@@ -305,6 +324,7 @@ public class BlockProgram implements ReadOnlyBlockProgram {
         var rwPlugBlock = (StatementBlock)plugBlock;
 
         rwSocketBlock.setNext(null);
+        rwPlugBlock.setPrevious(null);
 
         components.add(rwPlugBlock);
     }
@@ -337,6 +357,7 @@ public class BlockProgram implements ReadOnlyBlockProgram {
             throw new IllegalArgumentException(String.format("The given %s must be an instance of StatementBlock", argName));
     }
 
+    @Override
     public ReadOnlyStatementBlock getRootBlock(Block blockOfChain){
         //ensureValidStatementBlock(blockOfChain, "block");
         if(blockOfChain instanceof ConditionBlock){

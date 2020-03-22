@@ -3,7 +3,11 @@ package com.blockr.ui.components.programblocks;
 import an.awesome.pipelinr.Pipeline;
 import com.blockr.domain.block.*;
 import com.blockr.domain.block.interfaces.Block;
+import com.blockr.domain.block.interfaces.ReadOnlyStatementBlock;
 import com.blockr.handlers.blockprogram.addblock.AddBlock;
+import com.blockr.handlers.blockprogram.getblockprogram.GetBlockProgram;
+import com.blockr.handlers.blockprogram.removeblock.RemoveBlock;
+import com.blockr.handlers.blockprogram.removeblock.RemoveBlockHandler;
 import com.blockr.handlers.ui.input.GetPaletteSelection;
 import com.blockr.handlers.ui.input.GetProgramSelection;
 import com.blockr.handlers.ui.input.SetProgramSelection;
@@ -153,6 +157,9 @@ public class ProgramArea extends Container {
             }else{
                 recordedMouse = (mouseEvent.getWindowPosition().minus(recordedMouse));
             }
+            var bp = mediator.send(new GetBlockProgram());
+            var selectionRoot = bp.getRootBlock(programSelection.getBlockType().getSource());
+            bp.disconnectStatementBlock(selectionRoot, (ReadOnlyStatementBlock) programSelection.getBlockType().getSource());
 
             programBlockComponents.remove(programSelection.getBlockType());
             removeProgramBlockComponentsBaseOnRoot(programSelection.getBlockType().getSource());
@@ -191,5 +198,6 @@ public class ProgramArea extends Container {
 
     public void cleanUp(ProgramBlockComponent programBlockComponent) {
         removeProgramBlockComponentsBaseOnRoot(programBlockComponent.getSource());
+        mediator.send(new RemoveBlock((ReadOnlyStatementBlock) programBlockComponent.getSource()));
     }
 }
