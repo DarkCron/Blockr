@@ -21,10 +21,10 @@ public class WhileBlock extends ControlFlowBlock implements ReadOnlyWhileBlock {
             setCurrent(getBody());
         }
 
-        if(!getCondition().evaluate(gameWorld)) {
+/*        if(!getCondition().evaluate(gameWorld)) {
             setCurrent(null);
             return getNext();
-        }
+        }*/
 
 
         setCurrent(getCurrent().execute(gameWorld));

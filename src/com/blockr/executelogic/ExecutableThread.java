@@ -26,7 +26,7 @@ public class ExecutableThread extends Thread {
             viewContext.repaint();
             try {
                 if(current == null){
-                    break;
+                  break;
                 }
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
