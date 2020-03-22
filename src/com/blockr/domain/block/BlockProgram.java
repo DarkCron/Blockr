@@ -247,8 +247,14 @@ public class BlockProgram implements ReadOnlyBlockProgram {
         var rwPlugBlock = (StatementBlock)plugBlock;
 
         if(rwSocketBlock.getBody() != null){
-            rwPlugBlock.setNext(rwSocketBlock);
-            rwSocketBlock.setBody(null);
+            var temp = rwPlugBlock;
+            while (temp.getNext() != null){
+                temp = temp.getNext();
+            }
+            rwSocketBlock.getBody().setPrevious(temp);
+            temp.setNext(rwSocketBlock.getBody());
+            //rwPlugBlock.setNext(rwSocketBlock);
+            //rwSocketBlock.setBody(null);
         }
 
         rwSocketBlock.setBody(rwPlugBlock);

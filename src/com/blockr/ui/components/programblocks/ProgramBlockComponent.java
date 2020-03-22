@@ -72,9 +72,6 @@ public class ProgramBlockComponent extends UIBlockComponent {
         }
     }
 
-    private void handleMouseEventControlFlow(MouseEvent mouseEvent) {
-    }
-
     public void callForCleanUp() {
         programArea.cleanUp(this);
     }
