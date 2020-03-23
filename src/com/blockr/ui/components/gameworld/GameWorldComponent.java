@@ -8,6 +8,7 @@ import com.blockr.domain.gameworld.TileType;
 import com.blockr.handlers.world.GetWorld;
 import com.ui.Component;
 import com.ui.WindowRegion;
+import com.ui.mouseevent.MouseEvent;
 
 import java.awt.*;
 
@@ -22,6 +23,7 @@ public class GameWorldComponent extends Component {
 
     @Override
     protected void draw(Graphics graphics) {
+
 
         var windowRegion = WindowRegion.fromGraphics(graphics);
 
@@ -41,6 +43,11 @@ public class GameWorldComponent extends Component {
 
             drawTile(graphics.create(offsetX, offsetY, tileWidth, tileHeight), new Position(tileX, tileY));
         }
+    }
+
+    @Override
+    public void onMouseEvent(MouseEvent mouseEvent) {
+        super.onMouseEvent(mouseEvent);
     }
 
     private void drawTile(Graphics graphics, Position position){
@@ -205,7 +212,7 @@ class GoalTile {
             }else{
                 graphics.setColor(Color.red);
             }
-            graphics.fillArc((int)((0.5-radius/2) * min),(int)((0.5-radius/2) * min),(int)(radius * min),(int)(radius * min),0,360);
+            graphics.fillArc((int)((0.5-radius/2) * windowRegion.getWidth()),(int)((0.5-radius/2) * windowRegion.getHeight()),(int)(radius * windowRegion.getWidth()),(int)(radius * windowRegion.getHeight()),0,360);
             radius -= mod;
         }
     }

@@ -8,4 +8,10 @@ public interface ReadOnlyBlockProgram {
 
     ReadOnlyStatementBlock getActive();
 
+    ReadOnlyStatementBlock executeNextFromThread(ReadOnlyStatementBlock currentBlock);
+
+    public ReadOnlyStatementBlock getRootBlock(Block blockOfChain);
+
+    public void disconnectStatementBlock(ReadOnlyStatementBlock socketBlock, ReadOnlyStatementBlock plugBlock);
+
 }

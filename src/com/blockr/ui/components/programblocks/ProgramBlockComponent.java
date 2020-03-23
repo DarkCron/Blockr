@@ -5,6 +5,9 @@ import com.blockr.domain.block.BlockCreator;
 import com.blockr.domain.block.interfaces.Block;
 import com.blockr.handlers.blockprogram.insertBlockInProgram.InsertBlockInProgram;
 import com.blockr.handlers.ui.input.GetPaletteSelection;
+import com.blockr.handlers.ui.input.GetProgramSelection;
+import com.blockr.handlers.ui.input.SetPaletteSelection;
+import com.blockr.handlers.ui.input.SetProgramSelection;
 import com.blockr.handlers.ui.input.recordMousePos.GetMouseRecord;
 import com.blockr.handlers.ui.input.recordMousePos.SetRecordMouse;
 import com.blockr.handlers.ui.input.resetuistate.ResetUIState;
@@ -13,8 +16,11 @@ import com.ui.mouseevent.MouseEvent;
 
 public class ProgramBlockComponent extends UIBlockComponent {
 
-    public ProgramBlockComponent(Block source, Pipeline mediator, WindowPosition rootPosition) {
+    private final ProgramArea programArea;
+
+    public ProgramBlockComponent(Block source, Pipeline mediator, WindowPosition rootPosition, ProgramArea parent) {
         super(source, mediator, rootPosition);
+        programArea = parent;
     }
 
     @Override
@@ -37,6 +43,7 @@ public class ProgramBlockComponent extends UIBlockComponent {
                     var info = getSocketAndPlug(recordedMouse,copy);
                     if(info != null){
                         var newRoot = mediator.send(new InsertBlockInProgram(info));
+                        programArea.rebuild(newRoot);
                     }
                 }
                 break;
@@ -45,9 +52,12 @@ public class ProgramBlockComponent extends UIBlockComponent {
                 if(recordedMouse == null){
                     mediator.send(new SetRecordMouse(new WindowPosition(mouseEvent.getWindowPosition().getX(),0)));
                 }
+
+                programArea.handleProgramMove(mouseEvent);
                 break;
             case MOUSE_DOWN:
                 System.out.println(BlockData.getName(source));
+                mediator.send(new SetProgramSelection(mouseEvent.getWindowPosition(),this));
                 break;
         }
 
@@ -62,6 +72,7 @@ public class ProgramBlockComponent extends UIBlockComponent {
         }
     }
 
-    private void handleMouseEventControlFlow(MouseEvent mouseEvent) {
+    public void callForCleanUp() {
+        programArea.cleanUp(this);
     }
 }

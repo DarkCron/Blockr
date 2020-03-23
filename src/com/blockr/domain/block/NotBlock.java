@@ -18,6 +18,7 @@ public class NotBlock extends ConditionBlock implements ReadOnlyNotBlock {
 
     @Override
     public boolean evaluate(GameWorld gameWorld) {
+        var result = getCondition().evaluate(gameWorld);
         return !getCondition().evaluate(gameWorld);
     }
 }

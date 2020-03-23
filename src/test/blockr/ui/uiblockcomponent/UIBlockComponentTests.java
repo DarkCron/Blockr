@@ -29,10 +29,10 @@ public class UIBlockComponentTests {
     @BeforeEach
     public void init(){
         testBlocks.clear();
-        testBlocks.add(new ProgramBlockComponent(new MoveForwardBlock(),unusedMediator, new WindowPosition(20,20)));
-        testBlocks.add(new ProgramBlockComponent(new WhileBlock(),unusedMediator, new WindowPosition(200,20)));
-        testBlocks.add(new ProgramBlockComponent(new NotBlock(),unusedMediator, new WindowPosition(400,20)));
-        testBlocks.add(new ProgramBlockComponent(new WhileBlock(),unusedMediator, new WindowPosition(600,20)));
+        testBlocks.add(new ProgramBlockComponent(new MoveForwardBlock(),unusedMediator, new WindowPosition(20,20),null));
+        testBlocks.add(new ProgramBlockComponent(new WhileBlock(),unusedMediator, new WindowPosition(200,20),null));
+        testBlocks.add(new ProgramBlockComponent(new NotBlock(),unusedMediator, new WindowPosition(400,20),null));
+        testBlocks.add(new ProgramBlockComponent(new WhileBlock(),unusedMediator, new WindowPosition(600,20),null));
         ((ControlFlowBlock)testBlocks.get(3).getSource()).setCondition(new WallInFrontBlock());
     }
 
