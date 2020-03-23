@@ -17,6 +17,8 @@ public class IfBlock extends ControlFlowBlock implements ReadOnlyIfBlock {
                 return getNext();
 
             setCurrent(getBody());
+
+            return this;
         }
 
 /*
