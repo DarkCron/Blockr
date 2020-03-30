@@ -5,8 +5,6 @@ import com.blockr.domain.block.BlockCreator;
 import com.blockr.domain.block.interfaces.Block;
 import com.blockr.handlers.blockprogram.insertBlockInProgram.InsertBlockInProgram;
 import com.blockr.handlers.ui.input.GetPaletteSelection;
-import com.blockr.handlers.ui.input.GetProgramSelection;
-import com.blockr.handlers.ui.input.SetPaletteSelection;
 import com.blockr.handlers.ui.input.SetProgramSelection;
 import com.blockr.handlers.ui.input.recordMousePos.GetMouseRecord;
 import com.blockr.handlers.ui.input.recordMousePos.SetRecordMouse;
@@ -14,6 +12,10 @@ import com.blockr.handlers.ui.input.resetuistate.ResetUIState;
 import com.ui.WindowPosition;
 import com.ui.mouseevent.MouseEvent;
 
+/**
+ * Specialized UI component for drawing blocks in the 'Game Area'
+ * Handles particular input based on the selected Game Area Block
+ */
 public class ProgramBlockComponent extends UIBlockComponent {
 
     private final ProgramArea programArea;
@@ -43,7 +45,7 @@ public class ProgramBlockComponent extends UIBlockComponent {
                     var info = getSocketAndPlug(recordedMouse,copy);
                     if(info != null){
                         var newRoot = mediator.send(new InsertBlockInProgram(info));
-                        programArea.rebuild(newRoot);
+                        programArea.updateBlockProgram(newRoot);
                     }
                 }
                 break;
@@ -72,6 +74,9 @@ public class ProgramBlockComponent extends UIBlockComponent {
         }
     }
 
+    /**
+     * Removes a (part of) a BlockProgram based on the given component in the parent's game area
+     */
     public void callForCleanUp() {
         programArea.cleanUp(this);
     }

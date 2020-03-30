@@ -14,6 +14,11 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Palette Area Container, the visual component on screen.
+ * Generates a list of possible blocks to use in game and displays then.
+ * Handles Palette logic, selection and removal.
+ */
 public class PaletteArea extends Container {
 
     private static final List<PaletteBlockComponent> programBlockComponents = new ArrayList<>();
@@ -88,12 +93,16 @@ public class PaletteArea extends Container {
         return new WindowRegion(childRegion.getMinX(),childRegion.getMinY(),Math.min(region.getMaxX(),childRegion.getMaxX()),Math.min(region.getMaxY(),childRegion.getMaxY()));
     }
 
+    /**
+     * Handles 1 particular important input event:
+     * If a BlockProgram gets dragged over this Palette Area then we remove it from game and redraw the current state.
+     * @param mouseEvent
+     */
     @Override
     public void onMouseEvent(MouseEvent mouseEvent) {
         super.onMouseEvent(mouseEvent);
         switch (mouseEvent.getType()){
             case MOUSE_UP:
-
                 var programSelection = mediator.send(new GetProgramSelection());
                 if(programSelection != null){
                     programSelection.getBlockType().callForCleanUp();

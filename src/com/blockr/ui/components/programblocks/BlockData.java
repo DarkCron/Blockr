@@ -5,6 +5,9 @@ import com.blockr.domain.block.interfaces.Block;
 
 import java.awt.*;
 
+/**
+ * Contains static, permanent data for displaying blocks on screen.
+ */
 public class BlockData {
 
     static final int BLOCK_WIDTH = 100;

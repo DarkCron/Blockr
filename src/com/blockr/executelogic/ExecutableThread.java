@@ -4,8 +4,6 @@ import com.blockr.domain.block.interfaces.ReadOnlyBlockProgram;
 import com.blockr.domain.block.interfaces.ReadOnlyStatementBlock;
 import com.ui.ViewContext;
 
-import java.util.concurrent.TimeUnit;
-
 public class ExecutableThread extends Thread {
     private final ReadOnlyBlockProgram robp;
     private final ViewContext viewContext;

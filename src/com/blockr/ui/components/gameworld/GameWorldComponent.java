@@ -12,6 +12,9 @@ import com.ui.mouseevent.MouseEvent;
 
 import java.awt.*;
 
+/**
+ * Representation of the Game World logic Visual on screen.
+ */
 public class GameWorldComponent extends Component {
 
     private ReadOnlyGameWorld gameWorld;
@@ -80,6 +83,9 @@ public class GameWorldComponent extends Component {
     }
 }
 
+/**
+ * Class representing the Robot Position and handling the Visual drawing
+ */
 class RobotTile {
 
     public static void draw(Graphics graphics, Orientation robotOrientation) {
@@ -197,6 +203,9 @@ class RobotTile {
     }
 }
 
+/**
+ * Class representing the Goal Position and handling the Visual drawing
+ */
 class GoalTile {
 
     public static void draw(Graphics graphics) {

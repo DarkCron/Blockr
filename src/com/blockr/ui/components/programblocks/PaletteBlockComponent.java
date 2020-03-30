@@ -7,12 +7,21 @@ import com.blockr.handlers.ui.input.resetuistate.ResetUIState;
 import com.ui.WindowPosition;
 import com.ui.mouseevent.MouseEvent;
 
+/**
+ * Specialized UI component for drawing blocks in the 'Palette Area'
+ * Handles particular input based on the selected Palette Block
+ */
 public class PaletteBlockComponent extends UIBlockComponent {
 
     public PaletteBlockComponent(Block source, Pipeline mediator, WindowPosition rootPosition) {
         super(source, mediator, rootPosition);
     }
 
+    /**
+     * Handles 1 particular input, if the user clicks a block from the palette the game
+     * selects this block to add it to another block.
+     * @param mouseEvent
+     */
     @Override
     public void onMouseEvent(MouseEvent mouseEvent) {
         switch (mouseEvent.getType()){

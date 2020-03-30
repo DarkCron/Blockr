@@ -12,6 +12,9 @@ import com.ui.components.textcomponent.VerticalAlign;
 
 import java.awt.*;
 
+/**
+ * Visual component to represent a Block on screen
+ */
 public abstract class UIBlockComponent extends Component {
     protected final Block source;
     protected final Pipeline mediator;
@@ -70,6 +73,12 @@ public abstract class UIBlockComponent extends Component {
         return BlockData.BLOCK_WIDTH;
     }
 
+    /**
+     * Generates and returns information based on what block is currently selected and where to connect it to.
+     * @param mousePosition ScreenSpace location on where the user clicked.
+     * @param blockToAdd Information on what Block the User currently has selected and may try to add to the current block.
+     * @return information based on what block is currently selected and where to connect it to.
+     */
     public ProgramBlockInsertInfo getSocketAndPlug(WindowPosition mousePosition, Block blockToAdd){
         //TODO FIX UP LEFT SOCKET OF WALLINFRONT
         if(blockToAdd == null || mousePosition == null){
@@ -98,6 +107,13 @@ public abstract class UIBlockComponent extends Component {
         return null;
     }
 
+    /**
+     * Generates Click location information, to determine whether a certain click is to connect a block to the upper or
+     * lower sockets for example.
+     * @param mousePostion
+     * @param blockToAdd
+     * @return
+     */
     private ClickLocations getClickLocation(WindowPosition mousePostion, Block blockToAdd){
         var relativePosition = mousePostion.minus(upperLeft);
         relativePosition = relativePosition.minus(new WindowPosition(-4,7));

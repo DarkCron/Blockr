@@ -2,11 +2,11 @@ package com.blockr.ui.components.programblocks;
 
 import com.blockr.domain.block.interfaces.Block;
 
-/*
-Value class that defines which block is the socket, which is the plug and, optionally, where the plug should be socketed.
-Example, if socket is MoveForward and plug is Turn, than the correct graph order should be MoveForward > Turn
-if socket is If and plug is Not than the Not should be the condition of the If block
-if socket is While and plug is MoveForward and the location is Body, than the While body should point to the MoveForward Block
+/**
+* Value class that defines which block is the socket, which is the plug and, optionally, where the plug should be socketed.
+* Example, if socket is MoveForward and plug is Turn, than the correct graph order should be MoveForward > Turn
+* if socket is If and plug is Not than the Not should be the condition of the If block
+* if socket is While and plug is MoveForward and the location is Body, than the While body should point to the MoveForward Block
  */
 public class ProgramBlockInsertInfo {
     private final Block socket;
