@@ -1,4 +1,4 @@
-package test.blockr.gameworld;
+package blockr.gameworld;
 
 import com.blockr.domain.gameworld.GameWorld;
 import com.blockr.domain.gameworld.Orientation;
