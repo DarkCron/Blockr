@@ -1,4 +1,4 @@
-package com.main;
+package com.blockr.main;
 import an.awesome.pipelinr.Pipeline;
 import an.awesome.pipelinr.Pipelinr;
 import com.blockr.domain.Level;
@@ -9,7 +9,6 @@ import com.blockr.domain.gameworld.Position;
 import com.blockr.domain.gameworld.TileType;
 import com.blockr.handlers.blockprogram.canstart.CanStartHandler;
 import com.blockr.handlers.blockprogram.executeprogram.ExecuteProgramHandler;
-import com.blockr.handlers.blockprogram.getblockprogram.GetBlockProgram;
 import com.blockr.handlers.blockprogram.getblockprogram.GetBlockProgramHandler;
 import com.blockr.handlers.blockprogram.getrootblock.GetRootBlockHandler;
 import com.blockr.handlers.blockprogram.insertBlockInProgram.InsertBlockInProgramHandler;
