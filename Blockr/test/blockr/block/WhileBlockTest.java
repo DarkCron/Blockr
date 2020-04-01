@@ -1,4 +1,4 @@
-package test.blockr.block;
+package blockr.block;
 
 import com.blockr.domain.block.*;
 import com.blockr.domain.gameworld.GameWorld;

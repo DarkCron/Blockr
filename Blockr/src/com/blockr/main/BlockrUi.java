@@ -1,4 +1,4 @@
-package com.main;
+package com.blockr.main;
 
 import an.awesome.pipelinr.Pipeline;
 import com.blockr.ui.components.executeprogrambutton.ExecuteProgramButton;

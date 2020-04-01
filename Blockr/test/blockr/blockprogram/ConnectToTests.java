@@ -1,4 +1,4 @@
-package tests.blockprogram;
+package blockr.blockprogram;
 
 import com.blockr.domain.block.*;
 import org.junit.jupiter.api.Test;
