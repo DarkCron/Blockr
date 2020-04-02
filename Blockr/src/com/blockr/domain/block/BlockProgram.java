@@ -2,10 +2,9 @@ package com.blockr.domain.block;
 
 import com.blockr.domain.block.interfaces.*;
 import com.blockr.domain.block.interfaces.markers.ReadOnlyConditionBlock;
-import com.blockr.domain.gameworld.GameWorld;
 import com.blockr.ui.components.programblocks.ProgramBlockInsertInfo;
+import com.gameworld.GameWorld;
 
-import javax.management.RuntimeErrorException;
 import java.util.*;
 import java.util.stream.Collectors;
 

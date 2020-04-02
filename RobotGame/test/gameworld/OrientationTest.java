@@ -1,6 +1,6 @@
-package blockr.gameworld;
+package gameworld;
 
-import com.blockr.domain.gameworld.Orientation;
+import com.robotgame.Orientation;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;

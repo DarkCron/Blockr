@@ -1,9 +1,8 @@
-package blockr.gameworld;
-
-import com.blockr.domain.gameworld.GameWorld;
-import com.blockr.domain.gameworld.Orientation;
-import com.blockr.domain.gameworld.Position;
-import com.blockr.domain.gameworld.TileType;
+package gameworld;
+import com.robotgame.Orientation;
+import com.robotgame.Position;
+import com.robotgame.RobotGameWorld;
+import com.robotgame.TileType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,11 +27,11 @@ public class GameWorldTest {
     private static final int WIDTH = GRID[0].length;
     private static final int HEIGHT = GRID.length;
 
-    private static GameWorld gameWorld;
+    private static RobotGameWorld gameWorld;
 
     @BeforeEach
     public void initializeGameWorld(){
-        gameWorld = new GameWorld(GRID, new Position(1, 1), Orientation.SOUTH,  new Position(3, 3));
+        gameWorld = new RobotGameWorld(GRID, new Position(1, 1), Orientation.SOUTH,  new Position(3, 3));
     }
 
     @ParameterizedTest
@@ -66,7 +65,7 @@ public class GameWorldTest {
     public void moveForward_NotFacingWall(Orientation orientation){
 
         final Position CENTER = new Position(2, 2);
-        var gameWorld = new GameWorld(GRID, CENTER, orientation, new Position(3, 3));
+        var gameWorld = new RobotGameWorld(GRID, CENTER, orientation, new Position(3, 3));
 
         gameWorld.moveForward();
         var newPosition = gameWorld.getRobotPosition();
@@ -86,7 +85,7 @@ public class GameWorldTest {
 
         final Position CENTER = new Position(1, 1);
 
-        var gameWorld = new GameWorld(GRID, CENTER, orientation, CENTER);
+        var gameWorld = new RobotGameWorld(GRID, CENTER, orientation, CENTER);
 
         gameWorld.moveForward();
         var newPosition = gameWorld.getRobotPosition();
@@ -104,7 +103,7 @@ public class GameWorldTest {
 
         final Position START_POSITION = new Position(0, 0);
 
-        var gameWorld = new GameWorld(GRID, START_POSITION, orientation, START_POSITION);
+        var gameWorld = new RobotGameWorld(GRID, START_POSITION, orientation, START_POSITION);
         gameWorld.moveForward();
 
         Assertions.assertEquals(START_POSITION, gameWorld.getRobotPosition());
@@ -120,5 +119,26 @@ public class GameWorldTest {
 
         Assertions.assertEquals(gameWorld.getStartPosition(), gameWorld.getRobotPosition());
         Assertions.assertEquals(gameWorld.getStartOrientation(), gameWorld.getRobotOrientation());
+    }
+
+
+    private static final TileType[][] GRID2 = new TileType[][]{
+            {TileType.Blocked, TileType.Blocked, TileType.Blocked},
+            {TileType.Blocked, TileType.Free, TileType.Free},
+            {TileType.Blocked, TileType.Blocked, TileType.Blocked}
+    };
+
+    @Test
+    public void isWallInFront_FacingWall(){
+
+        var gameWorld = new RobotGameWorld(GRID2, new Position(1, 1), Orientation.NORTH, new Position(1, 1));
+        Assertions.assertTrue(gameWorld.isWallInFront());
+    }
+
+    @Test
+    public void evaluate_NotFacingWall(){
+
+        var gameWorld = new RobotGameWorld(GRID2, new Position(1, 1), Orientation.EAST, new Position(1, 1));
+        Assertions.assertFalse(gameWorld.isWallInFront());
     }
 }

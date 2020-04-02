@@ -12,14 +12,15 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="file://$MODULE_DIR$/Blockr/lib" />
+          <root url="file://$MODULE_DIR$/lib" />
         </CLASSES>
         <JAVADOC>
-          <root url="file://$MODULE_DIR$/Blockr/lib/purecollections-1.0/docs" />
+          <root url="file://$MODULE_DIR$/lib/purecollections-1.0/docs" />
         </JAVADOC>
         <SOURCES />
-        <jarDirectory url="file://$MODULE_DIR$/Blockr/lib" recursive="false" />
+        <jarDirectory url="file://$MODULE_DIR$/lib" recursive="false" />
       </library>
     </orderEntry>
+    <orderEntry type="module" module-name="GameWorld" />
   </component>
 </module>

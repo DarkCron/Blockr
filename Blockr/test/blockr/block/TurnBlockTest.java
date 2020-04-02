@@ -2,7 +2,8 @@ package blockr.block;
 
 import com.blockr.domain.block.MoveForwardBlock;
 import com.blockr.domain.block.TurnBlock;
-import com.blockr.domain.gameworld.GameWorld;
+import com.gameworld.Action;
+import com.gameworld.GameWorld;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -23,7 +24,7 @@ public class TurnBlockTest {
 
         var result = turnBlock.execute(mockedGameWorld);
 
-        verify(mockedGameWorld).turnLeft();
+        verify(mockedGameWorld).execute(Action.TURN_LEFT);
         Assertions.assertEquals(NEXT, result);
     }
 
@@ -38,7 +39,7 @@ public class TurnBlockTest {
 
         var result = turnBlock.execute(mockedGameWorld);
 
-        verify(mockedGameWorld).turnRight();
+        verify(mockedGameWorld).execute(Action.TURN_RIGHT);
         Assertions.assertEquals(NEXT, result);
     }
 
