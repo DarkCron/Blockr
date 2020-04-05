@@ -5,14 +5,15 @@ import com.blockr.domain.State;
 import com.blockr.domain.block.interfaces.ReadOnlyBlockProgram;
 import com.blockr.handlers.HandlerBase;
 
-public class ExecuteProgramHandler extends HandlerBase<ExecuteProgram, ReadOnlyBlockProgram> {
+public class ExecuteProgramHandler extends HandlerBase<ExecuteProgram, Voidy> {
 
     public ExecuteProgramHandler(State state) {
         super(state);
     }
 
     @Override
-    public ReadOnlyBlockProgram handle(ExecuteProgram executeProgram) {
-        return getState().getBlockProgram().startExecute();
+    public Voidy handle(ExecuteProgram executeProgram) {
+        getState().getBlockProgram().executeNext();
+        return new Voidy();
     }
 }

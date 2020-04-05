@@ -2,12 +2,13 @@ package com.blockr.domain.block;
 
 import com.blockr.domain.block.interfaces.*;
 import com.blockr.domain.block.interfaces.markers.ReadOnlyConditionBlock;
-import com.blockr.ui.components.programblocks.ProgramBlockInsertInfo;
+import com.blockr.domain.block.interfaces.markers.ReadOnlyConditionedBlock;
 import com.gameworld.GameWorld;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
+@SuppressWarnings("SuspiciousMethodCalls")
 public class BlockProgram implements ReadOnlyBlockProgram {
 
     public BlockProgram(GameWorld gameWorld){
@@ -17,28 +18,36 @@ public class BlockProgram implements ReadOnlyBlockProgram {
     private final GameWorld gameWorld;
 
     @Override
-    public List<? extends ReadOnlyStatementBlock> getComponents() {
+    public List<? extends ReadOnlyBlock> getComponents() {
         return Collections.unmodifiableList(components);
     }
 
+    /**
+     * Returns the total amount of blocks in this program
+     */
     public int getBlockCount(){
         return blocks.size();
     }
 
+    /**
+     * Returns the block which will be executed next
+     */
     public ReadOnlyStatementBlock getActive() {
 
         if(currentBlock != null)
             return currentBlock.getActive();
 
         if(canStart())
-            return components.get(0).getActive();
+        {
+            var startBlock = (StatementBlock)components.get(0);
+            return startBlock.getActive();
+        }
 
         return null;
     }
 
-    //First block of every chain program
-    private final List<StatementBlock> components = new LinkedList<>();
-    //All blocks in the programArea
+    private final List<Block> components = new LinkedList<>();
+
     private final Set<Block> blocks = new HashSet<>();
 
     private StatementBlock currentBlock;
@@ -51,281 +60,141 @@ public class BlockProgram implements ReadOnlyBlockProgram {
         if(components.size() != 1)
             return false;
 
-        return getCompositeBlocks().stream().allMatch(CompositeBlock::isReady);
+        //check if each conditioned block has a conditionBlock
+        return getBlocksOfType(ConditionedBlock.class).stream().allMatch(ConditionedBlock::isReady) &&
+               getBlocksOfType(ControlFlowBlock.class).stream().allMatch(ControlFlowBlock::isReady);
     }
 
-
-    public ReadOnlyBlockProgram startExecute() {
-        //TODO: add exception message
-        if(!canStart())
-            throw new RuntimeException("");
-
-        return this;
-    }
-
-    @Override
-    public ReadOnlyStatementBlock executeNextFromThread(ReadOnlyStatementBlock currentBlock){
-
-        //TODO: add exception message
-        if(!canStart())
-            throw new RuntimeException("");
-
-        if(currentBlock == null){
-            currentBlock = components.get(0);
-        }
-
-        return ((StatementBlock)currentBlock).execute(gameWorld);
-    }
-
+    /**
+     * Executes one statement of this program
+     */
     public void executeNext(){
 
-        //TODO: add exception message
         if(!canStart())
-            throw new RuntimeException("");
+            throw new RuntimeException("The program must be in a valid state");
 
         if(currentBlock == null){
-            currentBlock = components.get(0);
+            currentBlock = (StatementBlock)components.get(0);
         }
 
         currentBlock = currentBlock.execute(gameWorld);
     }
 
+    /**
+     * Removes all blocks from the program
+     */
     public void clear(){
         blocks.clear();
         components.clear();
     }
 
-    public void reset(){
-        getCompositeBlocks().forEach(CompositeBlock::reset);
+    /**
+     * Resets the current execution of the program
+     */
+    private void reset(){
+        getBlocksOfType(ControlFlowBlock.class).forEach(ControlFlowBlock::reset);
         currentBlock = null;
     }
 
-    private Set<CompositeBlock> getCompositeBlocks(){
-        return blocks.stream().filter(b -> b instanceof CompositeBlock).map(b -> (CompositeBlock)b).collect(Collectors.toSet());
+    private <T> Set<T> getBlocksOfType(Class<T> clazz){
+        return blocks.stream().filter(clazz::isInstance).map(clazz::cast).collect(Collectors.toSet());
     }
 
-    //TODO: conditions
-    public void removeBlock(ReadOnlyStatementBlock statementBlock){
-        ensureValidStatementBlock(statementBlock, "statementBlock");
-        if(!blocks.contains(statementBlock)){
-            throw new IllegalArgumentException("The given statementBlock doesn't exist");
+    //TODO
+    public void removeBlock(ReadOnlyBlock block){
+
+        if(!blocks.contains(block)){
+            throw new IllegalArgumentException("The given block doesn't exist");
         }
 
-        blocks.remove(statementBlock);
-        components.remove(statementBlock);
-
-        if(statementBlock.getNext() != null){
-            removeBlock(statementBlock.getNext());
+        if(block instanceof StatementBlock){
+            var statementBlock = (StatementBlock)block;
         }
     }
 
     /**
      * Add a new block to the program, not connected to any other blocks
      */
-    public void addBlock(ReadOnlyStatementBlock statementBlock){
+    public void addBlock(ReadOnlyBlock block){
 
-        ensureValidStatementBlock(statementBlock, "statementBlock");
-
-        //noinspection SuspiciousMethodCalls
-        if(blocks.contains(statementBlock)){
-            throw new IllegalArgumentException("The given statementBlock already exists");
+        if(blocks.contains(block)){
+            throw new IllegalArgumentException("The given block already exists");
         }
 
-        components.add((StatementBlock) statementBlock);
-        blocks.add((StatementBlock)statementBlock);
+        blocks.add((Block)block);
+        components.add((Block)block);
     }
 
     /**
-     * Connects the plug of plugBlock to the socket of socketBlock
+     * Connects a statementBlock to an existing statementBlock. This method should be called when:
+     * - A new statementBlock is connected to a statementBlock
+     * - An existing chain of statementBlocks is connected to a statementBlock
+     * - An existing statementBlock which is the body of a controlFlowBlock is connected to a different statementBlock
+     * - An existing statementBlock is disconnected from another statementBlock and connected to a different statementBlock
      */
-    public void connectToStatementSocket(ReadOnlyStatementBlock socketBlock, ReadOnlyStatementBlock plugBlock){
-        ensureValidStatementBlock(socketBlock, "socketBlock");
-        ensureValidStatementBlock(plugBlock, "plugBlock");
+    public void connectStatementBlock(ReadOnlyStatementBlock socketBlock, ReadOnlyStatementBlock plugBlock) {
 
-        if(components.contains(plugBlock)){
-            components.remove(plugBlock);
-        }
-
-        if(!blocks.contains(socketBlock)){
-            addBlock(socketBlock);
-            //throw new IllegalArgumentException("The given socketBlock does not exist");
-        }
-
-        var rwSocketBlock = (StatementBlock)socketBlock;
-        var rwPlugBlock = (StatementBlock)plugBlock;
-
-        //Check if the socketBlock was part of a CFB's body
-        {
-            for(Block b : blocks){
-                if(b instanceof ControlFlowBlock){
-                    if(((ControlFlowBlock) b).getBody() == rwPlugBlock){
-                        ((ControlFlowBlock) b).setBody(rwSocketBlock);
-                        rwSocketBlock.setPrevious((StatementBlock) b);
-                    }
-                }
-            }
-        }
-
-        if(rwSocketBlock.getNext() != null){
-            var tempPlugNext = rwPlugBlock;
-            while (tempPlugNext.getNext() != null){
-                tempPlugNext = tempPlugNext.getNext();
-            }
-            rwSocketBlock.getNext().setPrevious(tempPlugNext);
-            tempPlugNext.setNext(rwSocketBlock.getNext());
-            rwSocketBlock.setNext(null);
-        }
-
-        rwSocketBlock.setNext(rwPlugBlock);
-
-        if(rwPlugBlock.getPrevious() != null){
-
-            rwPlugBlock.getPrevious().setNext(null);
-        }
-
-        rwPlugBlock.setPrevious(rwSocketBlock);
-
-        if(blocks.contains(plugBlock))
-            return;
-
-        blocks.add(rwPlugBlock);
-    }
-    /**
-     * Connect CFB with Condition
-     */
-    public void connectToStatementSocket(ReadOnlyControlFlowBlock socketBlock, ReadOnlyConditionBlock plugBlock){
-
-        ensureValidCFB(socketBlock, "socketBlock");
-        ensureValidCondition(plugBlock, "plugBlock");
-
-        if(!blocks.contains(socketBlock)){
-            addBlock(socketBlock);
-            //throw new IllegalArgumentException("The given socketBlock does not exist");
-        }
-
-        var rwSocketBlock = (ControlFlowBlock)socketBlock;
-        var rwPlugBlock = (ConditionBlock)plugBlock;
-
-        if(rwPlugBlock instanceof NotBlock){
-            if(rwSocketBlock.getCondition() != null){
-                ((NotBlock) rwPlugBlock).setCondition(rwSocketBlock.getCondition());
-                rwSocketBlock.setCondition(null);
-            }
-        }else if(rwPlugBlock instanceof WallInFrontBlock){
-            if(rwSocketBlock.getCondition() != null){
-                return; //We should not connect this new condition
-            }
-        }
-
-        rwSocketBlock.setCondition(rwPlugBlock);
-
-        if(blocks.contains(plugBlock))
-            return;
-
-        blocks.add(rwPlugBlock);
-    }
-    /**
-     * Connect Statement to CFB Body, the boolean is a marker to indicate we need to connect the body
-     * @param socketBlock
-     * @param plugBlock
-     */
-    public void connectToStatementSocket(ReadOnlyControlFlowBlock socketBlock, ReadOnlyStatementBlock plugBlock, boolean bIsBody){
-        ensureValidCFB(socketBlock, "socketBlock");
-        ensureValidStatementBlock(plugBlock, "plugBlock");
-
-        if(components.contains(plugBlock)){
-            components.remove(plugBlock);
-        }
-
-        if(!blocks.contains(socketBlock)){
-            addBlock(socketBlock);
-            //throw new IllegalArgumentException("The given socketBlock does not exist");
-        }
-
-        var rwSocketBlock = (ControlFlowBlock)socketBlock;
-        var rwPlugBlock = (StatementBlock)plugBlock;
-
-        if(rwSocketBlock.getBody() != null){
-            var temp = rwPlugBlock;
-            while (temp.getNext() != null){
-                temp = temp.getNext();
-            }
-            rwSocketBlock.getBody().setPrevious(temp);
-            temp.setNext(rwSocketBlock.getBody());
-            //rwPlugBlock.setNext(rwSocketBlock);
-            //rwSocketBlock.setBody(null);
-        }
-
-        rwSocketBlock.setBody(rwPlugBlock);
-        rwPlugBlock.setPrevious(rwSocketBlock);
-
-        if(blocks.contains(plugBlock))
-            return;
-
-        blocks.add(rwPlugBlock);
-    }
-
-    private void connectToConditionBlock(ReadOnlyConditionBlock socket, ReadOnlyConditionBlock plug) {
-        ensureValidCondition((ReadOnlyConditionBlock) socket,"socket");
-        ensureValidCondition((ReadOnlyConditionBlock) plug,"plug");
-
-        var socketCondition = (ConditionBlock)socket;
-        var plugCondition = (ConditionBlock)plug;
-
-        if(socketCondition instanceof NotBlock){
-            //Check if the plug is the condition of anything else:
-            var conditionFor = blocks.stream().filter(b ->
-                    (b instanceof ControlFlowBlock && ((ControlFlowBlock) b).getCondition() == plugCondition)
-                         || ((b instanceof NotBlock) && ((NotBlock) b).getCondition() == plugCondition)  ).findFirst().orElse(null);
-            if(conditionFor != null){
-                if(conditionFor instanceof ControlFlowBlock){
-                    ((ControlFlowBlock) conditionFor).setCondition( socketCondition);
-                    ((NotBlock) socketCondition).setCondition(plugCondition);
-                }else if(conditionFor instanceof NotBlock){
-                    ((NotBlock) conditionFor).setCondition(socketCondition);
-                    ((NotBlock) socketCondition).setCondition(plugCondition);
-                }
-            }else{
-                if(plug instanceof NotBlock){
-                    ((NotBlock) plug).setCondition(((NotBlock) socket).getCondition());
-                    ((NotBlock) socket).setCondition((ConditionBlock) plug);
-                }else{
-                    ((NotBlock) socket).setCondition((ConditionBlock) plug);
-                }
-            }
-        }else{
-            throw new IllegalArgumentException("Cannot connect with this condition socket.");
-        }
-
-        if(!blocks.contains(socketCondition)){
-            blocks.add(socketCondition);
-        }
-        if(!blocks.contains(plugCondition)){
-            blocks.add(plugCondition);
-        }
-    }
-
-    //TODO: conditions and bodies
-    /**
-     * Disconnects the plug of plugBlock from the socket of socketBlock
-     */
-    public void disconnectStatementBlock(ReadOnlyStatementBlock socketBlock, ReadOnlyStatementBlock plugBlock){
-        if(socketBlock == plugBlock){
-            return;
-        }
-
-        ensureValidStatementBlock(socketBlock, "socketBlock");
-        ensureValidStatementBlock(plugBlock, "plugBlock");
+        ensureValidBlock(socketBlock, StatementBlock.class, "socketBlock");
+        ensureValidBlock(plugBlock, StatementBlock.class,"plugBlock");
 
         if(!blocks.contains(socketBlock)){
             throw new IllegalArgumentException("The given socketBlock does not exist");
         }
 
-        if(!blocks.contains(plugBlock)){
-            throw new IllegalArgumentException("The given plugBlock does not exist");
-        }
+        components.remove(plugBlock);
+        blocks.add(plugBlock);
 
         var rwSocketBlock = (StatementBlock)socketBlock;
+        var rwPlugBlock = (StatementBlock)plugBlock;
+
+        //if the plugBlock was part of a cf block body, disconnect it
+        for(var cfBlock : getBlocksOfType(ControlFlowBlock.class)){
+            if(cfBlock.getBody() == rwPlugBlock){
+                cfBlock.setBody(null);
+            }
+        }
+
+        //the (chain) of statementBlock(s) might be inserted between rwSocketBlock and rwSocketBlock.getNext()
+        var nextPlugBlock = rwSocketBlock.getNext();
+        while(nextPlugBlock != null && nextPlugBlock.getNext() != null){
+            nextPlugBlock = nextPlugBlock.getNext();
+        }
+
+        //update the links between rwSocketBlock and rwPlugBlock
+        rwPlugBlock.setPrevious(rwSocketBlock);
+        rwSocketBlock.setNext(rwPlugBlock);
+
+        rwPlugBlock.setNext(nextPlugBlock);
+
+        if(nextPlugBlock != null){
+            nextPlugBlock.setPrevious(rwPlugBlock);
+        }
+    }
+
+    /**
+     * Disconnects a statementBlock from another statementBlock. This method should be called when:
+     * - A statementBlock is disconnected from another statementBlock
+     * - A statementBlock which is the body of a controlFlowBlock is disconnected
+     */
+    public void disconnectStatementBlock(ReadOnlyStatementBlock plugBlock){
+
+        ensureValidBlock(plugBlock, StatementBlock.class, "plugBlock");
+
+        var socketBlock = blocks.stream().filter(b -> (b instanceof StatementBlock && ((StatementBlock)b).getNext() == plugBlock) || (b instanceof ControlFlowBlock && ((ControlFlowBlock)b).getBody() == plugBlock)).findFirst();
+
+        if(socketBlock.isEmpty()){
+            throw new IllegalArgumentException("The given plugBlock is not connected to any block");
+        }
+
+        if(socketBlock.get() instanceof ControlFlowBlock){
+            var cfBlock = (ControlFlowBlock)socketBlock.get();
+
+            cfBlock.setBody(null);
+            components.add(plugBlock);
+            return;
+        }
+
+        var rwSocketBlock = (StatementBlock)socketBlock.get();
         var rwPlugBlock = (StatementBlock)plugBlock;
 
         rwSocketBlock.setNext(null);
@@ -334,112 +203,87 @@ public class BlockProgram implements ReadOnlyBlockProgram {
         components.add(rwPlugBlock);
     }
 
-    private static void ensureValidStatementBlock(ReadOnlyStatementBlock roBlock, String argName){
-
-        if(roBlock == null){
-            throw new IllegalArgumentException(String.format("The given %s must be effective", argName));
-        }
-
-        if(!(roBlock instanceof StatementBlock))
-            throw new IllegalArgumentException(String.format("The given %s must be an instance of StatementBlock", argName));
-    }
-    private static void ensureValidCFB(ReadOnlyControlFlowBlock roBlock, String argName){
-
-        if(roBlock == null){
-            throw new IllegalArgumentException(String.format("The given %s must be effective", argName));
-        }
-
-        if(!(roBlock instanceof ReadOnlyControlFlowBlock))
-            throw new IllegalArgumentException(String.format("The given %s must be an instance of StatementBlock", argName));
-    }
-    private static void ensureValidCondition(ReadOnlyConditionBlock roBlock, String argName){
-
-        if(roBlock == null){
-            throw new IllegalArgumentException(String.format("The given %s must be effective", argName));
-        }
-
-        if(!(roBlock instanceof ReadOnlyConditionBlock))
-            throw new IllegalArgumentException(String.format("The given %s must be an instance of StatementBlock", argName));
-    }
-
-    @Override
-    public ReadOnlyStatementBlock getRootBlock(Block blockOfChain){
-        //ensureValidStatementBlock(blockOfChain, "block");
-        if(blockOfChain instanceof ConditionBlock){
-            for(Block b : blocks){
-                if(b instanceof ControlFlowBlock){
-                    if(((ControlFlowBlock) b).getCondition() == blockOfChain){
-                        return getRootBlock(b);
-                    }
-                }else if(b instanceof NotBlock){
-                    if(((NotBlock) b).getCondition() == blockOfChain){
-                        return getRootBlock(b);
-                    }
-                }
-            }
-        }
-
-        if(blockOfChain instanceof ConditionBlock){
-            System.out.println();
-        }
-        for(StatementBlock block : components){
-            if(containsRoot(block, (ReadOnlyStatementBlock) blockOfChain)){
-                return block;
-            }
-        }
-        return null;
-    }
-
-    private boolean containsRoot(ReadOnlyStatementBlock block ,ReadOnlyStatementBlock blockOfChain){
-        if(block == null){
-            return false;
-        }
-        if(block instanceof ControlFlowBlock){
-            return containsRoot(((ControlFlowBlock) block).getBody(),blockOfChain) || (block == blockOfChain) || containsRoot(block.getNext(), blockOfChain);
-        }else{
-            return (block == blockOfChain) || containsRoot(block.getNext(), blockOfChain);
-        }
-    }
-
-    /*
-    Function that inserts a given plug block into a socket block, at least 1 of these 2 blocks already exists in the blocks
-    set (don't know which). PlugLocation returns the location where the socket should be plugged if it can't be inferred.
-    @return Should return the root component of the program that was modified so the visual graph can be rebuild
+    /**
+     * Connects a conditionBlock to a conditionedBlocked. This method should be called when:
+     * - A new conditionBlock is connected to a conditionedBlock
+     * - A existing conditionBlock separate from a conditionedBlock is connected to a conditionedBlock
+     * - A existing conditionBlock is disconnected from a conditionedBlock and connected to another conditionedBlock
      */
-    public Block processInsertBlock(ProgramBlockInsertInfo programBlockInsertInfo){
-        Block plug = programBlockInsertInfo.getPlug();
-        Block socket = programBlockInsertInfo.getSocket();
-        var location = programBlockInsertInfo.getPlugLocation();
-        if(location == ProgramBlockInsertInfo.PlugLocation.BODY){
-            ensureValidCFB((ReadOnlyControlFlowBlock) socket,"socket");
-            ensureValidStatementBlock((ReadOnlyStatementBlock) plug,"plug");
-            connectToStatementSocket((ReadOnlyControlFlowBlock) socket, (ReadOnlyStatementBlock) plug,true);
-        }else{
-            if(socket instanceof ReadOnlyControlFlowBlock){
-                ensureValidCFB((ReadOnlyControlFlowBlock) socket,"socket");
-                if(plug instanceof ReadOnlyConditionBlock){
-                    ensureValidCondition((ReadOnlyConditionBlock) plug,"plug");
-                    connectToStatementSocket((ReadOnlyControlFlowBlock)socket, (ReadOnlyConditionBlock) plug);
-                }else{
-                    ensureValidStatementBlock((ReadOnlyStatementBlock) plug,"plug");
-                    connectToStatementSocket((ReadOnlyStatementBlock) socket, (ReadOnlyStatementBlock) plug);
-                }
-            }else if(socket instanceof ReadOnlyStatementBlock){
-                ensureValidStatementBlock((ReadOnlyStatementBlock) socket,"socket");
-                ensureValidStatementBlock((ReadOnlyStatementBlock) plug,"plug");
-                connectToStatementSocket((ReadOnlyStatementBlock)socket,(ReadOnlyStatementBlock)plug);
-            }
-            if(socket instanceof ConditionBlock && plug instanceof ConditionBlock){
-                ensureValidCondition((ReadOnlyConditionBlock) socket,"socket");
-                ensureValidCondition((ReadOnlyConditionBlock) plug,"plug");
-                connectToConditionBlock((ReadOnlyConditionBlock)socket,(ReadOnlyConditionBlock)plug);
+    public void connectConditionBlock(ReadOnlyConditionedBlock conditionedBlock, ReadOnlyConditionBlock conditionBlock){
+
+        ensureValidBlock(conditionedBlock, ConditionedBlock.class, "conditionedBlock");
+        ensureValidBlock(conditionBlock, ConditionBlock.class, "conditionBlock");
+
+        components.remove(conditionBlock);
+        blocks.add(conditionBlock);
+
+        //disconnect the condition block
+        for(var cBlock : getBlocksOfType(ConditionedBlock.class)){
+            if(cBlock.getCondition() == conditionBlock){
+                cBlock.setCondition(null);
             }
         }
 
-        if(blocks.contains(socket) && blocks.contains(plug)){
-            return getRootBlock(socket);
-        }else{
-            throw new RuntimeException("Error adding plug to socket.");
+        var rwConditionedBlock = (ConditionedBlock)conditionedBlock;
+        var rwConditionBlock = (ConditionBlock)conditionBlock;
+
+        rwConditionedBlock.setCondition(rwConditionBlock);
+    }
+
+    /**
+     * Disconnects a conditionBlock from a conditionedBlock
+     */
+    public void disconnectConditionBlock(ReadOnlyConditionBlock conditionBlock){
+
+        ensureValidBlock(conditionBlock, ConditionBlock.class, "conditionBlock");
+
+        var socketBlock = blocks.stream()
+                .filter(b -> b instanceof ConditionedBlock)
+                .map(b -> (ConditionedBlock)b)
+                .filter(b -> b.getCondition() == conditionBlock).findFirst();
+
+        if(socketBlock.isEmpty()){
+            throw new IllegalArgumentException("The given conditionBlock is not connected to any block");
+        }
+
+        socketBlock.get().setCondition(null);
+
+        components.add(conditionBlock);
+    }
+
+    /**
+     * Connects a statementBlock to a controlFlowBlock as its body. This method should be called when:
+     * - A new statementBlock is connected as the body of a controlFlowBlock
+     * - An existing statementBlock chain is connected to a controlFlowBlock
+     */
+    public void connectControlFlowBody(ReadOnlyControlFlowBlock controlFlowBlock, ReadOnlyStatementBlock statementBlock){
+
+        ensureValidBlock(controlFlowBlock, ControlFlowBlock.class, "controlFlowBlock");
+        ensureValidBlock(statementBlock, StatementBlock.class, "statementBlock");
+
+        var rwControlFlowBlock = (ControlFlowBlock)controlFlowBlock;
+        var rwStatementBlock = (StatementBlock)statementBlock;
+
+        assert rwControlFlowBlock.getBody() == null;
+
+        if(rwStatementBlock.getPrevious() != null){
+            rwStatementBlock.getPrevious().setNext(null);
+        }
+
+        rwStatementBlock.setPrevious(null);
+
+        components.remove(rwStatementBlock);
+        rwControlFlowBlock.setBody(rwStatementBlock);
+    }
+
+    private static <T> void ensureValidBlock(Block block, Class<T> type, String argName){
+
+        if(block == null){
+            throw new IllegalArgumentException(String.format("The given %s must be effective", argName));
+        }
+
+        if(!type.isInstance(block)){
+            throw new IllegalArgumentException(String.format("The given %s must be an instance of %s", argName, type.getSimpleName()));
         }
     }
 }

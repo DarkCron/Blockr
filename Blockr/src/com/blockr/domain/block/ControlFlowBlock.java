@@ -1,10 +1,10 @@
 package com.blockr.domain.block;
 
-import com.blockr.domain.block.interfaces.CompositeBlock;
+import com.blockr.domain.block.interfaces.ConditionedBlock;
 import com.blockr.domain.block.interfaces.ReadOnlyControlFlowBlock;
 import com.blockr.domain.block.interfaces.ReadOnlyStatementBlock;
 
-public abstract class ControlFlowBlock extends StatementBlock implements ReadOnlyControlFlowBlock, CompositeBlock {
+public abstract class ControlFlowBlock extends StatementBlock implements ReadOnlyControlFlowBlock, ConditionedBlock {
 
     @Override
     public ConditionBlock getCondition() {
@@ -46,5 +46,9 @@ public abstract class ControlFlowBlock extends StatementBlock implements ReadOnl
     @Override
     public boolean isReady() {
         return getCondition() != null && getBody() != null;
+    }
+
+    public void reset(){
+        setCurrent(null);
     }
 }

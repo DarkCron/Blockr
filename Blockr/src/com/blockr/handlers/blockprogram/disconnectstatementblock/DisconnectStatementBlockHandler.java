@@ -13,7 +13,7 @@ public class DisconnectStatementBlockHandler extends HandlerBase<DisconnectState
 
     @Override
     public Voidy handle(DisconnectStatementBlock connectStatementBlock) {
-        getState().getBlockProgram().disconnectStatementBlock(connectStatementBlock.getSocketBlock(), connectStatementBlock.getPlugBlock());
+        getState().getBlockProgram().disconnectStatementBlock(connectStatementBlock.getPlugBlock());
         return new Voidy();
     }
 }
