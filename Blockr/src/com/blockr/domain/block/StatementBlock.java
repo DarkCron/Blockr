@@ -1,7 +1,7 @@
 package com.blockr.domain.block;
 
 import com.blockr.domain.block.interfaces.ReadOnlyStatementBlock;
-import com.blockr.domain.gameworld.GameWorld;
+import com.gameworld.GameWorld;
 
 
 public abstract class StatementBlock implements ReadOnlyStatementBlock {

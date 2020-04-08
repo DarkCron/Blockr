@@ -12,7 +12,7 @@ public class AddBlockHandler extends HandlerBase<AddBlock, Voidy> {
 
     @Override
     public Voidy handle(AddBlock addBlock) {
-        getState().getBlockProgram().addBlock(addBlock.getStatementBlock());
+        getState().getBlockProgram().addBlock(addBlock.getBlock());
         return new Voidy();
     }
 

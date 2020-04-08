@@ -1,7 +1,8 @@
 package blockr.block;
 
 import com.blockr.domain.block.MoveForwardBlock;
-import com.blockr.domain.gameworld.GameWorld;
+import com.gameworld.Action;
+import com.gameworld.GameWorld;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -22,7 +23,7 @@ public class MoveForwardBlockTest {
 
         var result = block.execute(mockedGameWorld);
 
-        verify(mockedGameWorld).moveForward();
+        verify(mockedGameWorld).execute(Action.MOVE_FORWARD);
         Assertions.assertEquals(next, result);
     }
 

@@ -12,7 +12,7 @@ public class RemoveBlockHandler extends HandlerBase<RemoveBlock, Voidy> {
 
     @Override
     public Voidy handle(RemoveBlock removeBlock) {
-        getState().getBlockProgram().removeBlock(removeBlock.getStatementBlock());
+        getState().getBlockProgram().removeBlock(removeBlock.getBlock());
         return new Voidy();
     }
 

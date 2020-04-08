@@ -1,8 +1,8 @@
 package com.blockr.handlers.world;
 
 import an.awesome.pipelinr.Command;
-import com.blockr.domain.gameworld.ReadOnlyGameWorld;
+import com.gameworld.GameWorld;
 
-public class GetWorld implements Command<ReadOnlyGameWorld> {
+public class GetWorld implements Command<GameWorld> {
 
 }

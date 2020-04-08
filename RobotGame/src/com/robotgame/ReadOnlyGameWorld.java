@@ -1,4 +1,4 @@
-package com.blockr.domain.gameworld;
+package com.robotgame;
 
 public interface ReadOnlyGameWorld {
 

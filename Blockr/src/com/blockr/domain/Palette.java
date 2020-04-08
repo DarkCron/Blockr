@@ -20,10 +20,7 @@ public class Palette {
             WallInFrontBlock.class
     );
 
-    public static List<? extends ReadOnlyBlock> getAvailableBlocks(Level level, BlockProgram blockProgram){
-
-        if(level.getMaxBlocks() == blockProgram.getBlockCount())
-            return Collections.emptyList();
+    public static List<? extends ReadOnlyBlock> getAvailableBlocks(BlockProgram blockProgram){
 
         var blocks = new LinkedList<Block>();
 

@@ -1,10 +1,8 @@
 package com.blockr.ui.components.executeprogrambutton;
 
 import an.awesome.pipelinr.Pipeline;
-import com.blockr.executelogic.ExecutableThread;
 import com.blockr.handlers.blockprogram.canstart.CanStart;
 import com.blockr.handlers.blockprogram.executeprogram.ExecuteProgram;
-import com.ui.Component;
 import com.ui.WindowRegion;
 import com.ui.components.divcomponent.*;
 import com.ui.components.textcomponent.TextComponent;
@@ -12,7 +10,6 @@ import com.ui.mouseevent.MouseEvent;
 
 import java.awt.*;
 import java.util.ArrayList;
-import java.util.Collections;
 
 public class ExecuteProgramButton extends DivComponent {
 
@@ -31,11 +28,8 @@ public class ExecuteProgramButton extends DivComponent {
 
     private static final TextComponent TEXT = new TextComponent("Execute program", 12);
 
-    private ExecutableThread executableThread;
-
 
     public ExecuteProgramButton(Pipeline pipeline) {
-        //super(Collections.singletonList(TEXT), Margin.NONE, new Border(BUTTON_BORDER_COLOR, BUTTON_BORDER_WIDTH), Padding.NONE, FlexAxis.Horizontal);
         super(new ArrayList<>(), Margin.NONE, new Border(BUTTON_BORDER_COLOR, BUTTON_BORDER_WIDTH), Padding.NONE, FlexAxis.Horizontal);
         this.pipeline = pipeline;
     }
@@ -79,12 +73,7 @@ public class ExecuteProgramButton extends DivComponent {
             return;
         }
 
-        if(mouseEvent.getType() == MouseEvent.Type.MOUSE_CLICKED){
-            if(executableThread == null || !executableThread.isAlive()){
-                executableThread = new ExecutableThread(pipeline.send(new ExecuteProgram()), this.getViewContext());
-                executableThread.start();
-            }
-        }
+        pipeline.send(new ExecuteProgram());
 
         getViewContext().repaint();
 
