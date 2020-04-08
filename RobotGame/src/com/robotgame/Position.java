@@ -1,4 +1,4 @@
-package com.blockr.domain.gameworld;
+package com.robotgame;
 
 import java.util.Objects;
 

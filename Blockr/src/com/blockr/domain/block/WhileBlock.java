@@ -1,10 +1,8 @@
 package com.blockr.domain.block;
 
-import com.blockr.domain.block.interfaces.Block;
-import com.blockr.domain.block.interfaces.CompositeBlock;
 import com.blockr.domain.block.interfaces.ReadOnlyStatementBlock;
 import com.blockr.domain.block.interfaces.markers.ReadOnlyWhileBlock;
-import com.blockr.domain.gameworld.GameWorld;
+import com.gameworld.GameWorld;
 
 public class WhileBlock extends ControlFlowBlock implements ReadOnlyWhileBlock {
 

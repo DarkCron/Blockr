@@ -1,17 +1,17 @@
 package com.blockr.handlers.world;
 
 import com.blockr.domain.State;
-import com.blockr.domain.gameworld.ReadOnlyGameWorld;
 import com.blockr.handlers.HandlerBase;
+import com.gameworld.GameWorld;
 
-public class GetWorldHandler extends HandlerBase<GetWorld   , ReadOnlyGameWorld> {
+public class GetWorldHandler extends HandlerBase<GetWorld, GameWorld> {
 
     public GetWorldHandler(State state) {
         super(state);
     }
 
     @Override
-    public ReadOnlyGameWorld handle(GetWorld getWorld) {
+    public GameWorld handle(GetWorld getWorld) {
         return getState().getGameWorld();
     }
 }

@@ -2,7 +2,8 @@ package com.blockr.domain.block;
 
 import com.blockr.domain.block.interfaces.Block;
 import com.blockr.domain.block.interfaces.markers.ReadOnlyTurnBlock;
-import com.blockr.domain.gameworld.GameWorld;
+import com.gameworld.Action;
+import com.gameworld.GameWorld;
 
 public class TurnBlock extends StatementBlock implements ReadOnlyTurnBlock {
 
@@ -23,10 +24,11 @@ public class TurnBlock extends StatementBlock implements ReadOnlyTurnBlock {
 
     public StatementBlock execute(GameWorld gameWorld) {
 
-        if(getDirection() == Direction.LEFT)
-            gameWorld.turnLeft();
-        else
-            gameWorld.turnRight();
+        if (direction == Direction.LEFT) {
+            gameWorld.execute(Action.TURN_LEFT);
+        } else {
+            gameWorld.execute(Action.TURN_RIGHT);
+        }
 
         return getNext();
     }

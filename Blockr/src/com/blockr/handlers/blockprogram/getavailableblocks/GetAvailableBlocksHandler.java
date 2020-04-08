@@ -15,6 +15,6 @@ public class GetAvailableBlocksHandler extends HandlerBase<GetAvailableBlocks, L
 
     @Override
     public List<? extends ReadOnlyBlock> handle(GetAvailableBlocks getAvailableBlocks) {
-        return Palette.getAvailableBlocks(getState().getActiveLevel(), getState().getBlockProgram());
+        return Palette.getAvailableBlocks(getState().getBlockProgram());
     }
 }

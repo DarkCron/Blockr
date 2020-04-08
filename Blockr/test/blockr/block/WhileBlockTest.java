@@ -1,7 +1,7 @@
 package blockr.block;
 
 import com.blockr.domain.block.*;
-import com.blockr.domain.gameworld.GameWorld;
+import com.gameworld.GameWorld;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

@@ -2,7 +2,7 @@ package blockr.block;
 
 import com.blockr.domain.block.ConditionBlock;
 import com.blockr.domain.block.NotBlock;
-import com.blockr.domain.gameworld.GameWorld;
+import com.gameworld.GameWorld;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
