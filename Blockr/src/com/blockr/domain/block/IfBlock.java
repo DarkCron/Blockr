@@ -1,7 +1,5 @@
 package com.blockr.domain.block;
 
-import com.blockr.domain.block.interfaces.Block;
-import com.blockr.domain.block.interfaces.CompositeBlock;
 import com.blockr.domain.block.interfaces.ReadOnlyStatementBlock;
 import com.blockr.domain.block.interfaces.markers.ReadOnlyIfBlock;
 import com.gameworld.GameWorld;
@@ -37,11 +35,6 @@ public class IfBlock extends ControlFlowBlock implements ReadOnlyIfBlock {
 
         setCurrent(nextBodyStatement);
         return this;
-    }
-
-    @Override
-    public void reset() {
-        setCurrent(null);
     }
 
     @Override

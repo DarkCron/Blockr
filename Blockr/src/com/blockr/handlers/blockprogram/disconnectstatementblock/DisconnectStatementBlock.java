@@ -6,20 +6,13 @@ import com.blockr.domain.block.interfaces.ReadOnlyStatementBlock;
 
 public class DisconnectStatementBlock implements Command<Voidy> {
 
-    public ReadOnlyStatementBlock getSocketBlock(){
-        return socketBlock;
-    }
-
-    private final ReadOnlyStatementBlock socketBlock;
-
     public ReadOnlyStatementBlock getPlugBlock(){
         return plugBlock;
     }
 
     private final ReadOnlyStatementBlock plugBlock;
 
-    public DisconnectStatementBlock(ReadOnlyStatementBlock socketBlock, ReadOnlyStatementBlock plugBlock){
-        this.socketBlock = socketBlock;
+    public DisconnectStatementBlock(ReadOnlyStatementBlock plugBlock){
         this.plugBlock = plugBlock;
     }
 

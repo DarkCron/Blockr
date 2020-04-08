@@ -21,42 +21,42 @@ public class ConnectToTests {
         }
 
         try {
-            testProgram.connectToStatementSocket((StatementBlock)null, (StatementBlock)null);
+            testProgram.connectStatementBlock((StatementBlock)null, (StatementBlock)null);
             fail();
         }catch (Exception e){
         }
         try {
-            testProgram.connectToStatementSocket((ControlFlowBlock) null, (ConditionBlock)null);
-            fail();
-        }catch (Exception e){
-        }
-
-        try {
-            testProgram.connectToStatementSocket(null, new MoveForwardBlock());
+            testProgram.connectStatementBlock((ControlFlowBlock) null, (ConditionBlock)null);
             fail();
         }catch (Exception e){
         }
 
         try {
-            testProgram.connectToStatementSocket(new MoveForwardBlock(), null);
+            testProgram.connectStatementBlock(null, new MoveForwardBlock());
+            fail();
+        }catch (Exception e){
+        }
+
+        try {
+            testProgram.connectStatementBlock(new MoveForwardBlock(), null);
             fail();
         }catch (Exception e){
         }
 
         testProgram.addBlock(simpleStatement1);
         try {
-            testProgram.connectToStatementSocket(simpleStatement1, null);
+            testProgram.connectStatementBlock(simpleStatement1, null);
             fail();
         }catch (Exception e){
         }
 
         try {
-            testProgram.connectToStatementSocket(simpleStatement2, null);
+            testProgram.connectStatementBlock(simpleStatement2, null);
             fail();
         }catch (Exception e){
         }
 
-        testProgram.connectToStatementSocket(simpleStatement1, simpleStatement2);
+        testProgram.connectStatementBlock(simpleStatement1, simpleStatement2);
     }
 
     @Test
@@ -66,7 +66,7 @@ public class ConnectToTests {
         StatementBlock simpleStatement2 = new MoveForwardBlock();
 
         testProgram.addBlock(simpleStatement1);
-        testProgram.connectToStatementSocket(simpleStatement1,simpleStatement2);
+        testProgram.connectStatementBlock(simpleStatement1,simpleStatement2);
         assertEquals(simpleStatement2,simpleStatement1.getNext());
         assertEquals(simpleStatement1, simpleStatement2.getPrevious());
         assertEquals(null,simpleStatement1.getPrevious());
@@ -83,13 +83,13 @@ public class ConnectToTests {
         StatementBlock simpleStatement4 = new WhileBlock();
 
         testProgram.addBlock(simpleStatement1);
-        testProgram.connectToStatementSocket(simpleStatement1,simpleStatement2);
+        testProgram.connectStatementBlock(simpleStatement1,simpleStatement2);
         assertEquals(simpleStatement2,simpleStatement1.getNext());
         assertEquals(simpleStatement1, simpleStatement2.getPrevious());
         assertEquals(null,simpleStatement1.getPrevious());
         assertEquals(null,simpleStatement2.getNext());
 
-        testProgram.connectToStatementSocket(simpleStatement2,simpleStatement3);
+        testProgram.connectStatementBlock(simpleStatement2,simpleStatement3);
         assertEquals(simpleStatement2,simpleStatement3.getPrevious());
         assertEquals(simpleStatement3,simpleStatement2.getNext());
         assertEquals(simpleStatement2,simpleStatement1.getNext());
@@ -98,7 +98,7 @@ public class ConnectToTests {
         assertEquals(null,simpleStatement3.getNext());
 
         //Insert statement4 between 1 and 2, so that: Statement1 > Statement 4 > Statement 2  > statement 3
-        testProgram.connectToStatementSocket(simpleStatement1,simpleStatement4);
+        testProgram.connectStatementBlock(simpleStatement1,simpleStatement4);
         assertEquals(simpleStatement1,simpleStatement4.getPrevious());
         assertEquals(simpleStatement4, simpleStatement1.getNext());
         assertEquals(simpleStatement2 ,simpleStatement4.getNext());
@@ -115,7 +115,7 @@ public class ConnectToTests {
         ConditionBlock simpleCondition = new WallInFrontBlock();
 
         testProgram.addBlock(simpleCFB);
-        testProgram.connectToStatementSocket(simpleCFB,simpleCondition);
+        testProgram.connectStatementBlock(simpleCFB,simpleCondition);
         assertEquals(simpleCondition,simpleCFB.getCondition());
     }
 
@@ -133,10 +133,10 @@ public class ConnectToTests {
         simpleCFB.setCondition(simpleCondition);
 
         testProgram.addBlock(simpleCFB);
-        testProgram.connectToStatementSocket(simpleCFB,otherCondition);
+        testProgram.connectStatementBlock(simpleCFB,otherCondition);
         assertEquals(simpleCondition,simpleCFB.getCondition());
 
-        testProgram.connectToStatementSocket(simpleCFB,simpleNotCondition);
+        testProgram.connectStatementBlock(simpleCFB,simpleNotCondition);
         assertEquals(simpleNotCondition,simpleCFB.getCondition());
         assertEquals(simpleCondition,((NotBlock)simpleCFB.getCondition()).getCondition());
     }
@@ -149,10 +149,10 @@ public class ConnectToTests {
         WhileBlock whileBlock = new WhileBlock();
 
         testProgram.addBlock(whileBlock);
-        testProgram.connectToStatementSocket(whileBlock,wallInFront);
+        testProgram.connectStatementBlock(whileBlock,wallInFront);
         assertEquals(wallInFront, whileBlock.getCondition());
 
-        testProgram.connectToStatementSocket(whileBlock,notBlock);
+        testProgram.connectStatementBlock(whileBlock,notBlock);
         assertEquals(notBlock, whileBlock.getCondition());
         assertEquals(wallInFront, notBlock.getCondition());
     }
@@ -168,12 +168,12 @@ public class ConnectToTests {
         //Let's use this boolean as 3rd argument to mark a connection to the body, so the arguments are:
         //(ControlFlowBLock, StatementBlock, boolean)
         testProgram.addBlock(whileBlock);
-        testProgram.connectToStatementSocket(whileBlock,moveForwardBlock,true);
+        testProgram.connectStatementBlock(whileBlock,moveForwardBlock,true);
         assertEquals(moveForwardBlock,whileBlock.getBody());
         assertEquals(whileBlock, moveForwardBlock.getPrevious()); //Important!
         assertEquals(null, moveForwardBlock.getNext());
 
-        testProgram.connectToStatementSocket(moveForwardBlock,moveForwardBlock2);
+        testProgram.connectStatementBlock(moveForwardBlock,moveForwardBlock2);
         assertEquals(moveForwardBlock,whileBlock.getBody());
         assertEquals(whileBlock, moveForwardBlock.getPrevious());
         assertEquals(moveForwardBlock2,moveForwardBlock.getNext());
@@ -184,7 +184,7 @@ public class ConnectToTests {
         //After adding a block in front of moveForwardBlock the WhileBlock should look like:
         //  WhileBlock has the body: moveForwardBlock3 > moveForwardBlock > moveForwardBlock2, where whileBlock.getBody() == moveForwardBlock3
         testProgram.addBlock(moveForwardBlock3);
-        testProgram.connectToStatementSocket(moveForwardBlock3,moveForwardBlock);
+        testProgram.connectStatementBlock(moveForwardBlock3,moveForwardBlock);
         assertEquals(moveForwardBlock3,whileBlock.getBody());
         assertEquals(whileBlock, moveForwardBlock3.getPrevious());
         assertEquals(null, moveForwardBlock2.getNext());
@@ -204,18 +204,18 @@ public class ConnectToTests {
         MoveForwardBlock moveForwardBlock4 = new MoveForwardBlock();
 
         testProgram.addBlock(moveForwardBlock);
-        testProgram.connectToStatementSocket(moveForwardBlock,moveForwardBlock2);
+        testProgram.connectStatementBlock(moveForwardBlock,moveForwardBlock2);
         assertEquals(moveForwardBlock2,moveForwardBlock.getNext());
         assertEquals(moveForwardBlock,moveForwardBlock2.getPrevious());
 
         testProgram.addBlock(moveForwardBlock3);
-        testProgram.connectToStatementSocket(moveForwardBlock3,moveForwardBlock4);
+        testProgram.connectStatementBlock(moveForwardBlock3,moveForwardBlock4);
         assertEquals(moveForwardBlock4,moveForwardBlock3.getNext());
         assertEquals(moveForwardBlock3,moveForwardBlock4.getPrevious());
 
         assertEquals(2, testProgram.getComponents().size());
 
-        testProgram.connectToStatementSocket(moveForwardBlock,moveForwardBlock3);
+        testProgram.connectStatementBlock(moveForwardBlock,moveForwardBlock3);
         assertEquals(moveForwardBlock3,moveForwardBlock.getNext());
         assertEquals(moveForwardBlock4,moveForwardBlock3.getNext());
         assertEquals(moveForwardBlock2,moveForwardBlock4.getNext());
@@ -237,18 +237,18 @@ public class ConnectToTests {
         MoveForwardBlock moveForwardBlock4 = new MoveForwardBlock();
 
         testProgram.addBlock(whileBlock);
-        testProgram.connectToStatementSocket(whileBlock,moveForwardBlock2);
+        testProgram.connectStatementBlock(whileBlock,moveForwardBlock2);
         assertEquals(moveForwardBlock2,whileBlock.getNext());
         assertEquals(whileBlock,moveForwardBlock2.getPrevious());
 
         testProgram.addBlock(moveForwardBlock3);
-        testProgram.connectToStatementSocket(moveForwardBlock3,moveForwardBlock4);
+        testProgram.connectStatementBlock(moveForwardBlock3,moveForwardBlock4);
         assertEquals(moveForwardBlock4,moveForwardBlock3.getNext());
         assertEquals(moveForwardBlock3,moveForwardBlock4.getPrevious());
 
         assertEquals(2, testProgram.getComponents().size());
 
-        testProgram.connectToStatementSocket(whileBlock,moveForwardBlock3,true);
+        testProgram.connectStatementBlock(whileBlock,moveForwardBlock3,true);
 
         assertEquals(moveForwardBlock2,whileBlock.getNext());
         assertEquals(whileBlock,moveForwardBlock2.getPrevious());
@@ -270,16 +270,16 @@ public class ConnectToTests {
         WhileBlock whileBlock2 = new WhileBlock();
 
         testProgram.addBlock(whileBlock);
-        testProgram.connectToStatementSocket(whileBlock,moveForwardBlock2,true);
-        testProgram.connectToStatementSocket(moveForwardBlock2,moveForwardBlock3);
+        testProgram.connectStatementBlock(whileBlock,moveForwardBlock2,true);
+        testProgram.connectStatementBlock(moveForwardBlock2,moveForwardBlock3);
 
         testProgram.addBlock(whileBlock2);
-        testProgram.connectToStatementSocket(whileBlock2,moveForwardBlock4,true);
+        testProgram.connectStatementBlock(whileBlock2,moveForwardBlock4,true);
 
         assertEquals(2, testProgram.getComponents().size());
 
 
-        testProgram.connectToStatementSocket(moveForwardBlock2,whileBlock2);
+        testProgram.connectStatementBlock(moveForwardBlock2,whileBlock2);
         //Result should be WhileBlock body: MoveForwardBlock2 > WhileBlock2 body: MoveForwardBlock4 > MoveForwardBlock 3
         assertEquals(null,whileBlock.getNext());
         assertEquals(null,whileBlock.getPrevious());

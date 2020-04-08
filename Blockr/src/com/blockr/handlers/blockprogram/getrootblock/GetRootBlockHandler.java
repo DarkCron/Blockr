@@ -13,6 +13,7 @@ public class GetRootBlockHandler extends HandlerBase<GetRootBlock, ReadOnlyState
 
     @Override
     public ReadOnlyStatementBlock handle(GetRootBlock getBlockProgram) {
-        return getState().getBlockProgram().getRootBlock(getBlockProgram.getReadOnlyStatementBlock());
+        //return getState().getBlockProgram().getRootBlock(getBlockProgram.getReadOnlyStatementBlock());
+        return null;
     }
 }

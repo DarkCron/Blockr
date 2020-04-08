@@ -6,7 +6,6 @@ import com.blockr.handlers.blockprogram.canstart.CanStartHandler;
 import com.blockr.handlers.blockprogram.executeprogram.ExecuteProgramHandler;
 import com.blockr.handlers.blockprogram.getblockprogram.GetBlockProgramHandler;
 import com.blockr.handlers.blockprogram.getrootblock.GetRootBlockHandler;
-import com.blockr.handlers.blockprogram.insertBlockInProgram.InsertBlockInProgramHandler;
 import com.blockr.handlers.blockprogram.removeblock.RemoveBlockHandler;
 import com.blockr.handlers.ui.input.GetPaletteSelectionHandler;
 import com.blockr.handlers.ui.input.GetProgramSelectionHandler;
@@ -42,7 +41,6 @@ public class Main {
                     , new AddBlockHandler(state)
                     , new GetMouseRecordHandler(state)
                     , new SetRecordMouseHandler(state)
-                    , new InsertBlockInProgramHandler(state)
                     , new ExecuteProgramHandler(state)
                     , new GetBlockProgramHandler(state)
                     , new RemoveBlockHandler(state)
