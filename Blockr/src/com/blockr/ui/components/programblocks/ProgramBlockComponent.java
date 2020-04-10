@@ -2,8 +2,17 @@ package com.blockr.ui.components.programblocks;
 
 import an.awesome.pipelinr.Pipeline;
 import com.blockr.domain.block.BlockCreator;
+import com.blockr.domain.block.BlockUtilities;
 import com.blockr.domain.block.interfaces.Block;
-import com.blockr.handlers.blockprogram.insertBlockInProgram.InsertBlockInProgram;
+import com.blockr.domain.block.interfaces.ReadOnlyBlock;
+import com.blockr.domain.block.interfaces.ReadOnlyControlFlowBlock;
+import com.blockr.domain.block.interfaces.ReadOnlyStatementBlock;
+import com.blockr.domain.block.interfaces.markers.ReadOnlyConditionBlock;
+import com.blockr.domain.block.interfaces.markers.ReadOnlyConditionedBlock;
+import com.blockr.handlers.blockprogram.addblock.AddBlock;
+import com.blockr.handlers.blockprogram.connectconditionblock.ConnectConditionBlock;
+import com.blockr.handlers.blockprogram.connectcontrolflowbody.ConnectControlFlowBody;
+import com.blockr.handlers.blockprogram.connectstatementblock.ConnectStatementBlock;
 import com.blockr.handlers.ui.input.GetPaletteSelection;
 import com.blockr.handlers.ui.input.SetProgramSelection;
 import com.blockr.handlers.ui.input.recordMousePos.GetMouseRecord;
@@ -20,7 +29,7 @@ public class ProgramBlockComponent extends UIBlockComponent {
 
     private final ProgramArea programArea;
 
-    public ProgramBlockComponent(Block source, Pipeline mediator, WindowPosition rootPosition, ProgramArea parent) {
+    public ProgramBlockComponent(ReadOnlyBlock source, Pipeline mediator, WindowPosition rootPosition, ProgramArea parent) {
         super(source, mediator, rootPosition);
         programArea = parent;
     }
@@ -44,8 +53,21 @@ public class ProgramBlockComponent extends UIBlockComponent {
 
                     var info = getSocketAndPlug(recordedMouse,copy);
                     if(info != null){
-                        var newRoot = mediator.send(new InsertBlockInProgram(info));
-                        programArea.updateBlockProgram(newRoot);
+                        if(info.getPlug() == null){
+                            mediator.send(new AddBlock(info.getSocket()));
+                            programArea.updateBlockProgram(info.getSocket());
+                        }else{
+                            if(info.getPlugLocation() == ProgramBlockInsertInfo.PlugLocation.BODY){
+                                mediator.send(new ConnectControlFlowBody((ReadOnlyControlFlowBlock) info.getSocket(),(ReadOnlyStatementBlock) info.getPlug()));
+                            }else if(info.getPlug() instanceof ReadOnlyConditionBlock && info.getSocket() instanceof ReadOnlyConditionBlock){
+                                mediator.send(new ConnectConditionBlock((ReadOnlyConditionedBlock) info.getSocket(), (ReadOnlyConditionBlock) info.getPlug()));
+                            }else if(info.getSocket() instanceof ReadOnlyStatementBlock && info.getPlug() instanceof ReadOnlyConditionBlock){
+
+                            }else{
+                                mediator.send(new ConnectStatementBlock((ReadOnlyStatementBlock) info.getSocket(),(ReadOnlyStatementBlock) info.getPlug()));
+                            }
+                        }
+                        programArea.updateBlockProgram(BlockUtilities.getRootFrom((ReadOnlyStatementBlock) info.getSocket()));
                     }
                 }
                 break;

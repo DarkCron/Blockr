@@ -1,6 +1,7 @@
 package com.blockr.ui.components.programblocks;
 
 import com.blockr.domain.block.interfaces.Block;
+import com.blockr.domain.block.interfaces.ReadOnlyBlock;
 
 /**
 * Value class that defines which block is the socket, which is the plug and, optionally, where the plug should be socketed.
@@ -9,15 +10,15 @@ import com.blockr.domain.block.interfaces.Block;
 * if socket is While and plug is MoveForward and the location is Body, than the While body should point to the MoveForward Block
  */
 public class ProgramBlockInsertInfo {
-    private final Block socket;
-    private final Block plug;
+    private final ReadOnlyBlock socket;
+    private final ReadOnlyBlock plug;
     private final PlugLocation plugLocation;
 
-    public Block getSocket() {
+    public ReadOnlyBlock getSocket() {
         return socket;
     }
 
-    public Block getPlug() {
+    public ReadOnlyBlock getPlug() {
         return plug;
     }
 
@@ -28,7 +29,7 @@ public class ProgramBlockInsertInfo {
     //OTHER means that the location to plug can be inferred
     public enum PlugLocation {BODY, OTHER}
 
-    public ProgramBlockInsertInfo(Block socket, Block plug, PlugLocation plugLocation) {
+    public ProgramBlockInsertInfo(ReadOnlyBlock socket, ReadOnlyBlock plug, PlugLocation plugLocation) {
         this.socket = socket;
         this.plug = plug;
         this.plugLocation = plugLocation;

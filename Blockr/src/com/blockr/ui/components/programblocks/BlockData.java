@@ -2,6 +2,7 @@ package com.blockr.ui.components.programblocks;
 
 import com.blockr.domain.block.*;
 import com.blockr.domain.block.interfaces.Block;
+import com.blockr.domain.block.interfaces.ReadOnlyBlock;
 
 import java.awt.*;
 
@@ -24,6 +25,10 @@ public class BlockData {
     static final Color HIGHLIGHT_COLOR = Color.GREEN;
     static final Color CONNECTION_COLOR = Color.orange;
     static final Color FONT_COLOR = Color.BLACK;
+
+    public static String getName(ReadOnlyBlock block){
+        return getName(block);
+    }
 
     public static String getName(Block block){
         if(block instanceof NotBlock){

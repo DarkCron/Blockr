@@ -3,6 +3,12 @@ package com.blockr.ui.components.programblocks;
 import an.awesome.pipelinr.Pipeline;
 import com.blockr.domain.block.*;
 import com.blockr.domain.block.interfaces.Block;
+import com.blockr.domain.block.interfaces.ReadOnlyBlock;
+import com.blockr.domain.block.interfaces.ReadOnlyControlFlowBlock;
+import com.blockr.domain.block.interfaces.ReadOnlyStatementBlock;
+import com.blockr.domain.block.interfaces.markers.ReadOnlyConditionBlock;
+import com.blockr.domain.block.interfaces.markers.ReadOnlyNotBlock;
+import com.blockr.domain.block.interfaces.markers.ReadOnlyWallInFrontBlock;
 import com.ui.Component;
 import com.ui.WindowPosition;
 import com.ui.WindowRegion;
@@ -16,7 +22,7 @@ import java.awt.*;
  * Visual component to represent a Block on screen
  */
 public abstract class UIBlockComponent extends Component {
-    protected final Block source;
+    protected final ReadOnlyBlock source;
     protected final Pipeline mediator;
     protected final WindowPosition upperLeft;
     private final String title;
@@ -24,7 +30,7 @@ public abstract class UIBlockComponent extends Component {
 
     private enum ClickLocations {PREVIOUS, NEXT, CFB_BODY, CFB_CONDITION, C_LEFT, C_RIGHT, INVALID}
 
-    public UIBlockComponent(Block source, Pipeline mediator, WindowPosition rootPosition) {
+    public UIBlockComponent(ReadOnlyBlock source, Pipeline mediator, WindowPosition rootPosition) {
         this.source = source;
         this.mediator = mediator;
         this.upperLeft = rootPosition;
@@ -33,40 +39,40 @@ public abstract class UIBlockComponent extends Component {
     }
 
     //TODO: Write some unit tests
-    public static int getHeight(Block source) {
+    public static int getHeight(ReadOnlyBlock source) {
         if(source == null){
             return 0;
         }
-        if(source instanceof ControlFlowBlock){
+        if(source instanceof ReadOnlyControlFlowBlock){
             int bodyheight = 0;
-            var body = ((ControlFlowBlock) source).getBody();
+            var body = ((ReadOnlyControlFlowBlock) source).getBody();
             while (body != null) {
                 bodyheight += getHeight(body);
                 body = body.getNext();
             }
             return BlockData.BLOCK_HEIGHT + bodyheight;
-        }else if(source instanceof StatementBlock){
+        }else if(source instanceof ReadOnlyStatementBlock){
             return BlockData.BLOCK_HEIGHT;
-        }else if(source instanceof ConditionBlock){
+        }else if(source instanceof ReadOnlyConditionBlock){
             return BlockData.CONDITION_BLOCK_HEIGHT;
         }
         return BlockData.BLOCK_HEIGHT;
     }
 
     //TODO: Write some unit tests
-    public static int getWidth(Block source) {
+    public static int getWidth(ReadOnlyBlock source) {
         if(source == null){
             return 0;
         }
-        if(source instanceof ControlFlowBlock){
+        if(source instanceof ReadOnlyControlFlowBlock){
             return BlockData.BLOCK_WIDTH;
             //return Math.max(BlockData.BLOCK_WIDTH + getWidth(((ControlFlowBlock) source).getCondition()), BlockData.CONTROL_FLOW_INNER_START + getWidth(((ControlFlowBlock) source).getBody()));
-        }else if(source instanceof StatementBlock){
+        }else if(source instanceof ReadOnlyStatementBlock){
             return BlockData.BLOCK_WIDTH;
-        }else if(source instanceof ConditionBlock){
-            if(source instanceof WallInFrontBlock){
+        }else if(source instanceof ReadOnlyConditionBlock){
+            if(source instanceof ReadOnlyWallInFrontBlock){
                 return BlockData.CONDITION_BLOCK_WIDTH;
-            }else if(source instanceof NotBlock){
+            }else if(source instanceof ReadOnlyNotBlock){
                 return BlockData.CONDITION_BLOCK_WIDTH;
             }
         }
@@ -79,7 +85,7 @@ public abstract class UIBlockComponent extends Component {
      * @param blockToAdd Information on what Block the User currently has selected and may try to add to the current block.
      * @return information based on what block is currently selected and where to connect it to.
      */
-    public ProgramBlockInsertInfo getSocketAndPlug(WindowPosition mousePosition, Block blockToAdd){
+    public ProgramBlockInsertInfo getSocketAndPlug(WindowPosition mousePosition, ReadOnlyBlock blockToAdd){
         //TODO FIX UP LEFT SOCKET OF WALLINFRONT
         if(blockToAdd == null || mousePosition == null){
             return null;
@@ -114,20 +120,20 @@ public abstract class UIBlockComponent extends Component {
      * @param blockToAdd
      * @return
      */
-    private ClickLocations getClickLocation(WindowPosition mousePostion, Block blockToAdd){
+    private ClickLocations getClickLocation(WindowPosition mousePostion, ReadOnlyBlock blockToAdd){
         var relativePosition = mousePostion.minus(upperLeft);
         relativePosition = relativePosition.minus(new WindowPosition(-4,7));
-        if(source instanceof ControlFlowBlock){
-            if(blockToAdd instanceof ConditionBlock){
+        if(source instanceof ReadOnlyControlFlowBlock){
+            if(blockToAdd instanceof ReadOnlyConditionBlock){
                 var region = new WindowRegion(BlockData.BLOCK_WIDTH - BlockData.CONDITION_BLOCK_WIDTH, 0, BlockData.BLOCK_WIDTH,BlockData.CONDITION_BLOCK_HEIGHT);
                 if(region.contains(relativePosition)){
                     //TODO: this if clause prevents certain problems with wallinfront
-                    if(((ControlFlowBlock) source).getCondition() != null && blockToAdd instanceof WallInFrontBlock){
+                    if(((ControlFlowBlock) source).getCondition() != null && blockToAdd instanceof ReadOnlyWallInFrontBlock){
                         return ClickLocations.INVALID;
                     }
                     return ClickLocations.CFB_CONDITION;
                 }
-            }else if(blockToAdd instanceof StatementBlock){
+            }else if(blockToAdd instanceof ReadOnlyStatementBlock){
                 var region = new WindowRegion(BlockData.CONTROL_FLOW_INNER_START,BlockData.CONDITION_BLOCK_HEIGHT/2,BlockData.BLOCK_WIDTH,BlockData.CONDITION_BLOCK_HEIGHT);
                 if(region.contains(relativePosition)){
                     return ClickLocations.CFB_BODY;
@@ -141,7 +147,7 @@ public abstract class UIBlockComponent extends Component {
                     return ClickLocations.NEXT;
                 }
             }
-        }else if(source instanceof StatementBlock){
+        }else if(source instanceof ReadOnlyStatementBlock){
             var region = new WindowRegion(0,0,BlockData.BLOCK_WIDTH,BlockData.BLOCK_HEIGHT/2);
             if(region.contains(relativePosition)){
                 return ClickLocations.PREVIOUS;
@@ -150,17 +156,17 @@ public abstract class UIBlockComponent extends Component {
             if(region.contains(relativePosition)){
                 return ClickLocations.NEXT;
             }
-        }else if(source instanceof ConditionBlock){
-            if(source instanceof WallInFrontBlock){
+        }else if(source instanceof ReadOnlyConditionBlock){
+            if(source instanceof ReadOnlyWallInFrontBlock){
                 var region = new WindowRegion(0,0,BlockData.CONDITION_BLOCK_WIDTH/2,BlockData.CONDITION_BLOCK_HEIGHT);
-                if(blockToAdd instanceof NotBlock && region.contains(relativePosition)){
+                if(blockToAdd instanceof ReadOnlyNotBlock && region.contains(relativePosition)){
                     return ClickLocations.C_LEFT;
                 }else{
                     return ClickLocations.INVALID;
                 }
-            }else if(source instanceof NotBlock){
+            }else if(source instanceof ReadOnlyNotBlock){
                 var region = new WindowRegion(0,0,BlockData.CONDITION_BLOCK_WIDTH/2,BlockData.CONDITION_BLOCK_HEIGHT);
-                if(blockToAdd instanceof NotBlock && region.contains(relativePosition)){
+                if(blockToAdd instanceof ReadOnlyNotBlock && region.contains(relativePosition)){
                     return ClickLocations.C_LEFT;
                 }
                 region = new WindowRegion(BlockData.CONDITION_BLOCK_WIDTH/2,0,BlockData.CONDITION_BLOCK_WIDTH,BlockData.CONDITION_BLOCK_HEIGHT);
@@ -174,11 +180,11 @@ public abstract class UIBlockComponent extends Component {
 
     @Override
     protected void draw(Graphics graphics) {
-        if(source instanceof ControlFlowBlock){
+        if(source instanceof ReadOnlyControlFlowBlock){
             drawControlFlow(graphics);
-        }else if(source instanceof StatementBlock){
+        }else if(source instanceof ReadOnlyStatementBlock){
             drawNormalStatement(graphics);
-        }else if(source instanceof ConditionBlock){
+        }else if(source instanceof ReadOnlyConditionBlock){
             drawCondition(graphics);
         }
 
@@ -188,7 +194,7 @@ public abstract class UIBlockComponent extends Component {
     private void drawTextComponent(Graphics graphics) {
         //The code below fixes the text position since it's based on the Clip Region of Graphics
         var w = WindowRegion.fromGraphics(graphics);
-        int width = source instanceof ConditionBlock ? BlockData.CONDITION_BLOCK_WIDTH : BlockData.BLOCK_WIDTH;
+        int width = source instanceof ReadOnlyConditionBlock ? BlockData.CONDITION_BLOCK_WIDTH : BlockData.BLOCK_WIDTH;
         {
             Polygon poly = new Polygon(new int[]{0,width,width,Math.min(w.getWidth(),width),Math.min(w.getWidth(),width),0},
                     new int[]{0,0,1,1,w.getHeight(),w.getHeight()}, 6);
@@ -249,7 +255,7 @@ public abstract class UIBlockComponent extends Component {
         graphics.drawRect(0, 0, getWidth(source)-1, getHeight(source)-1);
     }
 
-    public Block getSource(){return source;}
+    public ReadOnlyBlock getSource(){return source;}
 
     public WindowPosition getUpperLeft(){ return upperLeft;}
 

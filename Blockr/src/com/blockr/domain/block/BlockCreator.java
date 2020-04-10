@@ -1,11 +1,16 @@
 package com.blockr.domain.block;
 
 import com.blockr.domain.block.interfaces.Block;
+import com.blockr.domain.block.interfaces.ReadOnlyBlock;
 
 public class BlockCreator {
     public enum BlockType{
         MOVEFORWARD, TURN_LEFT, TURN_RIGHT, IF, WHILE, NOT, WALLINFRONT;
-        static public BlockType getType(Block b){
+        static public BlockType getType(ReadOnlyBlock b){
+            return getType((Block)b);
+    }
+
+    static public BlockType getType(Block b){
             if(b instanceof MoveForwardBlock){
                 return MOVEFORWARD;
             }else if(b instanceof TurnBlock){
