@@ -306,4 +306,81 @@ public class BlockProgramTest {
         Assertions.assertNull(ifBlock.getBody());
         Assertions.assertEquals(plugBlock, whileBlock.getBody());
     }
+
+    @Test
+    public void removeBlock_SingleSeparateBlock(){
+
+        var block = new MoveForwardBlock();
+
+        blockProgram.addBlock(block);
+
+        blockProgram.removeBlock(block);
+
+        Assertions.assertEquals(0, blockProgram.getBlockCount());
+        Assertions.assertEquals(0, blockProgram.getComponents().size());
+    }
+
+    @Test
+    public void removeBlock_ConnectedStatementBlock(){
+
+        var socketBlock = new MoveForwardBlock();
+        var plugBlock = new TurnBlock();
+
+        blockProgram.addBlock(socketBlock);
+        blockProgram.connectStatementBlock(socketBlock, plugBlock);
+
+        blockProgram.removeBlock(plugBlock);
+
+        Assertions.assertEquals(1, blockProgram.getBlockCount());
+        Assertions.assertNull(socketBlock.getNext());
+    }
+
+    @Test
+    public void removeBlock_ControlFlowBody(){
+
+        var whileBlock = new WhileBlock();
+        var plugBlock = new MoveForwardBlock();
+
+        blockProgram.addBlock(whileBlock);
+        blockProgram.connectControlFlowBody(whileBlock, plugBlock);
+
+        blockProgram.removeBlock(plugBlock);
+
+        Assertions.assertEquals(1, blockProgram.getBlockCount());
+        Assertions.assertNull(whileBlock.getBody());
+    }
+
+    @Test
+    public void removeBlock_StatementBlockChain(){
+
+        var socketBlock = new MoveForwardBlock();
+        var plugBlock = new TurnBlock();
+
+        blockProgram.addBlock(socketBlock);
+        blockProgram.connectStatementBlock(socketBlock, plugBlock);
+
+        blockProgram.removeBlock(socketBlock);
+
+        Assertions.assertEquals(0, blockProgram.getBlockCount());
+        Assertions.assertEquals(0, blockProgram.getComponents().size());
+    }
+
+    @Test
+    public void removeBlock_Multiple(){
+
+        var whileBlock = new WhileBlock();
+        var ifBlock = new IfBlock();
+        var condition = new WallInFrontBlock();
+        var plugBlock = new MoveForwardBlock();
+
+        blockProgram.addBlock(whileBlock);
+        blockProgram.connectControlFlowBody(whileBlock, ifBlock);
+        blockProgram.connectControlFlowBody(ifBlock, plugBlock);
+        blockProgram.connectConditionBlock(ifBlock, condition);
+
+        blockProgram.removeBlock(whileBlock);
+
+        Assertions.assertEquals(0, blockProgram.getBlockCount());
+        Assertions.assertEquals(0, blockProgram.getComponents().size());
+    }
 }

@@ -1,4 +1,4 @@
-package com.blockr.domain;
+package com.blockr;
 
 import com.blockr.domain.block.BlockProgram;
 import com.blockr.handlers.ui.input.PaletteSelection;

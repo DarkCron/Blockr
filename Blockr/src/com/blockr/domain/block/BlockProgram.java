@@ -83,7 +83,9 @@ public class BlockProgram implements ReadOnlyBlockProgram {
     /**
      * Removes all blocks from the program
      */
-    public void clear(){
+    public void clear() {
+        reset();
+
         blocks.clear();
         components.clear();
     }
@@ -100,7 +102,9 @@ public class BlockProgram implements ReadOnlyBlockProgram {
         return blocks.stream().filter(clazz::isInstance).map(clazz::cast).collect(Collectors.toSet());
     }
 
-    //TODO
+    /**
+     * Removes the block from the program
+     */
     public void removeBlock(ReadOnlyBlock block){
 
         if(!blocks.contains(block)){
@@ -109,9 +113,42 @@ public class BlockProgram implements ReadOnlyBlockProgram {
 
         reset();
 
+        getBlocksOfType(StatementBlock.class).stream().filter(b -> b.getNext() == block).forEach(b -> b.setNext(null));
+        getBlocksOfType(ControlFlowBlock.class).stream().filter(b -> b.getBody() == block).forEach(b -> b.setBody(null));
+        getBlocksOfType(ConditionedBlock.class).stream().filter(b -> b.getCondition() == block).forEach(b -> b.setCondition(null));
+
+        Set<Block> toRemove = getBlocksToRemove((Block)block);
+
+        blocks.removeAll(toRemove);
+        components.remove(block);
+    }
+
+    private Set<Block> getBlocksToRemove(Block block){
+
+        var blocks = new HashSet<Block>();
+
+        if(block == null){
+            return blocks;
+        }
+
+        blocks.add(block);
+
+        if(block instanceof ConditionedBlock){
+            var conditionedBlock = (ConditionedBlock)block;
+            blocks.addAll(getBlocksToRemove(conditionedBlock.getCondition()));
+        }
+
+        if(block instanceof ControlFlowBlock){
+            var controlFlowBlock = (ControlFlowBlock)block;
+            blocks.addAll(getBlocksToRemove(controlFlowBlock.getBody()));
+        }
+
         if(block instanceof StatementBlock){
             var statementBlock = (StatementBlock)block;
+            blocks.addAll(getBlocksToRemove(statementBlock.getNext()));
         }
+
+        return blocks;
     }
 
     /**
