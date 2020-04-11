@@ -107,6 +107,8 @@ public class BlockProgram implements ReadOnlyBlockProgram {
             throw new IllegalArgumentException("The given block doesn't exist");
         }
 
+        reset();
+
         if(block instanceof StatementBlock){
             var statementBlock = (StatementBlock)block;
         }
@@ -120,6 +122,8 @@ public class BlockProgram implements ReadOnlyBlockProgram {
         if(blocks.contains(block)){
             throw new IllegalArgumentException("The given block already exists");
         }
+
+        reset();
 
         blocks.add((Block)block);
         components.add((Block)block);
@@ -141,6 +145,8 @@ public class BlockProgram implements ReadOnlyBlockProgram {
             throw new IllegalArgumentException("The given socketBlock does not exist");
         }
 
+        reset();
+
         components.remove(plugBlock);
         blocks.add(plugBlock);
 
@@ -148,27 +154,29 @@ public class BlockProgram implements ReadOnlyBlockProgram {
         var rwPlugBlock = (StatementBlock)plugBlock;
 
         //if the plugBlock was part of a cf block body, disconnect it
-        for(var cfBlock : getBlocksOfType(ControlFlowBlock.class)){
-            if(cfBlock.getBody() == rwPlugBlock){
-                cfBlock.setBody(null);
-            }
+        getBlocksOfType(ControlFlowBlock.class).stream().filter(b -> b.getBody() == rwPlugBlock).forEach(b -> b.setBody(null));
+
+        var previous = rwPlugBlock.getPrevious();
+        if(previous != null){
+            previous.setNext(null);
         }
 
         //the (chain) of statementBlock(s) might be inserted between rwSocketBlock and rwSocketBlock.getNext()
-        var nextPlugBlock = rwSocketBlock.getNext();
-        while(nextPlugBlock != null && nextPlugBlock.getNext() != null){
+        var nextPlugBlock = rwPlugBlock;
+        while(nextPlugBlock.getNext() != null){
             nextPlugBlock = nextPlugBlock.getNext();
+        }
+
+        var next = rwSocketBlock.getNext();
+
+        if(next != null){
+            nextPlugBlock.setNext(next);
+            next.setPrevious(nextPlugBlock);
         }
 
         //update the links between rwSocketBlock and rwPlugBlock
         rwPlugBlock.setPrevious(rwSocketBlock);
         rwSocketBlock.setNext(rwPlugBlock);
-
-        rwPlugBlock.setNext(nextPlugBlock);
-
-        if(nextPlugBlock != null){
-            nextPlugBlock.setPrevious(rwPlugBlock);
-        }
     }
 
     /**
@@ -185,6 +193,8 @@ public class BlockProgram implements ReadOnlyBlockProgram {
         if(socketBlock.isEmpty()){
             throw new IllegalArgumentException("The given plugBlock is not connected to any block");
         }
+
+        reset();
 
         if(socketBlock.get() instanceof ControlFlowBlock){
             var cfBlock = (ControlFlowBlock)socketBlock.get();
@@ -214,15 +224,17 @@ public class BlockProgram implements ReadOnlyBlockProgram {
         ensureValidBlock(conditionedBlock, ConditionedBlock.class, "conditionedBlock");
         ensureValidBlock(conditionBlock, ConditionBlock.class, "conditionBlock");
 
+        if(!blocks.contains(conditionedBlock)){
+            throw new IllegalArgumentException("The given conditionedBlock does not exist");
+        }
+
+        reset();
+
         components.remove(conditionBlock);
         blocks.add(conditionBlock);
 
         //disconnect the condition block
-        for(var cBlock : getBlocksOfType(ConditionedBlock.class)){
-            if(cBlock.getCondition() == conditionBlock){
-                cBlock.setCondition(null);
-            }
-        }
+        getBlocksOfType(ConditionedBlock.class).stream().filter(b -> b.getCondition() == conditionBlock).forEach(b -> b.setCondition(null));
 
         var rwConditionedBlock = (ConditionedBlock)conditionedBlock;
         var rwConditionBlock = (ConditionBlock)conditionBlock;
@@ -246,6 +258,8 @@ public class BlockProgram implements ReadOnlyBlockProgram {
             throw new IllegalArgumentException("The given conditionBlock is not connected to any block");
         }
 
+        reset();
+
         socketBlock.get().setCondition(null);
 
         components.add(conditionBlock);
@@ -261,10 +275,20 @@ public class BlockProgram implements ReadOnlyBlockProgram {
         ensureValidBlock(controlFlowBlock, ControlFlowBlock.class, "controlFlowBlock");
         ensureValidBlock(statementBlock, StatementBlock.class, "statementBlock");
 
+        if(!blocks.contains(controlFlowBlock)){
+            throw new IllegalArgumentException("The given controlFlowBlock does not exist");
+        }
+
+        reset();
+
+        blocks.add(statementBlock);
+
         var rwControlFlowBlock = (ControlFlowBlock)controlFlowBlock;
         var rwStatementBlock = (StatementBlock)statementBlock;
 
         assert rwControlFlowBlock.getBody() == null;
+
+        getBlocksOfType(ControlFlowBlock.class).stream().filter(b -> b.getBody() == rwStatementBlock).forEach(b -> b.setBody(null));
 
         if(rwStatementBlock.getPrevious() != null){
             rwStatementBlock.getPrevious().setNext(null);

@@ -158,8 +158,8 @@ public class ProgramArea extends Container {
                 recordedMouse = (mouseEvent.getWindowPosition().minus(recordedMouse));
             }
             var bp = mediator.send(new GetBlockProgram());
-            var selectionRoot = bp.getRootBlock(programSelection.getBlockType().getSource());
-            bp.disconnectStatementBlock(selectionRoot, (ReadOnlyStatementBlock) programSelection.getBlockType().getSource());
+            //var selectionRoot = bp.getRootBlock(programSelection.getBlockType().getSource());
+            //bp.disconnectStatementBlock(selectionRoot, (ReadOnlyStatementBlock) programSelection.getBlockType().getSource());
 
             programBlockComponents.remove(programSelection.getBlockType());
             removeProgramBlockComponentsBaseOnRoot(programSelection.getBlockType().getSource());
