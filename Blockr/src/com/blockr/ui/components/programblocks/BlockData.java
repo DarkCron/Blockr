@@ -3,6 +3,7 @@ package com.blockr.ui.components.programblocks;
 import com.blockr.domain.block.*;
 import com.blockr.domain.block.interfaces.Block;
 import com.blockr.domain.block.interfaces.ReadOnlyBlock;
+import com.blockr.domain.block.interfaces.markers.*;
 
 import java.awt.*;
 
@@ -26,22 +27,19 @@ public class BlockData {
     static final Color CONNECTION_COLOR = Color.orange;
     static final Color FONT_COLOR = Color.BLACK;
 
-    public static String getName(ReadOnlyBlock block){
-        return getName(block);
-    }
 
-    public static String getName(Block block){
-        if(block instanceof NotBlock){
+    public static String getName(ReadOnlyBlock block){
+        if(block instanceof ReadOnlyNotBlock){
             return "Not";
-        }else if(block instanceof WallInFrontBlock){
+        }else if(block instanceof ReadOnlyWallInFrontBlock){
             return "Wall in F.";
-        }else if(block instanceof MoveForwardBlock){
+        }else if(block instanceof ReadOnlyMoveForwardBlock){
             return "Move Forward";
-        }else if(block instanceof TurnBlock){
-            return "Turn "+(((TurnBlock) block).getDirection() == TurnBlock.Direction.LEFT ? "Left" : "Right");
-        }else if(block instanceof IfBlock){
+        }else if(block instanceof ReadOnlyTurnBlock){
+            return "Turn "+(((ReadOnlyTurnBlock) block).getDirection() == TurnBlock.Direction.LEFT ? "Left" : "Right");
+        }else if(block instanceof ReadOnlyIfBlock){
             return "If";
-        }else if(block instanceof WhileBlock){
+        }else if(block instanceof ReadOnlyWhileBlock){
             return "While";
         }
         return "";

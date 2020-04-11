@@ -1,8 +1,9 @@
 package com.blockr.ui.components.programblocks;
 
 import an.awesome.pipelinr.Pipeline;
-import com.blockr.domain.block.*;
-import com.blockr.domain.block.interfaces.Block;
+import com.blockr.domain.block.BlockCreator;
+import com.blockr.domain.block.BlockUtilities;
+import com.blockr.domain.block.StatementBlock;
 import com.blockr.domain.block.interfaces.ReadOnlyBlock;
 import com.blockr.domain.block.interfaces.ReadOnlyControlFlowBlock;
 import com.blockr.domain.block.interfaces.ReadOnlyStatementBlock;
@@ -15,7 +16,6 @@ import com.blockr.handlers.blockprogram.disconnectconditionblock.DisconnectCondi
 import com.blockr.handlers.blockprogram.disconnectstatementblock.DisconnectStatementBlock;
 import com.blockr.handlers.blockprogram.getblockprogram.GetBlockProgram;
 import com.blockr.handlers.blockprogram.removeblock.RemoveBlock;
-import com.blockr.handlers.blockprogram.removeblock.RemoveBlockHandler;
 import com.blockr.handlers.ui.input.GetPaletteSelection;
 import com.blockr.handlers.ui.input.GetProgramSelection;
 import com.blockr.handlers.ui.input.SetProgramSelection;

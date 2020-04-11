@@ -2,7 +2,11 @@ package com.blockr.main;
 import an.awesome.pipelinr.Pipeline;
 import an.awesome.pipelinr.Pipelinr;
 import com.blockr.State;
+import com.blockr.handlers.actions.ActionHandler;
 import com.blockr.handlers.blockprogram.canstart.CanStartHandler;
+import com.blockr.handlers.blockprogram.connectconditionblock.ConnectConditionBlock;
+import com.blockr.handlers.blockprogram.connectconditionblock.ConnectConditionBlockHandler;
+import com.blockr.handlers.blockprogram.connectcontrolflowbody.ConnectControlFlowBody;
 import com.blockr.handlers.blockprogram.executeprogram.ExecuteProgramHandler;
 import com.blockr.handlers.blockprogram.getblockprogram.GetBlockProgramHandler;
 import com.blockr.handlers.blockprogram.getrootblock.GetRootBlockHandler;
@@ -16,11 +20,10 @@ import com.blockr.handlers.ui.input.recordMousePos.SetRecordMouseHandler;
 import com.blockr.handlers.ui.input.resetuistate.ResetUIStateHandler;
 import com.blockr.handlers.world.GetWorldHandler;
 import com.blockr.handlers.blockprogram.addblock.AddBlockHandler;
-import com.gameworld.GameWorld;
-import com.ui.MyCanvasWindow;
+import com.kul.CanvasWindow;
 
 import javax.swing.*;
-import java.util.Arrays;
+import java.awt.*;
 import java.util.stream.Stream;
 
 public class Main {
@@ -44,11 +47,30 @@ public class Main {
                     , new ExecuteProgramHandler(state)
                     , new GetBlockProgramHandler(state)
                     , new RemoveBlockHandler(state)
-                    , new ResetUIStateHandler(state)));
+                    , new ResetUIStateHandler(state)
+                    , new ConnectConditionBlockHandler(state)))
+            .with(() -> Stream.of(new ActionHandler(state)))
+            ;
 
     public static void main(String[] args){
-        SwingUtilities.invokeLater(
-                () -> new MyCanvasWindow("Hello World", BlockrUi.build(pipeline)).show()
-        );
+        pipeline.send(new ConnectConditionBlock(null,null));
+        pipeline.send(new ConnectControlFlowBody(null,null));
+        SwingUtilities.invokeLater(() -> new CanvasWindow("test"){
+            @Override
+            protected void paint(Graphics g) {
+
+            }
+
+            @Override
+            protected void handleMouseEvent(int id, int x, int y, int clickCount) {
+
+            }
+
+            @Override
+            protected void handleKeyEvent(int id, int keyCode, char keyChar) {
+
+            }
+        });
+
     }
 }
