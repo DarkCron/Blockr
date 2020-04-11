@@ -1,6 +1,6 @@
 package com.blockr.handlers.ui.input;
 
-import com.blockr.domain.State;
+import com.blockr.State;
 import com.blockr.handlers.HandlerBase;
 
 public class GetProgramSelectionHandler extends HandlerBase<GetProgramSelection, ProgramAreaSelection> {

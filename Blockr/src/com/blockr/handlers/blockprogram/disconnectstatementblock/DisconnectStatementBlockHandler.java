@@ -1,7 +1,7 @@
 package com.blockr.handlers.blockprogram.disconnectstatementblock;
 
 import an.awesome.pipelinr.Voidy;
-import com.blockr.domain.State;
+import com.blockr.State;
 import com.blockr.handlers.HandlerBase;
 import com.blockr.handlers.blockprogram.connectstatementblock.ConnectStatementBlock;
 

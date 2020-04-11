@@ -1,7 +1,7 @@
 package com.blockr.handlers.blockprogram.connectconditionblock;
 
 import an.awesome.pipelinr.Voidy;
-import com.blockr.domain.State;
+import com.blockr.State;
 import com.blockr.handlers.HandlerBase;
 
 

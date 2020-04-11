@@ -1,7 +1,7 @@
 package com.blockr.handlers.blockprogram.connectcontrolflowbody;
 
 import an.awesome.pipelinr.Voidy;
-import com.blockr.domain.State;
+import com.blockr.State;
 import com.blockr.handlers.HandlerBase;
 
 public class ConnectControlFlowBodyHandler extends HandlerBase<ConnectControlFlowBody, Voidy> {

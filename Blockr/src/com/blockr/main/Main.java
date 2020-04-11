@@ -1,7 +1,7 @@
 package com.blockr.main;
 import an.awesome.pipelinr.Pipeline;
 import an.awesome.pipelinr.Pipelinr;
-import com.blockr.domain.State;
+import com.blockr.State;
 import com.blockr.handlers.blockprogram.canstart.CanStartHandler;
 import com.blockr.handlers.blockprogram.executeprogram.ExecuteProgramHandler;
 import com.blockr.handlers.blockprogram.getblockprogram.GetBlockProgramHandler;

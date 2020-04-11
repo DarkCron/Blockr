@@ -1,6 +1,6 @@
 package com.blockr.handlers.blockprogram.canstart;
 
-import com.blockr.domain.State;
+import com.blockr.State;
 import com.blockr.handlers.HandlerBase;
 
 public class CanStartHandler extends HandlerBase<CanStart, Boolean> {
