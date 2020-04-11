@@ -268,7 +268,9 @@ public class BlockProgram implements ReadOnlyBlockProgram {
     /**
      * Connects a statementBlock to a controlFlowBlock as its body. This method should be called when:
      * - A new statementBlock is connected as the body of a controlFlowBlock
-     * - An existing statementBlock chain is connected to a controlFlowBlock
+     * - An existing statementBlock is connected to a controlFlowBlock
+     * - An existing statementBlock is disconnected from a statementBlock and connected to a controlFlowBlock
+     * - An existing statementBlock is disconnected from a controlFlowBlock and connected to another controlFlowBlock
      */
     public void connectControlFlowBody(ReadOnlyControlFlowBlock controlFlowBlock, ReadOnlyStatementBlock statementBlock){
 
