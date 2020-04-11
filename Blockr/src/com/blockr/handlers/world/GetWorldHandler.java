@@ -1,6 +1,6 @@
 package com.blockr.handlers.world;
 
-import com.blockr.domain.State;
+import com.blockr.State;
 import com.blockr.handlers.HandlerBase;
 import com.gameworld.GameWorld;
 

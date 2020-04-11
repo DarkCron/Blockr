@@ -1,7 +1,7 @@
 package com.blockr.handlers.blockprogram.getavailableblocks;
 
+import com.blockr.State;
 import com.blockr.domain.Palette;
-import com.blockr.domain.State;
 import com.blockr.domain.block.interfaces.ReadOnlyBlock;
 import com.blockr.handlers.HandlerBase;
 
