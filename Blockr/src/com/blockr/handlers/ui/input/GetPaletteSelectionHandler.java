@@ -1,7 +1,6 @@
 package com.blockr.handlers.ui.input;
 
-import an.awesome.pipelinr.Voidy;
-import com.blockr.domain.State;
+import com.blockr.State;
 import com.blockr.handlers.HandlerBase;
 
 public class GetPaletteSelectionHandler extends HandlerBase<GetPaletteSelection, PaletteSelection> {

@@ -1,6 +1,6 @@
 package com.blockr.handlers.ui.input.recordMousePos;
 
-import com.blockr.domain.State;
+import com.blockr.State;
 import com.blockr.handlers.HandlerBase;
 import com.ui.WindowPosition;
 

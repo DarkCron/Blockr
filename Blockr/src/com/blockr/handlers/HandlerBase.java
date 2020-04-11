@@ -1,7 +1,7 @@
 package com.blockr.handlers;
 
 import an.awesome.pipelinr.Command;
-import com.blockr.domain.State;
+import com.blockr.State;
 
 public abstract class HandlerBase<C extends Command<R>, R> implements Command.Handler<C, R> {
 

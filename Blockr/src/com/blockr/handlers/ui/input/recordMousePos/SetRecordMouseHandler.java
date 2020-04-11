@@ -1,7 +1,7 @@
 package com.blockr.handlers.ui.input.recordMousePos;
 
 import an.awesome.pipelinr.Voidy;
-import com.blockr.domain.State;
+import com.blockr.State;
 import com.blockr.handlers.HandlerBase;
 
 public class SetRecordMouseHandler extends HandlerBase<SetRecordMouse, Voidy> {

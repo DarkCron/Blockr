@@ -1,8 +1,7 @@
 package com.blockr.handlers.blockprogram.executeprogram;
 
 import an.awesome.pipelinr.Voidy;
-import com.blockr.domain.State;
-import com.blockr.domain.block.interfaces.ReadOnlyBlockProgram;
+import com.blockr.State;
 import com.blockr.handlers.HandlerBase;
 
 public class ExecuteProgramHandler extends HandlerBase<ExecuteProgram, Voidy> {

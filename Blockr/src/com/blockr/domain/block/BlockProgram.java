@@ -83,7 +83,9 @@ public class BlockProgram implements ReadOnlyBlockProgram {
     /**
      * Removes all blocks from the program
      */
-    public void clear(){
+    public void clear() {
+        reset();
+
         blocks.clear();
         components.clear();
     }
@@ -100,16 +102,53 @@ public class BlockProgram implements ReadOnlyBlockProgram {
         return blocks.stream().filter(clazz::isInstance).map(clazz::cast).collect(Collectors.toSet());
     }
 
-    //TODO
+    /**
+     * Removes the block from the program
+     */
     public void removeBlock(ReadOnlyBlock block){
 
         if(!blocks.contains(block)){
             throw new IllegalArgumentException("The given block doesn't exist");
         }
 
+        reset();
+
+        getBlocksOfType(StatementBlock.class).stream().filter(b -> b.getNext() == block).forEach(b -> b.setNext(null));
+        getBlocksOfType(ControlFlowBlock.class).stream().filter(b -> b.getBody() == block).forEach(b -> b.setBody(null));
+        getBlocksOfType(ConditionedBlock.class).stream().filter(b -> b.getCondition() == block).forEach(b -> b.setCondition(null));
+
+        Set<Block> toRemove = getBlocksToRemove((Block)block);
+
+        blocks.removeAll(toRemove);
+        components.remove(block);
+    }
+
+    private Set<Block> getBlocksToRemove(Block block){
+
+        var blocks = new HashSet<Block>();
+
+        if(block == null){
+            return blocks;
+        }
+
+        blocks.add(block);
+
+        if(block instanceof ConditionedBlock){
+            var conditionedBlock = (ConditionedBlock)block;
+            blocks.addAll(getBlocksToRemove(conditionedBlock.getCondition()));
+        }
+
+        if(block instanceof ControlFlowBlock){
+            var controlFlowBlock = (ControlFlowBlock)block;
+            blocks.addAll(getBlocksToRemove(controlFlowBlock.getBody()));
+        }
+
         if(block instanceof StatementBlock){
             var statementBlock = (StatementBlock)block;
+            blocks.addAll(getBlocksToRemove(statementBlock.getNext()));
         }
+
+        return blocks;
     }
 
     /**
@@ -120,6 +159,8 @@ public class BlockProgram implements ReadOnlyBlockProgram {
         if(blocks.contains(block)){
             throw new IllegalArgumentException("The given block already exists");
         }
+
+        reset();
 
         blocks.add((Block)block);
         components.add((Block)block);
@@ -141,6 +182,8 @@ public class BlockProgram implements ReadOnlyBlockProgram {
             throw new IllegalArgumentException("The given socketBlock does not exist");
         }
 
+        reset();
+
         components.remove(plugBlock);
         blocks.add(plugBlock);
 
@@ -148,27 +191,29 @@ public class BlockProgram implements ReadOnlyBlockProgram {
         var rwPlugBlock = (StatementBlock)plugBlock;
 
         //if the plugBlock was part of a cf block body, disconnect it
-        for(var cfBlock : getBlocksOfType(ControlFlowBlock.class)){
-            if(cfBlock.getBody() == rwPlugBlock){
-                cfBlock.setBody(null);
-            }
+        getBlocksOfType(ControlFlowBlock.class).stream().filter(b -> b.getBody() == rwPlugBlock).forEach(b -> b.setBody(null));
+
+        var previous = rwPlugBlock.getPrevious();
+        if(previous != null){
+            previous.setNext(null);
         }
 
         //the (chain) of statementBlock(s) might be inserted between rwSocketBlock and rwSocketBlock.getNext()
-        var nextPlugBlock = rwSocketBlock.getNext();
-        while(nextPlugBlock != null && nextPlugBlock.getNext() != null){
+        var nextPlugBlock = rwPlugBlock;
+        while(nextPlugBlock.getNext() != null){
             nextPlugBlock = nextPlugBlock.getNext();
+        }
+
+        var next = rwSocketBlock.getNext();
+
+        if(next != null){
+            nextPlugBlock.setNext(next);
+            next.setPrevious(nextPlugBlock);
         }
 
         //update the links between rwSocketBlock and rwPlugBlock
         rwPlugBlock.setPrevious(rwSocketBlock);
         rwSocketBlock.setNext(rwPlugBlock);
-
-        rwPlugBlock.setNext(nextPlugBlock);
-
-        if(nextPlugBlock != null){
-            nextPlugBlock.setPrevious(rwPlugBlock);
-        }
     }
 
     /**
@@ -185,6 +230,8 @@ public class BlockProgram implements ReadOnlyBlockProgram {
         if(socketBlock.isEmpty()){
             throw new IllegalArgumentException("The given plugBlock is not connected to any block");
         }
+
+        reset();
 
         if(socketBlock.get() instanceof ControlFlowBlock){
             var cfBlock = (ControlFlowBlock)socketBlock.get();
@@ -214,15 +261,17 @@ public class BlockProgram implements ReadOnlyBlockProgram {
         ensureValidBlock(conditionedBlock, ConditionedBlock.class, "conditionedBlock");
         ensureValidBlock(conditionBlock, ConditionBlock.class, "conditionBlock");
 
+        if(!blocks.contains(conditionedBlock)){
+            throw new IllegalArgumentException("The given conditionedBlock does not exist");
+        }
+
+        reset();
+
         components.remove(conditionBlock);
         blocks.add(conditionBlock);
 
         //disconnect the condition block
-        for(var cBlock : getBlocksOfType(ConditionedBlock.class)){
-            if(cBlock.getCondition() == conditionBlock){
-                cBlock.setCondition(null);
-            }
-        }
+        getBlocksOfType(ConditionedBlock.class).stream().filter(b -> b.getCondition() == conditionBlock).forEach(b -> b.setCondition(null));
 
         var rwConditionedBlock = (ConditionedBlock)conditionedBlock;
         var rwConditionBlock = (ConditionBlock)conditionBlock;
@@ -246,6 +295,8 @@ public class BlockProgram implements ReadOnlyBlockProgram {
             throw new IllegalArgumentException("The given conditionBlock is not connected to any block");
         }
 
+        reset();
+
         socketBlock.get().setCondition(null);
 
         components.add(conditionBlock);
@@ -254,17 +305,29 @@ public class BlockProgram implements ReadOnlyBlockProgram {
     /**
      * Connects a statementBlock to a controlFlowBlock as its body. This method should be called when:
      * - A new statementBlock is connected as the body of a controlFlowBlock
-     * - An existing statementBlock chain is connected to a controlFlowBlock
+     * - An existing statementBlock is connected to a controlFlowBlock
+     * - An existing statementBlock is disconnected from a statementBlock and connected to a controlFlowBlock
+     * - An existing statementBlock is disconnected from a controlFlowBlock and connected to another controlFlowBlock
      */
     public void connectControlFlowBody(ReadOnlyControlFlowBlock controlFlowBlock, ReadOnlyStatementBlock statementBlock){
 
         ensureValidBlock(controlFlowBlock, ControlFlowBlock.class, "controlFlowBlock");
         ensureValidBlock(statementBlock, StatementBlock.class, "statementBlock");
 
+        if(!blocks.contains(controlFlowBlock)){
+            throw new IllegalArgumentException("The given controlFlowBlock does not exist");
+        }
+
+        reset();
+
+        blocks.add(statementBlock);
+
         var rwControlFlowBlock = (ControlFlowBlock)controlFlowBlock;
         var rwStatementBlock = (StatementBlock)statementBlock;
 
         assert rwControlFlowBlock.getBody() == null;
+
+        getBlocksOfType(ControlFlowBlock.class).stream().filter(b -> b.getBody() == rwStatementBlock).forEach(b -> b.setBody(null));
 
         if(rwStatementBlock.getPrevious() != null){
             rwStatementBlock.getPrevious().setNext(null);

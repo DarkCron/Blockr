@@ -3,10 +3,7 @@ package com.blockr.ui.components.programblocks;
 import an.awesome.pipelinr.Pipeline;
 import com.blockr.domain.block.BlockCreator;
 import com.blockr.domain.block.interfaces.Block;
-import com.blockr.handlers.blockprogram.insertBlockInProgram.InsertBlockInProgram;
 import com.blockr.handlers.ui.input.GetPaletteSelection;
-import com.blockr.handlers.ui.input.GetProgramSelection;
-import com.blockr.handlers.ui.input.SetPaletteSelection;
 import com.blockr.handlers.ui.input.SetProgramSelection;
 import com.blockr.handlers.ui.input.recordMousePos.GetMouseRecord;
 import com.blockr.handlers.ui.input.recordMousePos.SetRecordMouse;
@@ -42,8 +39,8 @@ public class ProgramBlockComponent extends UIBlockComponent {
 
                     var info = getSocketAndPlug(recordedMouse,copy);
                     if(info != null){
-                        var newRoot = mediator.send(new InsertBlockInProgram(info));
-                        programArea.rebuild(newRoot);
+                        //var newRoot = mediator.send(new InsertBlockInProgram(info));
+                        //programArea.rebuild(newRoot);
                     }
                 }
                 break;

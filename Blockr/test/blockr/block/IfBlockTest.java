@@ -6,9 +6,10 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-public class WhileBlockTest {
+public class IfBlockTest {
 
     private static final MoveForwardBlock NEXT1 = new MoveForwardBlock();
     private static final TurnBlock NEXT2 = new TurnBlock();
@@ -27,18 +28,18 @@ public class WhileBlockTest {
     @Test
     public void execute_First_ConditionFalse(){
 
-        //arrange
         var condition = mock(ConditionBlock.class);
         when(condition.evaluate(any(GameWorld.class))).thenReturn(false);
 
-        var whileBlock = new WhileBlock();
-        whileBlock.setNext(NEXT1);
-        whileBlock.setCondition(condition);
+        var body = mock(StatementBlock.class);
 
-        //act
-        var result = whileBlock.execute(gameWorld);
+        var ifBlock = new IfBlock();
+        ifBlock.setNext(NEXT1);
+        ifBlock.setBody(body);
+        ifBlock.setCondition(condition);
 
-        //assert
+        var result = ifBlock.execute(gameWorld);
+
         verify(condition).evaluate(gameWorld);
         Assertions.assertEquals(NEXT1, result);
     }
@@ -46,66 +47,63 @@ public class WhileBlockTest {
     @Test
     public void execute_First_ConditionTrue(){
 
-        //arrange
         var condition = mock(ConditionBlock.class);
         when(condition.evaluate(any(GameWorld.class))).thenReturn(true);
 
         var body = mock(StatementBlock.class);
 
-        var whileBlock = new WhileBlock();
-        whileBlock.setBody(body);
-        whileBlock.setCondition(condition);
-        whileBlock.execute(gameWorld);
+        var ifBlock = new IfBlock();
+        ifBlock.setNext(NEXT1);
+        ifBlock.setBody(body);
+        ifBlock.setCondition(condition);
 
-        //act
-        var result = whileBlock.execute(gameWorld);
+        var result = ifBlock.execute(gameWorld);
 
-        //assert
-        verify(body).execute(gameWorld);
-        Assertions.assertEquals(whileBlock, result);
+        verify(condition).evaluate(gameWorld);
+        Assertions.assertEquals(ifBlock, result);
     }
 
     @Test
     public void execute_LastBodyBlockActive(){
 
         var condition = mock(ConditionBlock.class);
-        when(condition.evaluate(gameWorld)).thenReturn(true);
+        when(condition.evaluate(any(GameWorld.class))).thenReturn(true);
 
         var body1 = mock(StatementBlock.class);
         var body2 = mock(StatementBlock.class);
         when(body1.execute(gameWorld)).thenReturn(body2);
 
-        var whileBlock = new WhileBlock();
-        whileBlock.setBody(body1);
-        whileBlock.setCondition(condition);
-        whileBlock.execute(gameWorld);
-        whileBlock.execute(gameWorld);
+        var ifBlock = new IfBlock();
+        ifBlock.setNext(NEXT1);
+        ifBlock.setBody(body1);
+        ifBlock.setCondition(condition);
+        ifBlock.execute(gameWorld);
+        ifBlock.execute(gameWorld);
 
-        var result = whileBlock.execute(gameWorld);
+        var result = ifBlock.execute(gameWorld);
 
         verify(body2).execute(gameWorld);
-        Assertions.assertEquals(whileBlock, result);
+        Assertions.assertEquals(NEXT1, result);
     }
 
     @Test
     public void getActive_BeforeExecute(){
-        var whileBlock = new WhileBlock();
-        Assertions.assertEquals(whileBlock, whileBlock.getActive());
+        var ifBlock = new IfBlock();
+        Assertions.assertEquals(ifBlock, ifBlock.getActive());
     }
 
     @Test
     public void getActive_FirstExecute(){
-
         var condition = mock(ConditionBlock.class);
         when(condition.evaluate(any(GameWorld.class))).thenReturn(true);
 
-        var whileBlock = new WhileBlock();
-        whileBlock.setCondition(condition);
-        whileBlock.setBody(NEXT1);
+        var ifBlock = new IfBlock();
+        ifBlock.setCondition(condition);
+        ifBlock.setBody(NEXT1);
 
-        whileBlock.execute(gameWorld);
+        ifBlock.execute(gameWorld);
 
-        var result = whileBlock.getActive();
+        var result = ifBlock.getActive();
 
         Assertions.assertEquals(NEXT1, result);
     }
@@ -115,14 +113,15 @@ public class WhileBlockTest {
         var condition = mock(ConditionBlock.class);
         when(condition.evaluate(any(GameWorld.class))).thenReturn(true);
 
-        var whileBlock = new WhileBlock();
-        whileBlock.setCondition(condition);
-        whileBlock.setBody(NEXT1);
-        whileBlock.execute(gameWorld);
-        whileBlock.execute(gameWorld);
+        var ifBlock = new WhileBlock();
+        ifBlock.setCondition(condition);
+        ifBlock.setBody(NEXT1);
+        ifBlock.execute(gameWorld);
+        ifBlock.execute(gameWorld);
 
-        var result = whileBlock.getActive();
+        var result = ifBlock.getActive();
 
         Assertions.assertEquals(NEXT2, result);
     }
+
 }
