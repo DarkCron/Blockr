@@ -10,6 +10,10 @@ public interface GameWorld {
 
     void draw(Graphics graphics);
 
+    GameWorldSnapshot takeSnapshot();
+
+    void restoreSnapshot(GameWorldSnapshot gameWorldSnapshot);
+
     enum ExecutionResult {
         Sucesss,
         Failure,
