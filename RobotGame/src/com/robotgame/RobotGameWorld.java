@@ -2,6 +2,7 @@ package com.robotgame;
 
 import com.gameworld.Action;
 import com.gameworld.GameWorld;
+import com.gameworld.GameWorldSnapshot;
 import com.gameworld.Predicate;
 
 import java.awt.*;
@@ -178,6 +179,22 @@ public class RobotGameWorld implements GameWorld  {
             drawTile(graphics.create(offsetX, offsetY, tileWidth, tileHeight), new Position(tileX, tileY));
         }
 
+    }
+
+    @Override
+    public GameWorldSnapshot takeSnapshot() {
+        return new RobotGameWorldSnapshot(getRobotPosition(), getRobotOrientation());
+    }
+
+    @Override
+    public void restoreSnapshot(GameWorldSnapshot gameWorldSnapshot) {
+
+        if(!(gameWorldSnapshot instanceof RobotGameWorldSnapshot))
+            throw new IllegalArgumentException("the gameWorldSnapshot is not a valid snapshot");
+
+        var snapshot = (RobotGameWorldSnapshot)gameWorldSnapshot;
+        this.robotPosition = snapshot.getRobotPosition();
+        this.robotOrientation = snapshot.getRobotOrientation();
     }
 
     private void drawTile(Graphics graphics, Position position){
