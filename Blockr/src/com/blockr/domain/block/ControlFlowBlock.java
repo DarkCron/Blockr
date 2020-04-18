@@ -28,7 +28,7 @@ public abstract class ControlFlowBlock extends StatementBlock implements ReadOnl
 
     private StatementBlock body;
 
-    protected StatementBlock getCurrent(){
+    StatementBlock getCurrent(){
         return current;
     }
 
