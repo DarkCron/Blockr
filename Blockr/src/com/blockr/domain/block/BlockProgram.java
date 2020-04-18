@@ -9,10 +9,19 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("SuspiciousMethodCalls")
-public class BlockProgram implements ReadOnlyBlockProgram {
+public class BlockProgram implements ReadOnlyBlockProgram, Cloneable {
 
     public BlockProgram(GameWorld gameWorld){
         this.gameWorld = gameWorld;
+        this.components = new LinkedList<>();
+        this.blocks = new HashSet<>();
+    }
+
+    private BlockProgram(GameWorld gameWorld, List<Block> components, Set<Block> blocks, StatementBlock currentBlock){
+        this.gameWorld = gameWorld;
+        this.components = components;
+        this.blocks = blocks;
+        this.currentBlock = currentBlock;
     }
 
     private final GameWorld gameWorld;
@@ -46,9 +55,9 @@ public class BlockProgram implements ReadOnlyBlockProgram {
         return null;
     }
 
-    private final List<Block> components = new LinkedList<>();
+    private final List<Block> components;
 
-    private final Set<Block> blocks = new HashSet<>();
+    private final Set<Block> blocks;
 
     private StatementBlock currentBlock;
 
@@ -348,5 +357,40 @@ public class BlockProgram implements ReadOnlyBlockProgram {
         if(!type.isInstance(block)){
             throw new IllegalArgumentException(String.format("The given %s must be an instance of %s", argName, type.getSimpleName()));
         }
+    }
+
+    @Override
+    protected Object clone() throws CloneNotSupportedException {
+        return null;
+    }
+
+    private static Block copyComponent(Block block, Map<Block, Block> allBlocks){
+
+        /*
+
+        var clone = block.clone();
+        allBlocks.put(clone, block);
+
+        if(block instanceof ControlFlowBlock){
+
+            var cfBlock = (ControlFlowBlock)block;
+            var newCfBlock = (ControlFlowBlock)clone;
+
+            if(cfBlock.getCondition() != null){
+                newCfBlock.setCondition((ConditionBlock) copyComponent(cfBlock.getCondition(), allBlocks));
+            }
+
+            if(cfBlock.getBody() != null){
+                newCfBlock.setBody((StatementBlock)copyComponent(cfBlock.getBody(), allBlocks));
+            }
+
+
+        }
+
+        return clone;
+
+         */
+
+        return null;
     }
 }
