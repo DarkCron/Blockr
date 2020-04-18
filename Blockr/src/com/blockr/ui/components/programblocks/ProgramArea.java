@@ -2,7 +2,6 @@ package com.blockr.ui.components.programblocks;
 
 import an.awesome.pipelinr.Pipeline;
 import com.blockr.domain.block.BlockCreator;
-import com.blockr.domain.block.BlockProgram;
 import com.blockr.domain.block.BlockUtilities;
 import com.blockr.domain.block.StatementBlock;
 import com.blockr.domain.block.interfaces.ReadOnlyBlock;
@@ -13,6 +12,8 @@ import com.blockr.domain.block.interfaces.markers.ReadOnlyConditionBlock;
 import com.blockr.domain.block.interfaces.markers.ReadOnlyConditionedBlock;
 import com.blockr.domain.block.interfaces.markers.ReadOnlyNotBlock;
 import com.blockr.domain.block.interfaces.markers.ReadOnlyWallInFrontBlock;
+import com.blockr.handlers.actions.redo.DoRedo;
+import com.blockr.handlers.actions.undo.DoUndo;
 import com.blockr.handlers.blockprogram.addblock.AddBlock;
 import com.blockr.handlers.blockprogram.disconnectconditionblock.DisconnectConditionBlock;
 import com.blockr.handlers.blockprogram.disconnectstatementblock.DisconnectStatementBlock;
@@ -26,8 +27,7 @@ import com.blockr.handlers.ui.input.recordMousePos.SetRecordMouse;
 import com.blockr.handlers.ui.input.resetuistate.ResetUIState;
 import com.ui.Component;
 import com.ui.Container;
-import com.ui.WindowPosition;
-import com.ui.WindowRegion;
+import com.ui.*;
 import com.ui.mouseevent.MouseEvent;
 
 import java.awt.*;
@@ -283,11 +283,6 @@ public class ProgramArea extends Container {
             mainProgramArea.removeProgramBlockComponentsBaseOnRoot(rootAndLocation.getKey());
             mainProgramArea.buildProgramBlockComponentFromRoot(rootAndLocation.getKey(),rootAndLocation.getValue());
         }
-        mainProgramArea.restoreActiveBlock(state.getActiveBlock());
-    }
-
-    private void restoreActiveBlock(ReadOnlyStatementBlock activeBlock) {
-        mediator.send();
     }
 
     public WindowPosition locationOf(ReadOnlyBlock rob) {
@@ -298,5 +293,14 @@ public class ProgramArea extends Container {
         }
 
         return null;
+    }
+
+    @Override
+    public void onKeyEvent() {
+        if(MyCanvasWindow.getKeyPressUtility().hasPressedUndo()){
+            mediator.send(new DoUndo());
+        }else if(MyCanvasWindow.getKeyPressUtility().hasPressedRedo()){
+            mediator.send(new DoRedo());
+        }
     }
 }

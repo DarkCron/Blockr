@@ -21,4 +21,6 @@ public abstract class Component {
     public void onMouseEvent(MouseEvent mouseEvent){
 
     }
+
+    public void onKeyEvent(){}
 }

@@ -1,6 +1,7 @@
 package com.blockr.handlers.actions;
 
 import com.blockr.State;
+import com.blockr.domain.block.BlockProgramState;
 import com.blockr.ui.components.programblocks.ProgramArea;
 import com.blockr.ui.components.programblocks.ProgramAreaState;
 import com.gameworld.GameWorldSnapshot;
@@ -14,20 +15,34 @@ public class UndoRedoStack {
 
     private final State state;
 
-    private final Stack<Pair<GameWorldSnapshot, ProgramAreaState>> undoStack = new Stack<>();
-    private final Stack<Pair<GameWorldSnapshot, ProgramAreaState>> redoStack = new Stack<>();
+    private final Stack<Triple<GameWorldSnapshot, ProgramAreaState, BlockProgramState>> undoStack = new Stack<>();
+    private final Stack<Triple<GameWorldSnapshot, ProgramAreaState, BlockProgramState>> redoStack = new Stack<>();
 
     public UndoRedoStack(State state) {
         this.state = state;
     }
 
     public void recordWorldStateForUndo() {
-        undoStack.push(new Pair<>(state.getGameWorld().takeSnapshot(), ProgramArea.generateProgramAreaState(state.getBlockProgram())));
+        try {
+            undoStack.push(new Triple<>(
+                    state.getGameWorld().takeSnapshot(),
+                    ProgramArea.generateProgramAreaState(state.getBlockProgram()),
+                    new BlockProgramState(state.getBlockProgram())));
+        } catch (CloneNotSupportedException e) {
+            e.printStackTrace();
+        }
         redoStack.clear();
     }
 
     public void recordWorldStateForRedo() {
-        redoStack.push(new Pair<>(state.getGameWorld().takeSnapshot(), ProgramArea.generateProgramAreaState(state.getBlockProgram())));
+        try {
+            redoStack.push(new Triple<>(
+                    state.getGameWorld().takeSnapshot(),
+                    ProgramArea.generateProgramAreaState(state.getBlockProgram()),
+                    new BlockProgramState(state.getBlockProgram())));
+        } catch (CloneNotSupportedException e) {
+            e.printStackTrace();
+        }
     }
 
     public void doUndo() {
@@ -35,11 +50,20 @@ public class UndoRedoStack {
             return;
         }
 
-        redoStack.push(new Pair<>(state.getGameWorld().takeSnapshot(), ProgramArea.generateProgramAreaState(state.getBlockProgram())));
+        try {
+            redoStack.push(new Triple<>(
+                    state.getGameWorld().takeSnapshot(),
+                    ProgramArea.generateProgramAreaState(state.getBlockProgram()),
+                    new BlockProgramState(state.getBlockProgram())));
+        } catch (CloneNotSupportedException e) {
+            e.printStackTrace();
+        }
+
         var restorePoint = undoStack.pop();
 
-        state.getGameWorld().restoreSnapshot(restorePoint.getKey());
-        ProgramArea.restoreProgramAreaState(restorePoint.getValue());
+        state.getGameWorld().restoreSnapshot(restorePoint.getFirst());
+        ProgramArea.restoreProgramAreaState(restorePoint.getSecond());
+        state.getBlockProgram().restoreFromClone(restorePoint.getThird());
     }
 
     public void doRedo() {
@@ -47,10 +71,19 @@ public class UndoRedoStack {
             return;
         }
 
-        undoStack.push(new Pair<>(state.getGameWorld().takeSnapshot(), ProgramArea.generateProgramAreaState(state.getBlockProgram())));
+        try {
+            undoStack.push(new Triple<>(
+                    state.getGameWorld().takeSnapshot(),
+                    ProgramArea.generateProgramAreaState(state.getBlockProgram()),
+                    new BlockProgramState(state.getBlockProgram())));
+        } catch (CloneNotSupportedException e) {
+            e.printStackTrace();
+        }
+
         var restorePoint = redoStack.pop();
 
-        state.getGameWorld().restoreSnapshot(restorePoint.getKey());
-        ProgramArea.restoreProgramAreaState(restorePoint.getValue());
+        state.getGameWorld().restoreSnapshot(restorePoint.getFirst());
+        ProgramArea.restoreProgramAreaState(restorePoint.getSecond());
+        state.getBlockProgram().restoreFromClone(restorePoint.getThird());
     }
 }

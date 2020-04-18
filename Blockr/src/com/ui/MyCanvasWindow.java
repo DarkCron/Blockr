@@ -8,6 +8,7 @@ import java.awt.*;
 public class MyCanvasWindow extends CanvasWindow {
     private final Component rootComponent;
     private final ViewContext viewContext;
+    private static final KeyPressUtility keyPressUtility = new KeyPressUtility();
 
     public MyCanvasWindow(String title, Component rootComponent) {
         super(title);
@@ -121,10 +122,25 @@ public class MyCanvasWindow extends CanvasWindow {
 
     @Override
     protected void handleKeyEvent(int id, int keyCode, char keyChar) {
+        keyPressUtility.process(id,keyCode,keyChar);
+        traverseComponentTree(rootComponent);
+    }
 
+    private void traverseComponentTree(Component rootComponent) {
+        rootComponent.onKeyEvent();
+
+        if(rootComponent instanceof Container){
+            for (Component c: ((Container) rootComponent).getChildren()) {
+                traverseComponentTree(c);
+            }
+        }
     }
 
     interface ComponentAction {
         void execute(Component component, WindowRegion windowRegion);
+    }
+
+    public static KeyPressUtility getKeyPressUtility(){
+        return keyPressUtility;
     }
 }

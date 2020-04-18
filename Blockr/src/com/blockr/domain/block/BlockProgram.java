@@ -393,4 +393,8 @@ public class BlockProgram implements ReadOnlyBlockProgram, Cloneable {
 
         return null;
     }
+
+    public void restoreFromClone(BlockProgramState restoreClone) {
+        //TODO
+    }
 }
