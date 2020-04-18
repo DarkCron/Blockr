@@ -9,14 +9,15 @@ import java.awt.*;
 
 public class GameWorldComponent extends Component {
 
-    private GameWorld gameWorld;
-
+    private final Pipeline pipeline;
+    
     public GameWorldComponent(Pipeline pipeline) {
-        this.gameWorld = pipeline.send(new GetWorld());
+        this.pipeline = pipeline;
     }
 
     @Override
     protected void draw(Graphics graphics) {
+        var gameWorld = pipeline.send(new GetWorld())
         gameWorld.draw(graphics);
     }
 }
