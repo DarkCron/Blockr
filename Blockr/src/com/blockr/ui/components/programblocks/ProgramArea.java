@@ -2,9 +2,11 @@ package com.blockr.ui.components.programblocks;
 
 import an.awesome.pipelinr.Pipeline;
 import com.blockr.domain.block.BlockCreator;
+import com.blockr.domain.block.BlockProgram;
 import com.blockr.domain.block.BlockUtilities;
 import com.blockr.domain.block.StatementBlock;
 import com.blockr.domain.block.interfaces.ReadOnlyBlock;
+import com.blockr.domain.block.interfaces.ReadOnlyBlockProgram;
 import com.blockr.domain.block.interfaces.ReadOnlyControlFlowBlock;
 import com.blockr.domain.block.interfaces.ReadOnlyStatementBlock;
 import com.blockr.domain.block.interfaces.markers.ReadOnlyConditionBlock;
@@ -43,9 +45,11 @@ public class ProgramArea extends Container {
     //private static final List<WindowPosition> regionPositions = new ArrayList<>();
 
     private final Pipeline mediator;
+    private static ProgramArea mainProgramArea;
 
     public ProgramArea(Pipeline mediator) {
         this.mediator = mediator;
+        mainProgramArea = this;
     }
 
     @Override
@@ -268,5 +272,31 @@ public class ProgramArea extends Container {
     public void cleanUp(ProgramBlockComponent programBlockComponent) {
         removeProgramBlockComponentsBaseOnRoot(programBlockComponent.getSource());
         mediator.send(new RemoveBlock((ReadOnlyStatementBlock) programBlockComponent.getSource()));
+    }
+
+    public static ProgramAreaState generateProgramAreaState(ReadOnlyBlockProgram rbp){
+        return new ProgramAreaState(mainProgramArea, rbp);
+    }
+
+    public static void restoreProgramAreaState(ProgramAreaState state) {
+        for (var rootAndLocation: state.getRootLocations()) {
+            mainProgramArea.removeProgramBlockComponentsBaseOnRoot(rootAndLocation.getKey());
+            mainProgramArea.buildProgramBlockComponentFromRoot(rootAndLocation.getKey(),rootAndLocation.getValue());
+        }
+        mainProgramArea.restoreActiveBlock(state.getActiveBlock());
+    }
+
+    private void restoreActiveBlock(ReadOnlyStatementBlock activeBlock) {
+        mediator.send();
+    }
+
+    public WindowPosition locationOf(ReadOnlyBlock rob) {
+        for (ProgramBlockComponent pbc: programBlockComponents) {
+            if(pbc.getSource() == rob){
+                return pbc.getUpperLeft();
+            }
+        }
+
+        return null;
     }
 }

@@ -57,18 +57,5 @@ public class State {
     }
 
 
-    public void recordWorldStateForUndo() {
-        //TODO: put worldstate on undo stack
-    }
 
-    public void doRedo() {
-    }
-
-    public Boolean canUndo() {
-        return false;
-    }
-
-    public Boolean canRedo() {
-        return false;
-    }
 }

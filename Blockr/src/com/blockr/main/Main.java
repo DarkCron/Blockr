@@ -3,6 +3,8 @@ import an.awesome.pipelinr.Pipeline;
 import an.awesome.pipelinr.Pipelinr;
 import com.blockr.State;
 import com.blockr.handlers.actions.ActionHandler;
+import com.blockr.handlers.actions.redo.DoRedoHandler;
+import com.blockr.handlers.actions.undo.DoUndoHandler;
 import com.blockr.handlers.blockprogram.canstart.CanStartHandler;
 import com.blockr.handlers.blockprogram.connectconditionblock.ConnectConditionBlock;
 import com.blockr.handlers.blockprogram.connectconditionblock.ConnectConditionBlockHandler;
@@ -21,6 +23,8 @@ import com.blockr.handlers.ui.input.resetuistate.ResetUIStateHandler;
 import com.blockr.handlers.world.GetWorldHandler;
 import com.blockr.handlers.blockprogram.addblock.AddBlockHandler;
 import com.kul.CanvasWindow;
+import com.ui.MyCanvasWindow;
+import com.ui.components.divcomponent.DivComponent;
 
 import javax.swing.*;
 import java.awt.*;
@@ -48,29 +52,19 @@ public class Main {
                     , new GetBlockProgramHandler(state)
                     , new RemoveBlockHandler(state)
                     , new ResetUIStateHandler(state)
-                    , new ConnectConditionBlockHandler(state)))
-            .with(() -> Stream.of(new ActionHandler(state)))
+                    , new ConnectConditionBlockHandler(state)
+                    , new DoRedoHandler(state)
+                    , new DoUndoHandler(state)
+                )
+            )
+            .with(
+                    () -> Stream.of(
+                            new ActionHandler(state)
+                    )
+                )
             ;
 
     public static void main(String[] args){
-        pipeline.send(new ConnectConditionBlock(null,null));
-        pipeline.send(new ConnectControlFlowBody(null,null));
-        SwingUtilities.invokeLater(() -> new CanvasWindow("test"){
-            @Override
-            protected void paint(Graphics g) {
-
-            }
-
-            @Override
-            protected void handleMouseEvent(int id, int x, int y, int clickCount) {
-
-            }
-
-            @Override
-            protected void handleKeyEvent(int id, int keyCode, char keyChar) {
-
-            }
-        });
-
+        SwingUtilities.invokeLater(() -> new MyCanvasWindow("test", BlockrUi.build(pipeline)));
     }
 }
