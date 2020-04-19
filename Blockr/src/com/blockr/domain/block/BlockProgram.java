@@ -1,5 +1,7 @@
 package com.blockr.domain.block;
 
+import com.blockr.State;
+import com.blockr.domain.Palette;
 import com.blockr.domain.block.interfaces.*;
 import com.blockr.domain.block.interfaces.markers.ReadOnlyConditionBlock;
 import com.blockr.domain.block.interfaces.markers.ReadOnlyConditionedBlock;
@@ -361,36 +363,68 @@ public class BlockProgram implements ReadOnlyBlockProgram, Cloneable {
 
     @Override
     protected Object clone() throws CloneNotSupportedException {
-        return null;
+
+        Map<Block, Block> newBlocks = new HashMap<>();
+        List<Block> newComponents = new LinkedList<>();
+
+        for(Block block : components){
+            newComponents.add(copyComponent(block, newBlocks));
+        }
+
+        StatementBlock newCurrent = null;
+
+        if(currentBlock != null){
+            newCurrent = (StatementBlock)newBlocks.get(currentBlock);
+        }
+
+        return new BlockProgram(gameWorld, newComponents, new HashSet<>(newBlocks.values()), newCurrent);
     }
 
     private static Block copyComponent(Block block, Map<Block, Block> allBlocks){
 
-        /*
-
-        var clone = block.clone();
-        allBlocks.put(clone, block);
+        var clone = Palette.createInstance(block);
+        allBlocks.put(block, clone);
 
         if(block instanceof ControlFlowBlock){
 
             var cfBlock = (ControlFlowBlock)block;
             var newCfBlock = (ControlFlowBlock)clone;
 
-            if(cfBlock.getCondition() != null){
-                newCfBlock.setCondition((ConditionBlock) copyComponent(cfBlock.getCondition(), allBlocks));
-            }
-
             if(cfBlock.getBody() != null){
                 newCfBlock.setBody((StatementBlock)copyComponent(cfBlock.getBody(), allBlocks));
             }
 
-
+            if(cfBlock.getCurrent() != null){
+                newCfBlock.setCurrent((StatementBlock)allBlocks.get(cfBlock.getCurrent()));
+            }
         }
 
+        if(block instanceof ConditionedBlock){
+
+            var cBlock = (ConditionedBlock)block;
+            var newConditionedBlock = (ConditionedBlock)clone;
+
+            if(cBlock.getCondition() != null){
+                newConditionedBlock.setCondition((ConditionBlock)copyComponent(cBlock.getCondition(), allBlocks));
+            }
+        }
+
+        if(!(block instanceof StatementBlock)){
+            return clone;
+        }
+
+        var statementBlock = (StatementBlock)block;
+
+        if(statementBlock.getNext() == null)
+            return clone;
+
+        var newStatementBlock = (StatementBlock)clone;
+
+        var next = (StatementBlock)copyComponent(statementBlock.getNext(), allBlocks);
+        newStatementBlock.setNext(next);
+        next.setPrevious(newStatementBlock);
+
         return clone;
-
-         */
-
-        return null;
     }
+
 }

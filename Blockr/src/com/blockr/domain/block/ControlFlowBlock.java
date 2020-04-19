@@ -32,7 +32,7 @@ public abstract class ControlFlowBlock extends StatementBlock implements ReadOnl
         return current;
     }
 
-    protected void setCurrent(StatementBlock current){
+    void setCurrent(StatementBlock current){
         this.current = current;
     }
 

@@ -22,5 +22,6 @@
       </library>
     </orderEntry>
     <orderEntry type="module" module-name="GameWorld" />
+    <orderEntry type="module" module-name="RobotGame" scope="RUNTIME" />
   </component>
 </module>
