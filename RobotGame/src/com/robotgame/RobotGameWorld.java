@@ -1,4 +1,4 @@
-package com.robotgame;
+package impl.root;
 
 import com.gameworld.Action;
 import com.gameworld.GameWorld;
@@ -65,6 +65,16 @@ public class RobotGameWorld implements GameWorld  {
     }
 
     private Orientation robotOrientation;
+
+    public RobotGameWorld(){
+        this(new TileType[][]{
+                {TileType.Blocked, TileType.Blocked, TileType.Blocked, TileType.Blocked, TileType.Blocked},
+                {TileType.Blocked, TileType.Free, TileType.Free, TileType.Free, TileType.Blocked},
+                {TileType.Blocked, TileType.Free, TileType.Free, TileType.Free, TileType.Blocked},
+                {TileType.Blocked, TileType.Free, TileType.Free, TileType.Free, TileType.Blocked},
+                {TileType.Blocked, TileType.Blocked, TileType.Blocked, TileType.Blocked, TileType.Blocked}
+        }, new Position(1, 1), Orientation.EAST, new Position(3, 3));
+    }
 
     public RobotGameWorld(TileType[][] grid, Position startPosition, Orientation startOrientation, Position goalPosition){
 
@@ -162,8 +172,8 @@ public class RobotGameWorld implements GameWorld  {
 
         var clip = graphics.getClipBounds();
 
-        var gridWidth = (int)clip.getWidth();
-        var gridHeight = (int)clip.getHeight();
+        var gridWidth = getWidth();
+        var gridHeight = getHeight();
 
         var tileWidth = (int)clip.getWidth() / gridWidth;
         var tileHeight = (int)clip.getHeight() / gridHeight;
