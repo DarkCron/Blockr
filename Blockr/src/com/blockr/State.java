@@ -25,6 +25,10 @@ public class State {
         this.blockProgram = new BlockProgram(gameWorld);
     }
 
+    public void setBlockProgram(BlockProgram bp) {
+        blockProgram = bp;
+    }
+
     /*UI STUFF*/
     private PaletteSelection paletteSelection;
     public void setPaletteSelection(PaletteSelection paletteSelection) {
@@ -55,7 +59,4 @@ public class State {
         recordMouse = null;
         programAreaSelection = null;
     }
-
-
-
 }

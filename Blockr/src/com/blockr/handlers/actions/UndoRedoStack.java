@@ -63,7 +63,7 @@ public class UndoRedoStack {
 
         state.getGameWorld().restoreSnapshot(restorePoint.getFirst());
         ProgramArea.restoreProgramAreaState(restorePoint.getSecond());
-        state.getBlockProgram().restoreFromClone(restorePoint.getThird());
+        state.setBlockProgram(restorePoint.getThird().getBp());
     }
 
     public void doRedo() {
@@ -84,6 +84,6 @@ public class UndoRedoStack {
 
         state.getGameWorld().restoreSnapshot(restorePoint.getFirst());
         ProgramArea.restoreProgramAreaState(restorePoint.getSecond());
-        state.getBlockProgram().restoreFromClone(restorePoint.getThird());
+        state.setBlockProgram(restorePoint.getThird().getBp());
     }
 }

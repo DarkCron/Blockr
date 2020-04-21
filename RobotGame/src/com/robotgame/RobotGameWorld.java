@@ -1,4 +1,4 @@
-package impl.root;
+package com.robotgame;
 
 import com.gameworld.Action;
 import com.gameworld.GameWorld;

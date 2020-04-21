@@ -22,5 +22,5 @@ public abstract class Component {
 
     }
 
-    public void onKeyEvent(){}
+    public void onKeyEvent(KeyPressUtility keyPressUtility){}
 }

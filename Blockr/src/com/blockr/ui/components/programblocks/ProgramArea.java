@@ -296,10 +296,10 @@ public class ProgramArea extends Container {
     }
 
     @Override
-    public void onKeyEvent() {
-        if(MyCanvasWindow.getKeyPressUtility().hasPressedUndo()){
+    public void onKeyEvent(KeyPressUtility keyPressUtility) {
+        if(keyPressUtility.hasPressedUndo()){
             mediator.send(new DoUndo());
-        }else if(MyCanvasWindow.getKeyPressUtility().hasPressedRedo()){
+        }else if(keyPressUtility.hasPressedRedo()){
             mediator.send(new DoRedo());
         }
     }
