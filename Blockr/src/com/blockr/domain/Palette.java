@@ -35,4 +35,13 @@ public class Palette {
         return blocks;
     }
 
+    public static Block createInstance(Block block){
+        try{
+            return block.getClass().getDeclaredConstructor().newInstance();
+        }catch(Exception ex){
+            // ignored
+            return null;
+        }
+    }
+
 }
