@@ -7,20 +7,26 @@ import com.blockr.ui.components.programblocks.ProgramAreaState;
 import com.gameworld.GameWorldSnapshot;
 import java.util.Stack;
 
-/*
-TODO: rename class
+/**
+ * Class for processing Undo and Redo commands
  */
 public class UndoRedoProcessor {
 
     private final State state;
-
     private final Stack<Triple<GameWorldSnapshot, ProgramAreaState, BlockProgramState>> undoStack = new Stack<>();
     private final Stack<Triple<GameWorldSnapshot, ProgramAreaState, BlockProgramState>> redoStack = new Stack<>();
 
+
+    /**
+     * @param state reference to the domain state
+     */
     public UndoRedoProcessor(State state) {
         this.state = state;
     }
 
+    /**
+     * Generates and saves information to put on the Undo stack, information is generated based on the program's current state.
+     */
     public void recordWorldStateForUndo() {
         try {
             undoStack.push(new Triple<>(
@@ -33,6 +39,9 @@ public class UndoRedoProcessor {
         redoStack.clear();
     }
 
+    /**
+     * Generates and saves information to put on the Redo stack, information is generated based on the program's current state.
+     */
     public void recordWorldStateForRedo() {
         try {
             redoStack.push(new Triple<>(
@@ -44,6 +53,10 @@ public class UndoRedoProcessor {
         }
     }
 
+    /**
+     * Performs an Undo if undo snapshots are available in the stack.
+     * Does effectively nothing if no such snapshots are available.
+     */
     public void doUndo() {
         if(undoStack.size() == 0){
             return;
@@ -65,6 +78,10 @@ public class UndoRedoProcessor {
         state.setBlockProgram(restorePoint.getThird().getBp());
     }
 
+    /**
+     * Performs a Redo if redo snapshots are available in the stack.
+     * Does effectively nothing if no such snapshots are available.
+     */
     public void doRedo() {
         if(redoStack.size() == 0){
             return;

@@ -9,6 +9,7 @@ import com.blockr.domain.block.interfaces.ReadOnlyStatementBlock;
 import com.blockr.domain.block.interfaces.markers.ReadOnlyConditionBlock;
 import com.blockr.domain.block.interfaces.markers.ReadOnlyNotBlock;
 import com.blockr.domain.block.interfaces.markers.ReadOnlyWallInFrontBlock;
+import com.blockr.handlers.blockprogram.getblockprogram.GetBlockProgram;
 import com.ui.Component;
 import com.ui.WindowPosition;
 import com.ui.WindowRegion;
@@ -234,6 +235,13 @@ public abstract class UIBlockComponent extends Component {
             graphics.setColor(Color.green);
             graphics.fillRect(0, 0, getWidth(source), getHeight(source));
 
+            if(mediator.send(new GetBlockProgram()).getActive() == source){
+                graphics.setColor(Color.PINK);
+                graphics.fillRect(0, 0, getWidth(source), getHeight(source));
+                graphics.setColor(Color.green);
+                graphics.fillRect(BlockData.BLOCK_SELECTION_BORDER, BlockData.BLOCK_SELECTION_BORDER, getWidth(source) - 2*BlockData.BLOCK_SELECTION_BORDER, getHeight(source) - 2*BlockData.BLOCK_SELECTION_BORDER);
+            }
+
             flowShape = new Polygon(new int[]{Math.max(0,x0),Math.max(0,x1-1),Math.max(0,x2-1),Math.max(0,x3-1),Math.max(0,x4-1),Math.max(0,x5-1),Math.max(0,x6-1),Math.max(0,x7)}
             , new int[]{Math.max(0,y0),Math.max(0,y1),Math.max(0,y2-1),Math.max(0,y3-1),Math.max(0,y4),Math.max(0,y5),Math.max(0,y6-1),Math.max(0,y7-1)},8);
             graphics.setColor(Color.black);
@@ -251,10 +259,21 @@ public abstract class UIBlockComponent extends Component {
     private void drawNormalStatement(Graphics graphics) {
         graphics.setColor(Color.yellow);
         graphics.fillRect(0, 0, getWidth(source), getHeight(source));
+
+        if(mediator.send(new GetBlockProgram()).getActive() == source){
+            graphics.setColor(Color.PINK);
+            graphics.fillRect(0, 0, getWidth(source), getHeight(source));
+            graphics.setColor(Color.yellow);
+            graphics.fillRect(BlockData.BLOCK_SELECTION_BORDER, BlockData.BLOCK_SELECTION_BORDER, getWidth(source) - 2*BlockData.BLOCK_SELECTION_BORDER, getHeight(source) - 2*BlockData.BLOCK_SELECTION_BORDER);
+        }
+
         graphics.setColor(Color.black);
         graphics.drawRect(0, 0, getWidth(source)-1, getHeight(source)-1);
     }
 
+    /**
+     * @return returns the abstract logical representation on which the visual component is based on
+     */
     public ReadOnlyBlock getSource(){return source;}
 
     public WindowPosition getUpperLeft(){ return upperLeft;}

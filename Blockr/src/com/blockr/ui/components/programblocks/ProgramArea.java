@@ -274,10 +274,22 @@ public class ProgramArea extends Container {
         mediator.send(new RemoveBlock((ReadOnlyStatementBlock) programBlockComponent.getSource()));
     }
 
+
+    /**
+     * Generates and returns a restorable snapshot of the Game Area
+     *
+     * @param rbp BlockProgram an abstract logic representation of the visual components
+     *            currently in the Program Area
+     * @return A generated snapshot of the Game Area components and locations
+     */
     public static ProgramAreaState generateProgramAreaState(ReadOnlyBlockProgram rbp){
         return new ProgramAreaState(mainProgramArea, rbp);
     }
 
+    /**
+     * Restores the Game Area to a previous snapshot
+     * @param state A snapshot of the current layout and locations of the Program Area
+     */
     public static void restoreProgramAreaState(ProgramAreaState state) {
         for (var rootAndLocation: state.getRootLocations()) {
             mainProgramArea.removeProgramBlockComponentsBaseOnRoot(rootAndLocation.getKey());
@@ -285,6 +297,14 @@ public class ProgramArea extends Container {
         }
     }
 
+
+    /**
+     * Returns the upper left position of the visual component of a certain block if it's present in the
+     * Game Area.
+     * @param rob a ReadOnlyBlock that is or is not pressent in the game Area
+     * @return returns the upper left location of the given block if it's in the Game Area,
+     *          Returns null if the block isn't available.
+     */
     public WindowPosition locationOf(ReadOnlyBlock rob) {
         for (ProgramBlockComponent pbc: programBlockComponents) {
             if(pbc.getSource() == rob){

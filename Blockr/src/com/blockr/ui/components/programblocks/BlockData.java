@@ -17,6 +17,7 @@ public class BlockData {
     static final int CONTROL_FLOW_INNER_START = (int)(BLOCK_WIDTH * 0.45f);
     static final int CONDITION_BLOCK_WIDTH = (int)(BLOCK_WIDTH * 0.5f);
     static final int CONDITION_BLOCK_HEIGHT = (int)(BLOCK_HEIGHT * 0.8f);
+    static final int BLOCK_SELECTION_BORDER = 8;
 
     static final int FONT_SIZE = 10;
 

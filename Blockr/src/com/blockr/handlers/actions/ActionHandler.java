@@ -11,6 +11,9 @@ import com.blockr.handlers.blockprogram.disconnectconditionblock.DisconnectCondi
 import com.blockr.handlers.blockprogram.disconnectstatementblock.DisconnectStatementBlock;
 import com.blockr.handlers.blockprogram.executeprogram.ExecuteProgram;
 
+/**
+ * Middleware for various game manipulating actions
+ */
 public class ActionHandler implements Command.Middleware {
     private UndoRedoProcessor undoRedoStack;
 

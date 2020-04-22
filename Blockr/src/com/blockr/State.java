@@ -7,6 +7,11 @@ import com.gameworld.GameWorld;
 import com.gameworld.GameWorldSnapshot;
 import com.ui.WindowPosition;
 
+
+/**
+ * Representation of the domain elements, a State is unique per game session and is only updated and modified,
+ * and should never be reinitialized.
+ */
 public class State {
 
     //resetWorldState to handle the resetting of a BlockProgram
