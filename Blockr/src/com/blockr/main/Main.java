@@ -43,7 +43,7 @@ public class Main {
 
         var state = new State(gameWorld);
 
-        SwingUtilities.invokeLater(() -> new MyCanvasWindow("test", BlockrUi.build(buildPipeline(state))));
+        SwingUtilities.invokeLater(() -> new MyCanvasWindow("test", BlockrUi.build(buildPipeline(state))).show());
     }
 
     private static Pipeline buildPipeline(State state){
