@@ -21,4 +21,11 @@ public abstract class Component {
     public void onMouseEvent(MouseEvent mouseEvent){
 
     }
+
+    /**
+     * Propagates a keyboard event to a component
+     *
+     * @param keyPressUtility KeyPressUtility represents keystrokes in simple booleans
+     */
+    public void onKeyEvent(KeyPressUtility keyPressUtility){}
 }

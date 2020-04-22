@@ -43,5 +43,4 @@ public class Palette {
             return null;
         }
     }
-
 }

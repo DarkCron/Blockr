@@ -1,7 +1,7 @@
 package com.blockr.ui.components.programblocks;
 
 import an.awesome.pipelinr.Pipeline;
-import com.blockr.domain.block.BlockCreator;
+import com.blockr.domain.Palette;
 import com.blockr.domain.block.BlockUtilities;
 import com.blockr.domain.block.interfaces.Block;
 import com.blockr.domain.block.interfaces.ReadOnlyBlock;
@@ -42,7 +42,7 @@ public class ProgramBlockComponent extends UIBlockComponent {
             case MOUSE_UP:
                 var paletteSelection = mediator.send(new GetPaletteSelection());
                 if(paletteSelection!=null) {
-                    var copy = BlockCreator.build(BlockCreator.BlockType.getType(paletteSelection.getBlockType().getSource()));
+                    var copy = Palette.createInstance((Block) paletteSelection.getBlockType().getSource());
 
                     var recordedMouse = mediator.send(new GetMouseRecord());
                     if(recordedMouse == null){

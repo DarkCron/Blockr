@@ -12,7 +12,6 @@ public class DoRedoHandler extends HandlerBase<DoRedo, Voidy> {
 
     @Override
     public Voidy handle(DoRedo doRedo) {
-        getState().doRedo();
         return new Voidy();
     }
 

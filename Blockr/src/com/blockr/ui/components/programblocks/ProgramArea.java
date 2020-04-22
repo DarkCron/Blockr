@@ -1,19 +1,22 @@
 package com.blockr.ui.components.programblocks;
 
 import an.awesome.pipelinr.Pipeline;
-import com.blockr.domain.block.BlockCreator;
+import com.blockr.domain.Palette;
 import com.blockr.domain.block.BlockUtilities;
 import com.blockr.domain.block.StatementBlock;
-import com.blockr.domain.block.interfaces.ReadOnlyBlock;
-import com.blockr.domain.block.interfaces.ReadOnlyControlFlowBlock;
-import com.blockr.domain.block.interfaces.ReadOnlyStatementBlock;
+import com.blockr.domain.block.interfaces.*;
 import com.blockr.domain.block.interfaces.markers.ReadOnlyConditionBlock;
 import com.blockr.domain.block.interfaces.markers.ReadOnlyConditionedBlock;
 import com.blockr.domain.block.interfaces.markers.ReadOnlyNotBlock;
 import com.blockr.domain.block.interfaces.markers.ReadOnlyWallInFrontBlock;
+import com.blockr.handlers.actions.redo.DoRedo;
+import com.blockr.handlers.actions.reset.DoReset;
+import com.blockr.handlers.actions.undo.DoUndo;
 import com.blockr.handlers.blockprogram.addblock.AddBlock;
+import com.blockr.handlers.blockprogram.canstart.CanStart;
 import com.blockr.handlers.blockprogram.disconnectconditionblock.DisconnectConditionBlock;
 import com.blockr.handlers.blockprogram.disconnectstatementblock.DisconnectStatementBlock;
+import com.blockr.handlers.blockprogram.executeprogram.ExecuteProgram;
 import com.blockr.handlers.blockprogram.getblockprogram.GetBlockProgram;
 import com.blockr.handlers.blockprogram.removeblock.RemoveBlock;
 import com.blockr.handlers.ui.input.GetPaletteSelection;
@@ -24,8 +27,7 @@ import com.blockr.handlers.ui.input.recordMousePos.SetRecordMouse;
 import com.blockr.handlers.ui.input.resetuistate.ResetUIState;
 import com.ui.Component;
 import com.ui.Container;
-import com.ui.WindowPosition;
-import com.ui.WindowRegion;
+import com.ui.*;
 import com.ui.mouseevent.MouseEvent;
 
 import java.awt.*;
@@ -43,9 +45,11 @@ public class ProgramArea extends Container {
     //private static final List<WindowPosition> regionPositions = new ArrayList<>();
 
     private final Pipeline mediator;
+    private static ProgramArea mainProgramArea;
 
     public ProgramArea(Pipeline mediator) {
         this.mediator = mediator;
+        mainProgramArea = this;
     }
 
     @Override
@@ -142,7 +146,7 @@ public class ProgramArea extends Container {
             case MOUSE_UP:
                 var paletteSelection = mediator.send(new GetPaletteSelection());
                 if(paletteSelection!=null){
-                    var copy = BlockCreator.build(BlockCreator.BlockType.getType(paletteSelection.getBlockType().getSource()));
+                    var copy = Palette.createInstance((Block) paletteSelection.getBlockType().getSource());
 
                     mediator.send(new AddBlock((StatementBlock)copy));
                    // var rootBlock = mediator.send(new GetRootBlock(copy));
@@ -268,5 +272,61 @@ public class ProgramArea extends Container {
     public void cleanUp(ProgramBlockComponent programBlockComponent) {
         removeProgramBlockComponentsBaseOnRoot(programBlockComponent.getSource());
         mediator.send(new RemoveBlock((ReadOnlyStatementBlock) programBlockComponent.getSource()));
+    }
+
+
+    /**
+     * Generates and returns a restorable snapshot of the Game Area
+     *
+     * @param rbp BlockProgram an abstract logic representation of the visual components
+     *            currently in the Program Area
+     * @return A generated snapshot of the Game Area components and locations
+     */
+    public static ProgramAreaState generateProgramAreaState(ReadOnlyBlockProgram rbp){
+        return new ProgramAreaState(mainProgramArea, rbp);
+    }
+
+    /**
+     * Restores the Game Area to a previous snapshot
+     * @param state A snapshot of the current layout and locations of the Program Area
+     */
+    public static void restoreProgramAreaState(ProgramAreaState state) {
+        for (var rootAndLocation: state.getRootLocations()) {
+            mainProgramArea.removeProgramBlockComponentsBaseOnRoot(rootAndLocation.getKey());
+            mainProgramArea.buildProgramBlockComponentFromRoot(rootAndLocation.getKey(),rootAndLocation.getValue());
+        }
+    }
+
+
+    /**
+     * Returns the upper left position of the visual component of a certain block if it's present in the
+     * Game Area.
+     * @param rob a ReadOnlyBlock that is or is not pressent in the game Area
+     * @return returns the upper left location of the given block if it's in the Game Area,
+     *          Returns null if the block isn't available.
+     */
+    public WindowPosition locationOf(ReadOnlyBlock rob) {
+        for (ProgramBlockComponent pbc: programBlockComponents) {
+            if(pbc.getSource() == rob){
+                return pbc.getUpperLeft();
+            }
+        }
+
+        return null;
+    }
+
+    @Override
+    public void onKeyEvent(KeyPressUtility keyPressUtility) {
+        if(keyPressUtility.hasPressedUndo()){
+            mediator.send(new DoUndo());
+        }else if(keyPressUtility.hasPressedRedo()){
+            mediator.send(new DoRedo());
+        }else if(keyPressUtility.hasPressedExecute()){
+            if(mediator.send(new CanStart())){
+                mediator.send(new ExecuteProgram());
+            }
+        }else if(keyPressUtility.hasPressedResetProgram()){
+            mediator.send(new DoReset());
+        }
     }
 }

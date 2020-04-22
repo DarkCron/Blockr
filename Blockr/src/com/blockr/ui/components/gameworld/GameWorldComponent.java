@@ -17,7 +17,7 @@ public class GameWorldComponent extends Component {
 
     @Override
     protected void draw(Graphics graphics) {
-        var gameWorld = pipeline.send(new GetWorld())
+        var gameWorld = pipeline.send(new GetWorld());
         gameWorld.draw(graphics);
     }
 }
