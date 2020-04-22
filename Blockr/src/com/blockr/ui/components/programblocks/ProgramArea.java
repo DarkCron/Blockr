@@ -1,13 +1,10 @@
 package com.blockr.ui.components.programblocks;
 
 import an.awesome.pipelinr.Pipeline;
-import com.blockr.domain.block.BlockCreator;
+import com.blockr.domain.Palette;
 import com.blockr.domain.block.BlockUtilities;
 import com.blockr.domain.block.StatementBlock;
-import com.blockr.domain.block.interfaces.ReadOnlyBlock;
-import com.blockr.domain.block.interfaces.ReadOnlyBlockProgram;
-import com.blockr.domain.block.interfaces.ReadOnlyControlFlowBlock;
-import com.blockr.domain.block.interfaces.ReadOnlyStatementBlock;
+import com.blockr.domain.block.interfaces.*;
 import com.blockr.domain.block.interfaces.markers.ReadOnlyConditionBlock;
 import com.blockr.domain.block.interfaces.markers.ReadOnlyConditionedBlock;
 import com.blockr.domain.block.interfaces.markers.ReadOnlyNotBlock;
@@ -146,7 +143,7 @@ public class ProgramArea extends Container {
             case MOUSE_UP:
                 var paletteSelection = mediator.send(new GetPaletteSelection());
                 if(paletteSelection!=null){
-                    var copy = BlockCreator.build(BlockCreator.BlockType.getType(paletteSelection.getBlockType().getSource()));
+                    var copy = Palette.createInstance((Block) paletteSelection.getBlockType().getSource());
 
                     mediator.send(new AddBlock((StatementBlock)copy));
                    // var rootBlock = mediator.send(new GetRootBlock(copy));

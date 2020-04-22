@@ -12,10 +12,10 @@ import com.blockr.handlers.blockprogram.disconnectstatementblock.DisconnectState
 import com.blockr.handlers.blockprogram.executeprogram.ExecuteProgram;
 
 public class ActionHandler implements Command.Middleware {
-    private UndoRedoStack undoRedoStack;
+    private UndoRedoProcessor undoRedoStack;
 
     public ActionHandler(State state) {
-        this.undoRedoStack = new UndoRedoStack(state);
+        this.undoRedoStack = new UndoRedoProcessor(state);
     }
 
     @Override

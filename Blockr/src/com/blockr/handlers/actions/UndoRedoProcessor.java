@@ -5,20 +5,19 @@ import com.blockr.domain.block.BlockProgramState;
 import com.blockr.ui.components.programblocks.ProgramArea;
 import com.blockr.ui.components.programblocks.ProgramAreaState;
 import com.gameworld.GameWorldSnapshot;
-import javafx.util.Pair;
 import java.util.Stack;
 
 /*
 TODO: rename class
  */
-public class UndoRedoStack {
+public class UndoRedoProcessor {
 
     private final State state;
 
     private final Stack<Triple<GameWorldSnapshot, ProgramAreaState, BlockProgramState>> undoStack = new Stack<>();
     private final Stack<Triple<GameWorldSnapshot, ProgramAreaState, BlockProgramState>> redoStack = new Stack<>();
 
-    public UndoRedoStack(State state) {
+    public UndoRedoProcessor(State state) {
         this.state = state;
     }
 
