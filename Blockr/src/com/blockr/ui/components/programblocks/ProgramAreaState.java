@@ -2,8 +2,8 @@ package com.blockr.ui.components.programblocks;
 
 import com.blockr.domain.block.interfaces.ReadOnlyBlock;
 import com.blockr.domain.block.interfaces.ReadOnlyBlockProgram;
+import com.blockr.handlers.actions.Pair;
 import com.ui.WindowPosition;
-import javafx.util.Pair;
 
 import java.util.ArrayList;
 import java.util.List;

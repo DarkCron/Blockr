@@ -292,8 +292,8 @@ public class ProgramArea extends Container {
      */
     public static void restoreProgramAreaState(ProgramAreaState state) {
         for (var rootAndLocation: state.getRootLocations()) {
-            mainProgramArea.removeProgramBlockComponentsBaseOnRoot(rootAndLocation.getKey());
-            mainProgramArea.buildProgramBlockComponentFromRoot(rootAndLocation.getKey(),rootAndLocation.getValue());
+            mainProgramArea.removeProgramBlockComponentsBaseOnRoot(rootAndLocation.getFirst());
+            mainProgramArea.buildProgramBlockComponentFromRoot(rootAndLocation.getFirst(),rootAndLocation.getSecond());
         }
     }
 
