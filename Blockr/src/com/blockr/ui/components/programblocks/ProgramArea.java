@@ -10,10 +10,13 @@ import com.blockr.domain.block.interfaces.markers.ReadOnlyConditionedBlock;
 import com.blockr.domain.block.interfaces.markers.ReadOnlyNotBlock;
 import com.blockr.domain.block.interfaces.markers.ReadOnlyWallInFrontBlock;
 import com.blockr.handlers.actions.redo.DoRedo;
+import com.blockr.handlers.actions.reset.DoReset;
 import com.blockr.handlers.actions.undo.DoUndo;
 import com.blockr.handlers.blockprogram.addblock.AddBlock;
+import com.blockr.handlers.blockprogram.canstart.CanStart;
 import com.blockr.handlers.blockprogram.disconnectconditionblock.DisconnectConditionBlock;
 import com.blockr.handlers.blockprogram.disconnectstatementblock.DisconnectStatementBlock;
+import com.blockr.handlers.blockprogram.executeprogram.ExecuteProgram;
 import com.blockr.handlers.blockprogram.getblockprogram.GetBlockProgram;
 import com.blockr.handlers.blockprogram.removeblock.RemoveBlock;
 import com.blockr.handlers.ui.input.GetPaletteSelection;
@@ -298,6 +301,12 @@ public class ProgramArea extends Container {
             mediator.send(new DoUndo());
         }else if(keyPressUtility.hasPressedRedo()){
             mediator.send(new DoRedo());
+        }else if(keyPressUtility.hasPressedExecute()){
+            if(mediator.send(new CanStart())){
+                mediator.send(new ExecuteProgram());
+            }
+        }else if(keyPressUtility.hasPressedResetProgram()){
+            mediator.send(new DoReset());
         }
     }
 }

@@ -4,6 +4,7 @@ import an.awesome.pipelinr.Pipelinr;
 import com.blockr.State;
 import com.blockr.handlers.actions.ActionHandler;
 import com.blockr.handlers.actions.redo.DoRedoHandler;
+import com.blockr.handlers.actions.reset.DoResetHandler;
 import com.blockr.handlers.actions.undo.DoUndoHandler;
 import com.blockr.handlers.blockprogram.canstart.CanStartHandler;
 import com.blockr.handlers.blockprogram.connectconditionblock.ConnectConditionBlock;
@@ -55,6 +56,7 @@ public class Main {
                     , new ConnectConditionBlockHandler(state)
                     , new DoRedoHandler(state)
                     , new DoUndoHandler(state)
+                    , new DoResetHandler(state)
                 )
             )
             .with(

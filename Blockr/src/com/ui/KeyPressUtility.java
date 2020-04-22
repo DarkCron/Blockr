@@ -15,11 +15,19 @@ public class KeyPressUtility {
         }
     }
 
+    public boolean hasPressedResetProgram(){
+        return pressedKeys.size() == 1 && pressedKeys.contains(KeyEvent.VK_ESCAPE);
+    }
+
+    public boolean hasPressedExecute(){
+        return pressedKeys.size() == 1 && pressedKeys.contains(KeyEvent.VK_F5);
+    }
+
     public boolean hasPressedUndo(){
-        return pressedKeys.contains(KeyEvent.VK_CONTROL) && pressedKeys.contains(KeyEvent.VK_Z) && !pressedKeys.contains(KeyEvent.VK_SHIFT);
+        return pressedKeys.size() == 2 && pressedKeys.contains(KeyEvent.VK_CONTROL) && pressedKeys.contains(KeyEvent.VK_Z) && !pressedKeys.contains(KeyEvent.VK_SHIFT);
     }
 
     public boolean hasPressedRedo(){
-        return pressedKeys.contains(KeyEvent.VK_CONTROL) && pressedKeys.contains(KeyEvent.VK_Z) && pressedKeys.contains(KeyEvent.VK_SHIFT);
+        return pressedKeys.size() == 3 && pressedKeys.contains(KeyEvent.VK_CONTROL) && pressedKeys.contains(KeyEvent.VK_Z) && pressedKeys.contains(KeyEvent.VK_SHIFT);
     }
 }
