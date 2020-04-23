@@ -66,6 +66,8 @@ public class RobotGameWorld implements GameWorld  {
 
     private Orientation robotOrientation;
 
+    private final GameWorldSnapshot resetWorldSnapshot;
+
     public RobotGameWorld(){
         this(new TileType[][]{
                 {TileType.Blocked, TileType.Blocked, TileType.Blocked, TileType.Blocked, TileType.Blocked},
@@ -89,6 +91,7 @@ public class RobotGameWorld implements GameWorld  {
         this.goalPosition = goalPosition;
         this.robotPosition = startPosition;
         this.robotOrientation = startOrientation;
+        this.resetWorldSnapshot = takeSnapshot();
     }
 
     private void throwIfNull(Object object, String name)
@@ -205,6 +208,11 @@ public class RobotGameWorld implements GameWorld  {
         var snapshot = (RobotGameWorldSnapshot)gameWorldSnapshot;
         this.robotPosition = snapshot.getRobotPosition();
         this.robotOrientation = snapshot.getRobotOrientation();
+    }
+
+    @Override
+    public void resetWorldSnapshot() {
+        restoreSnapshot(resetWorldSnapshot);
     }
 
     private void drawTile(Graphics graphics, Position position){

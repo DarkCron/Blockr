@@ -1,6 +1,7 @@
 package com.blockr.handlers.actions;
 
 import com.blockr.State;
+import com.blockr.domain.block.BlockProgram;
 import com.blockr.domain.block.BlockProgramState;
 import com.blockr.ui.components.programblocks.ProgramArea;
 import com.blockr.ui.components.programblocks.ProgramAreaState;
@@ -33,6 +34,11 @@ public class UndoRedoProcessor {
                     state.getGameWorld().takeSnapshot(),
                     ProgramArea.generateProgramAreaState(state.getBlockProgram()),
                     new BlockProgramState(state.getBlockProgram())));
+            try {
+                state.setBlockProgram((BlockProgram) state.getBlockProgram().clone());
+            }catch (Exception e){
+
+            }
         } catch (CloneNotSupportedException e) {
             e.printStackTrace();
         }
@@ -74,8 +80,8 @@ public class UndoRedoProcessor {
         var restorePoint = undoStack.pop();
 
         state.getGameWorld().restoreSnapshot(restorePoint.getFirst());
-        ProgramArea.restoreProgramAreaState(restorePoint.getSecond());
         state.setBlockProgram(restorePoint.getThird().getBp());
+        ProgramArea.restoreProgramAreaState(restorePoint.getSecond());
     }
 
     /**
@@ -99,7 +105,7 @@ public class UndoRedoProcessor {
         var restorePoint = redoStack.pop();
 
         state.getGameWorld().restoreSnapshot(restorePoint.getFirst());
-        ProgramArea.restoreProgramAreaState(restorePoint.getSecond());
         state.setBlockProgram(restorePoint.getThird().getBp());
+        ProgramArea.restoreProgramAreaState(restorePoint.getSecond());
     }
 }

@@ -101,7 +101,7 @@ public class MyCanvasWindow extends CanvasWindow {
 
     @Override
     protected void handleMouseEvent(int id, int x, int y, int clickCount) {
-
+        keyPressUtility.ConsumeInput();
         viewContext.setMousePosition(new WindowPosition(x,y));
 
         var type = MouseEvent.Type.getTypeById(id);

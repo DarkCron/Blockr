@@ -14,6 +14,8 @@ public interface GameWorld {
 
     void restoreSnapshot(GameWorldSnapshot gameWorldSnapshot);
 
+    void resetWorldSnapshot();
+
     enum ExecutionResult {
         Sucesss,
         Failure,

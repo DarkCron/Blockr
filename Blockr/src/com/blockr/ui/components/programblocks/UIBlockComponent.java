@@ -23,7 +23,7 @@ import java.awt.*;
  * Visual component to represent a Block on screen
  */
 public abstract class UIBlockComponent extends Component {
-    protected final ReadOnlyBlock source;
+    protected ReadOnlyBlock source;
     protected final Pipeline mediator;
     protected final WindowPosition upperLeft;
     private final String title;
@@ -96,6 +96,23 @@ public abstract class UIBlockComponent extends Component {
 
         switch (clickLocation){
             case INVALID:
+                if(source instanceof ReadOnlyControlFlowBlock){
+                    if (((ReadOnlyControlFlowBlock) source).getBody() != null){
+                        var body = ((ReadOnlyControlFlowBlock) source).getBody();
+                        while (body!=null){
+                            for (var pbc: ProgramArea.programBlockComponents) {
+                                if(pbc.getSource() == body){
+                                    var result = pbc.getSocketAndPlug(mousePosition,blockToAdd);
+                                    if(result != null){
+                                        return result;
+                                    }
+                                }
+                            }
+                            body = body.getNext();
+                        }
+
+                    }
+                }
                 return null;
             case NEXT:
                 return new ProgramBlockInsertInfo(source,blockToAdd, ProgramBlockInsertInfo.PlugLocation.OTHER);
@@ -121,7 +138,7 @@ public abstract class UIBlockComponent extends Component {
      * @param blockToAdd
      * @return
      */
-    private ClickLocations getClickLocation(WindowPosition mousePostion, ReadOnlyBlock blockToAdd){
+    protected ClickLocations getClickLocation(WindowPosition mousePostion, ReadOnlyBlock blockToAdd){
         var relativePosition = mousePostion.minus(upperLeft);
         relativePosition = relativePosition.minus(new WindowPosition(-4,7));
         if(source instanceof ReadOnlyControlFlowBlock){
@@ -177,6 +194,10 @@ public abstract class UIBlockComponent extends Component {
             }
         }
         return ClickLocations.INVALID;
+    }
+
+    protected void reassignSource(ReadOnlyBlock readOnlyBlock){
+        source = readOnlyBlock;
     }
 
     @Override

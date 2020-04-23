@@ -4,12 +4,18 @@ import an.awesome.pipelinr.Pipeline;
 import an.awesome.pipelinr.Pipelinr;
 import com.blockr.State;
 import com.blockr.handlers.actions.ActionHandler;
+import com.blockr.handlers.actions.record.DoRecordHandler;
 import com.blockr.handlers.actions.redo.DoRedoHandler;
 import com.blockr.handlers.actions.reset.DoResetHandler;
 import com.blockr.handlers.actions.undo.DoUndoHandler;
 import com.blockr.handlers.blockprogram.addblock.AddBlockHandler;
 import com.blockr.handlers.blockprogram.canstart.CanStartHandler;
+import com.blockr.handlers.blockprogram.connectCFandCondition.ConnectControlFlowAndConditionHandler;
 import com.blockr.handlers.blockprogram.connectconditionblock.ConnectConditionBlockHandler;
+import com.blockr.handlers.blockprogram.connectcontrolflowbody.ConnectControlFlowBodyHandler;
+import com.blockr.handlers.blockprogram.connectstatementblock.ConnectStatementBlockHandler;
+import com.blockr.handlers.blockprogram.disconnectconditionblock.DisconnectConditionBlockHandler;
+import com.blockr.handlers.blockprogram.disconnectstatementblock.DisconnectStatementBlockHandler;
 import com.blockr.handlers.blockprogram.executeprogram.ExecuteProgramHandler;
 import com.blockr.handlers.blockprogram.getblockprogram.GetBlockProgramHandler;
 import com.blockr.handlers.blockprogram.getrootblock.GetRootBlockHandler;
@@ -43,7 +49,7 @@ public class Main {
 
         var state = new State(gameWorld);
 
-        SwingUtilities.invokeLater(() -> new MyCanvasWindow("test", BlockrUi.build(buildPipeline(state))));
+        SwingUtilities.invokeLater(() -> new MyCanvasWindow("test", BlockrUi.build(buildPipeline(state))).show());
     }
 
     private static Pipeline buildPipeline(State state){
@@ -67,6 +73,12 @@ public class Main {
                         , new DoRedoHandler(state)
                         , new DoUndoHandler(state)
                         , new DoResetHandler(state)
+                        , new ConnectStatementBlockHandler(state)
+                        , new DisconnectStatementBlockHandler(state)
+                        , new ConnectControlFlowBodyHandler(state)
+                        , new DisconnectConditionBlockHandler(state)
+                        , new ConnectControlFlowAndConditionHandler(state)
+                        , new DoRecordHandler(state)
                         )
                 )
                 .with(

@@ -3,16 +3,22 @@ package com.blockr.ui.components.programblocks;
 import an.awesome.pipelinr.Pipeline;
 import com.blockr.domain.Palette;
 import com.blockr.domain.block.BlockUtilities;
+import com.blockr.domain.block.TurnBlock;
 import com.blockr.domain.block.interfaces.Block;
 import com.blockr.domain.block.interfaces.ReadOnlyBlock;
 import com.blockr.domain.block.interfaces.ReadOnlyControlFlowBlock;
 import com.blockr.domain.block.interfaces.ReadOnlyStatementBlock;
 import com.blockr.domain.block.interfaces.markers.ReadOnlyConditionBlock;
 import com.blockr.domain.block.interfaces.markers.ReadOnlyConditionedBlock;
+import com.blockr.handlers.actions.record.DoRecord;
+import com.blockr.handlers.actions.record.DoRecordHandler;
 import com.blockr.handlers.blockprogram.addblock.AddBlock;
+import com.blockr.handlers.blockprogram.connectCFandCondition.ConnectControlFlowAndCondition;
 import com.blockr.handlers.blockprogram.connectconditionblock.ConnectConditionBlock;
 import com.blockr.handlers.blockprogram.connectcontrolflowbody.ConnectControlFlowBody;
+import com.blockr.handlers.blockprogram.connectcontrolflowbody.ConnectControlFlowBodyHandler;
 import com.blockr.handlers.blockprogram.connectstatementblock.ConnectStatementBlock;
+import com.blockr.handlers.blockprogram.getblockprogram.GetBlockProgram;
 import com.blockr.handlers.ui.input.GetPaletteSelection;
 import com.blockr.handlers.ui.input.SetProgramSelection;
 import com.blockr.handlers.ui.input.recordMousePos.GetMouseRecord;
@@ -42,7 +48,12 @@ public class ProgramBlockComponent extends UIBlockComponent {
             case MOUSE_UP:
                 var paletteSelection = mediator.send(new GetPaletteSelection());
                 if(paletteSelection!=null) {
+                    mediator.send(new DoRecord());
+                    var bp = mediator.send(new GetBlockProgram());
                     var copy = Palette.createInstance((Block) paletteSelection.getBlockType().getSource());
+                    if(paletteSelection.getBlockType().getSource() instanceof TurnBlock){
+                        ((TurnBlock)copy).setDirection(((TurnBlock) paletteSelection.getBlockType().getSource()).getDirection());
+                    }
 
                     var recordedMouse = mediator.send(new GetMouseRecord());
                     if(recordedMouse == null){
@@ -61,13 +72,14 @@ public class ProgramBlockComponent extends UIBlockComponent {
                                 mediator.send(new ConnectControlFlowBody((ReadOnlyControlFlowBlock) info.getSocket(),(ReadOnlyStatementBlock) info.getPlug()));
                             }else if(info.getPlug() instanceof ReadOnlyConditionBlock && info.getSocket() instanceof ReadOnlyConditionBlock){
                                 mediator.send(new ConnectConditionBlock((ReadOnlyConditionedBlock) info.getSocket(), (ReadOnlyConditionBlock) info.getPlug()));
-                            }else if(info.getSocket() instanceof ReadOnlyStatementBlock && info.getPlug() instanceof ReadOnlyConditionBlock){
-
+                            }else if(info.getSocket() instanceof ReadOnlyControlFlowBlock && info.getPlug() instanceof ReadOnlyConditionBlock){
+                                mediator.send(new ConnectControlFlowAndCondition((ReadOnlyControlFlowBlock) info.getSocket(), (ReadOnlyConditionBlock) info.getPlug()));
                             }else{
                                 mediator.send(new ConnectStatementBlock((ReadOnlyStatementBlock) info.getSocket(),(ReadOnlyStatementBlock) info.getPlug()));
                             }
                         }
-                        programArea.updateBlockProgram(BlockUtilities.getRootFrom((ReadOnlyStatementBlock) info.getSocket()));
+                        programArea.updateBlockProgram(BlockUtilities.getRootFrom(info.getSocket(),mediator.send(new GetBlockProgram())));
+                        //mediator.send(new DoRecord());
                     }
                 }
                 break;
@@ -81,6 +93,7 @@ public class ProgramBlockComponent extends UIBlockComponent {
                 break;
             case MOUSE_DOWN:
                 System.out.println(BlockData.getName(source));
+                mediator.send(new DoRecord());
                 mediator.send(new SetProgramSelection(mouseEvent.getWindowPosition(),this));
                 break;
         }

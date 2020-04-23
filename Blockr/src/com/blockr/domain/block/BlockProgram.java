@@ -5,6 +5,7 @@ import com.blockr.domain.Palette;
 import com.blockr.domain.block.interfaces.*;
 import com.blockr.domain.block.interfaces.markers.ReadOnlyConditionBlock;
 import com.blockr.domain.block.interfaces.markers.ReadOnlyConditionedBlock;
+import com.blockr.ui.components.programblocks.ProgramArea;
 import com.gameworld.GameWorld;
 
 import java.util.*;
@@ -19,14 +20,16 @@ public class BlockProgram implements ReadOnlyBlockProgram, Cloneable {
         this.blocks = new HashSet<>();
     }
 
-    private BlockProgram(GameWorld gameWorld, List<Block> components, Set<Block> blocks, StatementBlock currentBlock){
+    private BlockProgram(GameWorld gameWorld, List<Block> components, Set<Block> blocks, StatementBlock currentBlock, boolean bHasStartedExecute){
         this.gameWorld = gameWorld;
         this.components = components;
         this.blocks = blocks;
         this.currentBlock = currentBlock;
+        this.bHasStartedExecute = bHasStartedExecute;
     }
 
     private final GameWorld gameWorld;
+    private boolean bHasStartedExecute = false;
 
     @Override
     public List<? extends ReadOnlyBlock> getComponents() {
@@ -85,7 +88,12 @@ public class BlockProgram implements ReadOnlyBlockProgram, Cloneable {
             throw new RuntimeException("The program must be in a valid state");
 
         if(currentBlock == null){
-            currentBlock = (StatementBlock)components.get(0);
+            if(!bHasStartedExecute){
+                bHasStartedExecute = true;
+                currentBlock = (StatementBlock)components.get(0);
+            }else{
+                return;
+            }
         }
 
         currentBlock = currentBlock.execute(gameWorld);
@@ -104,9 +112,11 @@ public class BlockProgram implements ReadOnlyBlockProgram, Cloneable {
     /**
      * Resets the current execution of the program
      */
-    private void reset(){
+    public void reset(){
         getBlocksOfType(ControlFlowBlock.class).forEach(ControlFlowBlock::reset);
         currentBlock = null;
+        bHasStartedExecute = false;
+        gameWorld.resetWorldSnapshot();
     }
 
     private <T> Set<T> getBlocksOfType(Class<T> clazz){
@@ -190,7 +200,8 @@ public class BlockProgram implements ReadOnlyBlockProgram, Cloneable {
         ensureValidBlock(plugBlock, StatementBlock.class,"plugBlock");
 
         if(!blocks.contains(socketBlock)){
-            throw new IllegalArgumentException("The given socketBlock does not exist");
+            //throw new IllegalArgumentException("The given socketBlock does not exist");
+            addBlock(socketBlock);
         }
 
         reset();
@@ -326,7 +337,8 @@ public class BlockProgram implements ReadOnlyBlockProgram, Cloneable {
         ensureValidBlock(statementBlock, StatementBlock.class, "statementBlock");
 
         if(!blocks.contains(controlFlowBlock)){
-            throw new IllegalArgumentException("The given controlFlowBlock does not exist");
+            //throw new IllegalArgumentException("The given controlFlowBlock does not exist");
+            addBlock(controlFlowBlock);
         }
 
         reset();
@@ -350,6 +362,37 @@ public class BlockProgram implements ReadOnlyBlockProgram, Cloneable {
         rwControlFlowBlock.setBody(rwStatementBlock);
     }
 
+    /**
+     * Connects a statementBlock to a controlFlowBlock as its body. This method should be called when:
+     * - A new statementBlock is connected as the body of a controlFlowBlock
+     * - An existing statementBlock is connected to a controlFlowBlock
+     * - An existing statementBlock is disconnected from a statementBlock and connected to a controlFlowBlock
+     * - An existing statementBlock is disconnected from a controlFlowBlock and connected to another controlFlowBlock
+     */
+    public void connectControlFlowBodyAndCondition(ReadOnlyControlFlowBlock controlFlowBlock, ReadOnlyConditionBlock conditionBlock){
+
+        ensureValidBlock(controlFlowBlock, ControlFlowBlock.class, "controlFlowBlock");
+        ensureValidBlock(conditionBlock, ConditionBlock.class, "statementBlock");
+
+        if(!blocks.contains(controlFlowBlock)){
+            throw new IllegalArgumentException("The given controlFlowBlock does not exist");
+        }
+
+        reset();
+
+        blocks.add(conditionBlock);
+
+        var rwControlFlowBlock = (ControlFlowBlock)controlFlowBlock;
+        var rwConditionBlock = (ConditionBlock)conditionBlock;
+
+        assert rwControlFlowBlock.getBody() == null;
+
+        getBlocksOfType(ControlFlowBlock.class).stream().filter(b -> b.getCondition() == rwConditionBlock).forEach(b -> b.setCondition(null));
+
+        rwControlFlowBlock.setCondition(rwConditionBlock);
+    }
+
+
     private static <T> void ensureValidBlock(Block block, Class<T> type, String argName){
 
         if(block == null){
@@ -362,13 +405,18 @@ public class BlockProgram implements ReadOnlyBlockProgram, Cloneable {
     }
 
     @Override
-    protected Object clone() throws CloneNotSupportedException {
+    public Object clone() throws CloneNotSupportedException {
 
         Map<Block, Block> newBlocks = new HashMap<>();
         List<Block> newComponents = new LinkedList<>();
 
         for(Block block : components){
-            newComponents.add(copyComponent(block, newBlocks));
+            var copy = copyComponent(block, newBlocks);
+            if(block instanceof TurnBlock && copy instanceof TurnBlock){
+                ((TurnBlock)copy).setDirection(((TurnBlock)block).getDirection());
+            }
+            newComponents.add(copy);
+            ProgramArea.CarryOverCopy(block,copy);
         }
 
         StatementBlock newCurrent = null;
@@ -377,7 +425,7 @@ public class BlockProgram implements ReadOnlyBlockProgram, Cloneable {
             newCurrent = (StatementBlock)newBlocks.get(currentBlock);
         }
 
-        return new BlockProgram(gameWorld, newComponents, new HashSet<>(newBlocks.values()), newCurrent);
+        return new BlockProgram(gameWorld, newComponents, new HashSet<>(newBlocks.values()), newCurrent, bHasStartedExecute);
     }
 
     private static Block copyComponent(Block block, Map<Block, Block> allBlocks){
@@ -385,13 +433,19 @@ public class BlockProgram implements ReadOnlyBlockProgram, Cloneable {
         var clone = Palette.createInstance(block);
         allBlocks.put(block, clone);
 
+        if(block instanceof TurnBlock && clone instanceof TurnBlock){
+            ((TurnBlock)clone).setDirection(((TurnBlock)block).getDirection());
+        }
+
         if(block instanceof ControlFlowBlock){
 
             var cfBlock = (ControlFlowBlock)block;
             var newCfBlock = (ControlFlowBlock)clone;
 
             if(cfBlock.getBody() != null){
-                newCfBlock.setBody((StatementBlock)copyComponent(cfBlock.getBody(), allBlocks));
+                var copy = (StatementBlock)copyComponent(cfBlock.getBody(), allBlocks);
+                newCfBlock.setBody(copy);
+                ProgramArea.CarryOverCopy(cfBlock.getBody(),copy);
             }
 
             if(cfBlock.getCurrent() != null){
@@ -405,7 +459,9 @@ public class BlockProgram implements ReadOnlyBlockProgram, Cloneable {
             var newConditionedBlock = (ConditionedBlock)clone;
 
             if(cBlock.getCondition() != null){
-                newConditionedBlock.setCondition((ConditionBlock)copyComponent(cBlock.getCondition(), allBlocks));
+                var copy = (ConditionBlock)copyComponent(cBlock.getCondition(), allBlocks);
+                newConditionedBlock.setCondition(copy);
+                ProgramArea.CarryOverCopy(cBlock.getCondition(),copy);
             }
         }
 
@@ -423,6 +479,7 @@ public class BlockProgram implements ReadOnlyBlockProgram, Cloneable {
         var next = (StatementBlock)copyComponent(statementBlock.getNext(), allBlocks);
         newStatementBlock.setNext(next);
         next.setPrevious(newStatementBlock);
+        ProgramArea.CarryOverCopy(statementBlock.getNext(),next);
 
         return clone;
     }

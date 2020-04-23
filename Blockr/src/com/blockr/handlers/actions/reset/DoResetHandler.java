@@ -13,6 +13,7 @@ public class DoResetHandler extends HandlerBase<DoReset, Voidy> {
     @Override
     public Voidy handle(DoReset doReset) {
         this.getState().getGameWorld().restoreSnapshot(this.getState().getResetWorldState());
+        this.getState().getBlockProgram().reset();
         return new Voidy();
     }
 

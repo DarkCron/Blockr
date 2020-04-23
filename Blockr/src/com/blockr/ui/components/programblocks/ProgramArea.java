@@ -4,11 +4,13 @@ import an.awesome.pipelinr.Pipeline;
 import com.blockr.domain.Palette;
 import com.blockr.domain.block.BlockUtilities;
 import com.blockr.domain.block.StatementBlock;
+import com.blockr.domain.block.TurnBlock;
 import com.blockr.domain.block.interfaces.*;
 import com.blockr.domain.block.interfaces.markers.ReadOnlyConditionBlock;
 import com.blockr.domain.block.interfaces.markers.ReadOnlyConditionedBlock;
 import com.blockr.domain.block.interfaces.markers.ReadOnlyNotBlock;
 import com.blockr.domain.block.interfaces.markers.ReadOnlyWallInFrontBlock;
+import com.blockr.handlers.actions.record.DoRecord;
 import com.blockr.handlers.actions.redo.DoRedo;
 import com.blockr.handlers.actions.reset.DoReset;
 import com.blockr.handlers.actions.undo.DoUndo;
@@ -41,7 +43,7 @@ import java.util.List;
  */
 public class ProgramArea extends Container {
 
-    private final List<ProgramBlockComponent> programBlockComponents = new ArrayList<>();
+    protected static final List<ProgramBlockComponent> programBlockComponents = new ArrayList<>();
     //private static final List<WindowPosition> regionPositions = new ArrayList<>();
 
     private final Pipeline mediator;
@@ -50,6 +52,21 @@ public class ProgramArea extends Container {
     public ProgramArea(Pipeline mediator) {
         this.mediator = mediator;
         mainProgramArea = this;
+    }
+
+    public static void CarryOverCopy(Block block, Block copy) {
+        for (var pbc: programBlockComponents) {
+            if(pbc.getSource() == block){
+                pbc.reassignSource(copy);
+            }
+        }
+
+        var sel1 = mainProgramArea.mediator.send(new GetProgramSelection());
+        if(sel1 != null){
+            if(sel1.getBlockType().getSource() == block){
+                sel1.getBlockType().reassignSource(copy);
+            }
+        }
     }
 
     @Override
@@ -146,7 +163,12 @@ public class ProgramArea extends Container {
             case MOUSE_UP:
                 var paletteSelection = mediator.send(new GetPaletteSelection());
                 if(paletteSelection!=null){
+                    mediator.send(new DoRecord());
+
                     var copy = Palette.createInstance((Block) paletteSelection.getBlockType().getSource());
+                    if(paletteSelection.getBlockType().getSource() instanceof TurnBlock){
+                        ((TurnBlock)copy).setDirection(((TurnBlock) paletteSelection.getBlockType().getSource()).getDirection());
+                    }
 
                     mediator.send(new AddBlock((StatementBlock)copy));
                    // var rootBlock = mediator.send(new GetRootBlock(copy));
@@ -159,6 +181,7 @@ public class ProgramArea extends Container {
                         recordedMouse = (mouseEvent.getWindowPosition().minus(recordedMouse));
                     }
                     programBlockComponents.add(new ProgramBlockComponent(rootBlock,mediator, recordedMouse,this));
+
                     this.getViewContext().repaint();
                 }
                 break;
@@ -195,6 +218,7 @@ public class ProgramArea extends Container {
         //TODO: break up in smaller functions
         var programSelection = mediator.send(new GetProgramSelection());
         if(programSelection != null){
+
             var recordedMouse = mediator.send(new GetMouseRecord());
             if(recordedMouse == null){
                 recordedMouse = (new WindowPosition(50,50));
@@ -203,14 +227,18 @@ public class ProgramArea extends Container {
             }
             var bp = mediator.send(new GetBlockProgram());
             //var selectionRoot = bp.getRootBlock(programSelection.getBlockType().getSource());
-            var componentsToMove = bp.getComponents();
+            var componentsToMove = programSelection.getBlockType().getSource();
             var disconnectionRoot = BlockUtilities.getRootFrom(componentsToMove);
             var disconnectionRootPosition = programSelection.getBlockType().getUpperLeft();
+            disconnectionRootPosition = positionFromBlock(disconnectionRoot) == null? disconnectionRootPosition : positionFromBlock(disconnectionRoot);
 
-            removeProgramBlockComponentsBaseOnRoot(componentsToMove);
+            removeProgramBlockComponentsBaseOnRoot(disconnectionRoot);
 
-            if(programSelection.getBlockType().getSource() instanceof ReadOnlyStatementBlock){
-                mediator.send(new DisconnectStatementBlock((ReadOnlyStatementBlock) programSelection.getBlockType().getSource()));
+            if(componentsToMove instanceof ReadOnlyStatementBlock){
+                if(((ReadOnlyStatementBlock)componentsToMove).getPrevious() != null){
+                    mediator.send(new DisconnectStatementBlock((ReadOnlyStatementBlock) programSelection.getBlockType().getSource()));
+                    buildProgramBlockComponentFromRoot(disconnectionRoot,disconnectionRootPosition);
+                }
             }else if(programSelection.getBlockType().getSource() instanceof ReadOnlyConditionedBlock){
                 mediator.send(new DisconnectConditionBlock((ReadOnlyConditionBlock) programSelection.getBlockType().getSource()));
             }
@@ -220,12 +248,20 @@ public class ProgramArea extends Container {
             //removeProgramBlockComponentsBaseOnRoot(programSelection.getBlockType().getSource());
 
             //buildProgramBlockComponentFromRoot(programSelection.getBlockType().getSource(),recordedMouse);
-            buildProgramBlockComponentFromRoot(disconnectionRoot,disconnectionRootPosition);
-            buildProgramBlockComponentFromRoot((ReadOnlyConditionBlock) programSelection.getBlockType().getSource(),recordedMouse);
+            buildProgramBlockComponentFromRoot(programSelection.getBlockType().getSource(),recordedMouse);
 
             var temp = programBlockComponents.stream().filter(pbc -> pbc.getSource() == programSelection.getBlockType().getSource()).findFirst().orElse(null);
             mediator.send(new SetProgramSelection(recordedMouse,temp));
         }
+    }
+
+    private WindowPosition positionFromBlock(ReadOnlyBlock disconnectionRoot) {
+        for (var pbc: programBlockComponents) {
+            if(pbc.getSource() == disconnectionRoot){
+                return pbc.getUpperLeft();
+            }
+        }
+        return null;
     }
 
     @Override
@@ -271,7 +307,11 @@ public class ProgramArea extends Container {
      */
     public void cleanUp(ProgramBlockComponent programBlockComponent) {
         removeProgramBlockComponentsBaseOnRoot(programBlockComponent.getSource());
-        mediator.send(new RemoveBlock((ReadOnlyStatementBlock) programBlockComponent.getSource()));
+        try {
+            mediator.send(new RemoveBlock((ReadOnlyStatementBlock) programBlockComponent.getSource()));
+        }catch (Exception e){
+
+        }
     }
 
 
@@ -291,10 +331,15 @@ public class ProgramArea extends Container {
      * @param state A snapshot of the current layout and locations of the Program Area
      */
     public static void restoreProgramAreaState(ProgramAreaState state) {
+        while (programBlockComponents.size() > 0){
+            mainProgramArea.cleanUp(programBlockComponents.get(0));
+        }
         for (var rootAndLocation: state.getRootLocations()) {
-            mainProgramArea.removeProgramBlockComponentsBaseOnRoot(rootAndLocation.getFirst());
+            //mainProgramArea.removeProgramBlockComponentsBaseOnRoot(rootAndLocation.getFirst());
             mainProgramArea.buildProgramBlockComponentFromRoot(rootAndLocation.getFirst(),rootAndLocation.getSecond());
         }
+
+        mainProgramArea.getViewContext().repaint();
     }
 
 
@@ -319,14 +364,21 @@ public class ProgramArea extends Container {
     public void onKeyEvent(KeyPressUtility keyPressUtility) {
         if(keyPressUtility.hasPressedUndo()){
             mediator.send(new DoUndo());
+            keyPressUtility.ConsumeInput();
         }else if(keyPressUtility.hasPressedRedo()){
             mediator.send(new DoRedo());
+            keyPressUtility.ConsumeInput();
         }else if(keyPressUtility.hasPressedExecute()){
             if(mediator.send(new CanStart())){
                 mediator.send(new ExecuteProgram());
+                keyPressUtility.ConsumeInput();
+                getViewContext().repaint();
             }
         }else if(keyPressUtility.hasPressedResetProgram()){
             mediator.send(new DoReset());
+            keyPressUtility.ConsumeInput();
+            getViewContext().repaint();
         }
+        keyPressUtility.Reset();
     }
 }

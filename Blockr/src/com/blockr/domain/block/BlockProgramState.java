@@ -4,7 +4,7 @@ public class BlockProgramState {
     private final BlockProgram bp;
 
     public BlockProgramState(BlockProgram bp) throws CloneNotSupportedException{
-        this.bp = (BlockProgram) bp.clone();
+        this.bp = bp;
     }
 
     public BlockProgram getBp() {

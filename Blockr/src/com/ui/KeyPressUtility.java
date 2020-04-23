@@ -21,6 +21,9 @@ public class KeyPressUtility {
         }
     }
 
+    public void ConsumeInput(){
+        pressedKeys.clear();
+    }
 
     /**
      * @return true if ESC is pressed and nothing else
@@ -52,5 +55,11 @@ public class KeyPressUtility {
      */
     public boolean hasPressedRedo(){
         return pressedKeys.size() == 3 && pressedKeys.contains(KeyEvent.VK_CONTROL) && pressedKeys.contains(KeyEvent.VK_Z) && pressedKeys.contains(KeyEvent.VK_SHIFT);
+    }
+
+    public void Reset() {
+        if(pressedKeys.size() >= 3){
+            pressedKeys.clear();
+        }
     }
 }

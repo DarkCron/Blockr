@@ -64,16 +64,36 @@ public class ExecuteProgramButton extends DivComponent {
         TEXT.draw(graphics);
     }
 
+    private static boolean bMouseLock = false;
+
     @Override
     public void onMouseEvent(MouseEvent mouseEvent) {
         enabled = pipeline.send(new CanStart());
+
+        switch (mouseEvent.getType()){
+            case MOUSE_UP:
+                bMouseLock = false;
+                break;
+        }
 
         if(!enabled){
             //optionally do something here
             return;
         }
+        if(bMouseLock){
+            return;
+        }
 
-        pipeline.send(new ExecuteProgram());
+        switch (mouseEvent.getType()){
+            case MOUSE_DOWN:
+                bMouseLock = true;
+                pipeline.send(new ExecuteProgram());
+                break;
+            case MOUSE_UP:
+                bMouseLock = false;
+                break;
+        }
+
 
         getViewContext().repaint();
 
