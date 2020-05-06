@@ -334,7 +334,7 @@ public class BlockProgram implements ReadOnlyBlockProgram, Cloneable {
      */
     public void connectContainedBlockBody(ReadOnlyContainerBlock containerBlock, ReadOnlyStatementBlock statementBlock){
 
-        ensureValidBlock(containerBlock, ContainerBlock.class, "controlFlowBlock");
+        ensureValidBlock(containerBlock, ContainerBlock.class, "containerBlock");
         ensureValidBlock(statementBlock, StatementBlock.class, "statementBlock");
 
         if(!blocks.contains(containerBlock)){
@@ -390,32 +390,6 @@ public class BlockProgram implements ReadOnlyBlockProgram, Cloneable {
         getBlocksOfType(ControlFlowBlock.class).stream().filter(b -> b.getCondition() == rwConditionBlock).forEach(b -> b.setCondition(null));
 
         rwControlFlowBlock.setCondition(rwConditionBlock);
-    }
-
-    /**
-     * CREATE and connect a new Function Definition Block to the program, this should automatically add a FunctionBlock to the program area as well.
-     * NOTE: both the socket and plug can be a Function Definition Block, you'll have to figure out which isn't in the BlockProgram yet (since this will be the new one)
-     * Function definition is the statement block of a function in a program. Function Block is the container with the logic for the function.
-     * @param socketBlock
-     * @param plugBlock
-     */
-    public void connectFunctionDefinitionBlock(ReadOnlyStatementBlock socketBlock, ReadOnlyStatementBlock plugBlock) {
-        if(socketBlock instanceof ReadOnlyFunctionDefinitionBlock){
-            //...
-        }else if(plugBlock instanceof ReadOnlyFunctionDefinitionBlock){
-            //...
-        }
-
-        //Create and add a FunctionBlock
-    }
-
-    /**
-     * Connect a given statement plug block to the socket function block.
-     * The functionblock is guaranteed to exist.
-     * @param socketBlock
-     * @param plugBlock
-     */
-    public void connectFunctionBlock(ReadOnlyFunctionBlock socketBlock, ReadOnlyStatementBlock plugBlock) {
     }
 
     private static <T> void ensureValidBlock(Block block, Class<T> type, String argName){
