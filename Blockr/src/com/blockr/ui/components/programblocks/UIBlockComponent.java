@@ -2,10 +2,7 @@ package com.blockr.ui.components.programblocks;
 
 import an.awesome.pipelinr.Pipeline;
 import com.blockr.domain.block.*;
-import com.blockr.domain.block.interfaces.Block;
-import com.blockr.domain.block.interfaces.ReadOnlyBlock;
-import com.blockr.domain.block.interfaces.ReadOnlyControlFlowBlock;
-import com.blockr.domain.block.interfaces.ReadOnlyStatementBlock;
+import com.blockr.domain.block.interfaces.*;
 import com.blockr.domain.block.interfaces.markers.ReadOnlyConditionBlock;
 import com.blockr.domain.block.interfaces.markers.ReadOnlyNotBlock;
 import com.blockr.domain.block.interfaces.markers.ReadOnlyWallInFrontBlock;
@@ -56,6 +53,14 @@ public abstract class UIBlockComponent extends Component {
             return BlockData.BLOCK_HEIGHT;
         }else if(source instanceof ReadOnlyConditionBlock){
             return BlockData.CONDITION_BLOCK_HEIGHT;
+        }else if(source instanceof ReadOnlyFunctionBlock){
+            int bodyheight = 0;
+            var body = ((ReadOnlyFunctionBlock) source).getBody();
+            while (body != null) {
+                bodyheight += getHeight(body);
+                body = body.getNext();
+            }
+            return BlockData.BLOCK_HEIGHT + bodyheight;
         }
         return BlockData.BLOCK_HEIGHT;
     }
@@ -76,6 +81,8 @@ public abstract class UIBlockComponent extends Component {
             }else if(source instanceof ReadOnlyNotBlock){
                 return BlockData.CONDITION_BLOCK_WIDTH;
             }
+        }else if(source instanceof ReadOnlyFunctionBlock){
+            return BlockData.BLOCK_WIDTH;
         }
         return BlockData.BLOCK_WIDTH;
     }
@@ -141,7 +148,15 @@ public abstract class UIBlockComponent extends Component {
     protected ClickLocations getClickLocation(WindowPosition mousePostion, ReadOnlyBlock blockToAdd){
         var relativePosition = mousePostion.minus(upperLeft);
         relativePosition = relativePosition.minus(new WindowPosition(-4,7));
-        if(source instanceof ReadOnlyControlFlowBlock){
+
+        if(source instanceof ReadOnlyFunctionBlock){
+            if(blockToAdd instanceof ReadOnlyStatementBlock){
+                var region = new WindowRegion(BlockData.CONTROL_FLOW_INNER_START,BlockData.CONDITION_BLOCK_HEIGHT/2,BlockData.BLOCK_WIDTH,BlockData.CONDITION_BLOCK_HEIGHT);
+                if(region.contains(relativePosition)){
+                    return ClickLocations.CFB_BODY;
+                }
+            }
+        }else if(source instanceof ReadOnlyControlFlowBlock){
             if(blockToAdd instanceof ReadOnlyConditionBlock){
                 var region = new WindowRegion(BlockData.BLOCK_WIDTH - BlockData.CONDITION_BLOCK_WIDTH, 0, BlockData.BLOCK_WIDTH,BlockData.CONDITION_BLOCK_HEIGHT);
                 if(region.contains(relativePosition)){
@@ -202,7 +217,10 @@ public abstract class UIBlockComponent extends Component {
 
     @Override
     protected void draw(Graphics graphics) {
-        if(source instanceof ReadOnlyControlFlowBlock){
+        if(source instanceof ReadOnlyFunctionBlock){
+            drawControlFlow(graphics);
+            //drawControlFlow should work otherwise use drawFunction
+        }else if(source instanceof ReadOnlyControlFlowBlock){
             drawControlFlow(graphics);
         }else if(source instanceof ReadOnlyStatementBlock){
             drawNormalStatement(graphics);
@@ -211,6 +229,48 @@ public abstract class UIBlockComponent extends Component {
         }
 
         drawTextComponent(graphics);
+    }
+
+    private void drawFunction(Graphics graphics) {
+        var w = WindowRegion.fromGraphics(graphics);
+        //Since I technically draw the CFB on 'TOP' of it's body I only draw the part that is supposed to be below it thanks to a custom poly shape.
+        {
+            int x0 = 0;
+            int x1 = Math.min(BlockData.BLOCK_WIDTH,w.getWidth());
+            int x2 = x1;
+            int x3 = Math.min(BlockData.CONTROL_FLOW_INNER_START, w.getWidth());
+            int x4 = x3;
+            int x5 = x1;
+            int x6 = x1;
+            int x7 = x0;
+
+            int y0 = 0;
+            int y1 = y0;
+            int y2 = Math.min(BlockData.CONDITION_BLOCK_HEIGHT, w.getHeight());
+            int y3 = Math.min(BlockData.CONDITION_BLOCK_HEIGHT, w.getHeight());
+            int y4 = Math.min(getHeight(source)-(BlockData.BLOCK_HEIGHT - BlockData.CONDITION_BLOCK_HEIGHT), w.getHeight());
+            int y5 = y4;
+            int y6 = Math.min(getHeight(source), w.getHeight());
+            int y7 = y6;
+
+            Polygon flowShape = new Polygon(new int[]{x0,x1,x2,x3,x4,x5,x6,x7}, new int[]{y0,y1,y2,y3,y4,y5,y6,y7},8);
+
+            graphics.setClip(flowShape);
+            graphics.setColor(Color.green);
+            graphics.fillRect(0, 0, getWidth(source), getHeight(source));
+
+            if(mediator.send(new GetBlockProgram()).getActive() == source){
+                graphics.setColor(Color.PINK);
+                graphics.fillRect(0, 0, getWidth(source), getHeight(source));
+                graphics.setColor(Color.green);
+                graphics.fillRect(BlockData.BLOCK_SELECTION_BORDER, BlockData.BLOCK_SELECTION_BORDER, getWidth(source) - 2*BlockData.BLOCK_SELECTION_BORDER, getHeight(source) - 2*BlockData.BLOCK_SELECTION_BORDER);
+            }
+
+            flowShape = new Polygon(new int[]{Math.max(0,x0),Math.max(0,x1-1),Math.max(0,x2-1),Math.max(0,x3-1),Math.max(0,x4-1),Math.max(0,x5-1),Math.max(0,x6-1),Math.max(0,x7)}
+                    , new int[]{Math.max(0,y0),Math.max(0,y1),Math.max(0,y2-1),Math.max(0,y3-1),Math.max(0,y4),Math.max(0,y5),Math.max(0,y6-1),Math.max(0,y7-1)},8);
+            graphics.setColor(Color.black);
+            graphics.drawPolygon(flowShape);
+        }
     }
 
     private void drawTextComponent(Graphics graphics) {

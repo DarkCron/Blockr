@@ -4,10 +4,7 @@ import an.awesome.pipelinr.Pipeline;
 import com.blockr.domain.Palette;
 import com.blockr.domain.block.BlockUtilities;
 import com.blockr.domain.block.TurnBlock;
-import com.blockr.domain.block.interfaces.Block;
-import com.blockr.domain.block.interfaces.ReadOnlyBlock;
-import com.blockr.domain.block.interfaces.ReadOnlyControlFlowBlock;
-import com.blockr.domain.block.interfaces.ReadOnlyStatementBlock;
+import com.blockr.domain.block.interfaces.*;
 import com.blockr.domain.block.interfaces.markers.ReadOnlyConditionBlock;
 import com.blockr.domain.block.interfaces.markers.ReadOnlyConditionedBlock;
 import com.blockr.handlers.actions.record.DoRecord;
@@ -17,6 +14,8 @@ import com.blockr.handlers.blockprogram.connectCFandCondition.ConnectControlFlow
 import com.blockr.handlers.blockprogram.connectconditionblock.ConnectConditionBlock;
 import com.blockr.handlers.blockprogram.connectcontrolflowbody.ConnectControlFlowBody;
 import com.blockr.handlers.blockprogram.connectcontrolflowbody.ConnectControlFlowBodyHandler;
+import com.blockr.handlers.blockprogram.connectfunctionblock.ConnectFunctionBlock;
+import com.blockr.handlers.blockprogram.connectfunctiondefinitionblock.ConnectFunctionDefinitionBlock;
 import com.blockr.handlers.blockprogram.connectstatementblock.ConnectStatementBlock;
 import com.blockr.handlers.blockprogram.getblockprogram.GetBlockProgram;
 import com.blockr.handlers.ui.input.GetPaletteSelection;
@@ -69,13 +68,22 @@ public class ProgramBlockComponent extends UIBlockComponent {
                             programArea.updateBlockProgram(info.getSocket());
                         }else{
                             if(info.getPlugLocation() == ProgramBlockInsertInfo.PlugLocation.BODY){
-                                mediator.send(new ConnectControlFlowBody((ReadOnlyControlFlowBlock) info.getSocket(),(ReadOnlyStatementBlock) info.getPlug()));
+                                if(info.getSocket() instanceof ReadOnlyFunctionBlock){
+                                    mediator.send(new ConnectFunctionBlock((ReadOnlyFunctionBlock)info.getSocket(),(ReadOnlyStatementBlock)info.getPlug()));
+                                }else if(info.getSocket() instanceof ReadOnlyControlFlowBlock){
+                                    mediator.send(new ConnectControlFlowBody((ReadOnlyControlFlowBlock) info.getSocket(),(ReadOnlyStatementBlock) info.getPlug()));
+                                }
                             }else if(info.getPlug() instanceof ReadOnlyConditionBlock && info.getSocket() instanceof ReadOnlyConditionBlock){
                                 mediator.send(new ConnectConditionBlock((ReadOnlyConditionedBlock) info.getSocket(), (ReadOnlyConditionBlock) info.getPlug()));
                             }else if(info.getSocket() instanceof ReadOnlyControlFlowBlock && info.getPlug() instanceof ReadOnlyConditionBlock){
                                 mediator.send(new ConnectControlFlowAndCondition((ReadOnlyControlFlowBlock) info.getSocket(), (ReadOnlyConditionBlock) info.getPlug()));
                             }else{
-                                mediator.send(new ConnectStatementBlock((ReadOnlyStatementBlock) info.getSocket(),(ReadOnlyStatementBlock) info.getPlug()));
+                                if((info.getSocket() instanceof ReadOnlyFunctionDefinition && !blockProgramHasFunctionDef(bp, (ReadOnlyFunctionDefinition) info.getSocket())) ||
+                                        (info.getPlug() instanceof  ReadOnlyFunctionDefinition && !blockProgramHasFunctionDef(bp, (ReadOnlyFunctionDefinition) info.getPlug()))){
+                                    mediator.send(new ConnectFunctionDefinitionBlock((ReadOnlyStatementBlock)info.getSocket(),(ReadOnlyStatementBlock)info.getPlug()));
+                                }else{
+                                    mediator.send(new ConnectStatementBlock((ReadOnlyStatementBlock) info.getSocket(),(ReadOnlyStatementBlock) info.getPlug()));
+                                }
                             }
                         }
                         programArea.updateBlockProgram(BlockUtilities.getRootFrom(info.getSocket(),mediator.send(new GetBlockProgram())));
@@ -107,6 +115,20 @@ public class ProgramBlockComponent extends UIBlockComponent {
             case MOUSE_DOWN:
                 break;
         }
+    }
+
+    private boolean blockProgramHasFunctionDef(ReadOnlyBlockProgram bp, ReadOnlyFunctionDefinition b){
+        if(bp.getComponents().size() == 0){
+            return false;
+        }
+        var body = bp.getComponents().get(0);
+        while (body!= null && body instanceof ReadOnlyStatementBlock){
+            if(body == b){
+                return true;
+            }
+            body = ((ReadOnlyStatementBlock) body).getNext();
+        }
+        return false;
     }
 
     /**
