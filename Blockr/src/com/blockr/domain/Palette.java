@@ -37,8 +37,7 @@ public class Palette {
         try{
             return block.getClass().getDeclaredConstructor().newInstance();
         }catch(Exception ex){
-            // ignored
-            return null;
+            return new MoveForwardBlock();
         }
     }
 }

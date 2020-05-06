@@ -332,7 +332,7 @@ public class BlockProgram implements ReadOnlyBlockProgram, Cloneable {
      * - An existing statementBlock is disconnected from a statementBlock and connected to a containerBlock
      * - An existing statementBlock is disconnected from a containerBlock and connected to another containerBlock
      */
-    public void connectContainedBlockBody(ReadOnlyContainerBlock containerBlock, ReadOnlyStatementBlock statementBlock){
+    public void connectContainerBlockBody(ReadOnlyContainerBlock containerBlock, ReadOnlyStatementBlock statementBlock){
 
         ensureValidBlock(containerBlock, ContainerBlock.class, "containerBlock");
         ensureValidBlock(statementBlock, StatementBlock.class, "statementBlock");
@@ -360,36 +360,6 @@ public class BlockProgram implements ReadOnlyBlockProgram, Cloneable {
 
         components.remove(rwStatementBlock);
         rwContainerBlock.setBody(rwStatementBlock);
-    }
-
-    /**
-     * Connects a statementBlock to a controlFlowBlock as its body. This method should be called when:
-     * - A new statementBlock is connected as the body of a controlFlowBlock
-     * - An existing statementBlock is connected to a controlFlowBlock
-     * - An existing statementBlock is disconnected from a statementBlock and connected to a controlFlowBlock
-     * - An existing statementBlock is disconnected from a controlFlowBlock and connected to another controlFlowBlock
-     */
-    public void connectControlFlowBodyAndCondition(ReadOnlyControlFlowBlock controlFlowBlock, ReadOnlyConditionBlock conditionBlock){
-
-        ensureValidBlock(controlFlowBlock, ControlFlowBlock.class, "controlFlowBlock");
-        ensureValidBlock(conditionBlock, ConditionBlock.class, "statementBlock");
-
-        if(!blocks.contains(controlFlowBlock)){
-            throw new IllegalArgumentException("The given controlFlowBlock does not exist");
-        }
-
-        reset();
-
-        blocks.add(conditionBlock);
-
-        var rwControlFlowBlock = (ControlFlowBlock)controlFlowBlock;
-        var rwConditionBlock = (ConditionBlock)conditionBlock;
-
-        assert rwControlFlowBlock.getBody() == null;
-
-        getBlocksOfType(ControlFlowBlock.class).stream().filter(b -> b.getCondition() == rwConditionBlock).forEach(b -> b.setCondition(null));
-
-        rwControlFlowBlock.setCondition(rwConditionBlock);
     }
 
     private static <T> void ensureValidBlock(Block block, Class<T> type, String argName){
@@ -478,6 +448,7 @@ public class BlockProgram implements ReadOnlyBlockProgram, Cloneable {
         var next = (StatementBlock)copyComponent(statementBlock.getNext(), allBlocks);
         newStatementBlock.setNext(next);
         next.setPrevious(newStatementBlock);
+
         ProgramArea.CarryOverCopy(statementBlock.getNext(),next);
 
         return clone;

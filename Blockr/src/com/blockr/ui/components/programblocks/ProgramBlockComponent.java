@@ -13,7 +13,7 @@ import com.blockr.handlers.actions.record.DoRecord;
 import com.blockr.handlers.blockprogram.addblock.AddBlock;
 import com.blockr.handlers.blockprogram.connectCFandCondition.ConnectControlFlowAndCondition;
 import com.blockr.handlers.blockprogram.connectconditionblock.ConnectConditionBlock;
-import com.blockr.handlers.blockprogram.connectcontrolflowbody.ConnectControlFlowBody;
+import com.blockr.handlers.blockprogram.connectcontainerblockbody.ConnectContainerBlockBody;
 import com.blockr.handlers.blockprogram.connectfunctionblock.ConnectFunctionBlock;
 import com.blockr.handlers.blockprogram.connectfunctiondefinitionblock.ConnectFunctionDefinitionBlock;
 import com.blockr.handlers.blockprogram.connectstatementblock.ConnectStatementBlock;
@@ -71,7 +71,7 @@ public class ProgramBlockComponent extends UIBlockComponent {
                                 if(info.getSocket() instanceof ReadOnlyFunctionBlock){
                                     mediator.send(new ConnectFunctionBlock((ReadOnlyFunctionBlock)info.getSocket(),(ReadOnlyStatementBlock)info.getPlug()));
                                 }else if(info.getSocket() instanceof ReadOnlyControlFlowBlock){
-                                    mediator.send(new ConnectControlFlowBody((ReadOnlyControlFlowBlock) info.getSocket(),(ReadOnlyStatementBlock) info.getPlug()));
+                                    mediator.send(new ConnectContainerBlockBody((ReadOnlyControlFlowBlock) info.getSocket(),(ReadOnlyStatementBlock) info.getPlug()));
                                 }
                             }else if(info.getPlug() instanceof ReadOnlyConditionBlock && info.getSocket() instanceof ReadOnlyConditionBlock){
                                 mediator.send(new ConnectConditionBlock((ReadOnlyConditionedBlock) info.getSocket(), (ReadOnlyConditionBlock) info.getPlug()));

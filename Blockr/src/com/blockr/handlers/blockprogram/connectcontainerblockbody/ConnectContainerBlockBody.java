@@ -1,12 +1,11 @@
-package com.blockr.handlers.blockprogram.connectCFandCondition;
+package com.blockr.handlers.blockprogram.connectcontainerblockbody;
 
 import an.awesome.pipelinr.Command;
 import an.awesome.pipelinr.Voidy;
 import com.blockr.domain.block.interfaces.ReadOnlyControlFlowBlock;
 import com.blockr.domain.block.interfaces.ReadOnlyStatementBlock;
-import com.blockr.domain.block.interfaces.markers.ReadOnlyConditionBlock;
 
-public class ConnectControlFlowAndCondition implements Command<Voidy> {
+public class ConnectContainerBlockBody implements Command<Voidy> {
 
     public ReadOnlyControlFlowBlock getControlFlowBlock(){
         return controlFlowBlock;
@@ -14,13 +13,13 @@ public class ConnectControlFlowAndCondition implements Command<Voidy> {
 
     private final ReadOnlyControlFlowBlock controlFlowBlock;
 
-    public ReadOnlyConditionBlock getStatementBlock(){
+    public ReadOnlyStatementBlock getStatementBlock(){
         return statementBlock;
     }
 
-    private final ReadOnlyConditionBlock statementBlock;
+    private final ReadOnlyStatementBlock statementBlock;
 
-    public ConnectControlFlowAndCondition(ReadOnlyControlFlowBlock controlFlowBlock, ReadOnlyConditionBlock statementBlock) {
+    public ConnectContainerBlockBody(ReadOnlyControlFlowBlock controlFlowBlock, ReadOnlyStatementBlock statementBlock) {
         this.controlFlowBlock = controlFlowBlock;
         this.statementBlock = statementBlock;
     }
