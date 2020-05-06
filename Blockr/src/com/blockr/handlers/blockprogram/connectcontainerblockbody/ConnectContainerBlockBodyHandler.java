@@ -12,7 +12,7 @@ public class ConnectContainerBlockBodyHandler extends HandlerBase<ConnectContain
 
     @Override
     public Voidy handle(ConnectContainerBlockBody connectContainerBlockBody) {
-        getState().getBlockProgram().connectContainerBlockBody(connectContainerBlockBody.getControlFlowBlock(), connectContainerBlockBody.getStatementBlock());
+        getState().getBlockProgram().connectContainerBlockBody(connectContainerBlockBody.getContainerBlock(), connectContainerBlockBody.getStatementBlock());
         return new Voidy();
     }
 }
