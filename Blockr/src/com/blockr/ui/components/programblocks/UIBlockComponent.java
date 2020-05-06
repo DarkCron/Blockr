@@ -119,6 +119,21 @@ public abstract class UIBlockComponent extends Component {
                         }
 
                     }
+                }else if(source instanceof ReadOnlyFunctionBlock){
+                    if (((ReadOnlyFunctionBlock) source).getBody() != null){
+                        var body = ((ReadOnlyControlFlowBlock) source).getBody();
+                        while (body!=null){
+                            for (var pbc: ProgramArea.programBlockComponents) {
+                                if(pbc.getSource() == body){
+                                    var result = pbc.getSocketAndPlug(mousePosition,blockToAdd);
+                                    if(result != null){
+                                        return result;
+                                    }
+                                }
+                            }
+                            body = body.getNext();
+                        }
+                    }
                 }
                 return null;
             case NEXT:

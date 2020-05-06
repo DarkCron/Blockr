@@ -1,7 +1,2 @@
 Manifest-Version: 1.0
-Main-Class: 
-Class-Path: pipelinr-0.5.jar objenesis-3.1.jar opentest4j-1.2.0.jar byte
- -buddy-1.10.5.jar mockito-core-3.3.3.jar apiguardian-api-1.1.0.jar byte
- -buddy-agent-1.10.5.jar junit-jupiter-api-5.6.0.jar junit-jupiter-param
- s-5.6.0.jar junit-platform-commons-1.6.0.jar
 
