@@ -2,7 +2,7 @@ package com.blockr.handlers.blockprogram.connectfunctionblock;
 
 import an.awesome.pipelinr.Command;
 import an.awesome.pipelinr.Voidy;
-import com.blockr.domain.block.interfaces.ReadOnlyFunctionBlock;
+import com.blockr.domain.block.interfaces.markers.ReadOnlyFunctionBlock;
 import com.blockr.domain.block.interfaces.ReadOnlyStatementBlock;
 
 public class ConnectFunctionBlock implements Command<Voidy> {

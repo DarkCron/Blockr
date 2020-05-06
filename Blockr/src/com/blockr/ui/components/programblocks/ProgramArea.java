@@ -2,6 +2,7 @@ package com.blockr.ui.components.programblocks;
 
 import an.awesome.pipelinr.Pipeline;
 import com.blockr.domain.Palette;
+import com.blockr.domain.block.BlockProgram;
 import com.blockr.domain.block.BlockUtilities;
 import com.blockr.domain.block.StatementBlock;
 import com.blockr.domain.block.TurnBlock;
@@ -98,7 +99,7 @@ public class ProgramArea extends Container {
      * @param root The 'root' of a BlockProgram is the first (highest visually) Statement Block of a BlockProgram.
      *             A Block is a root if root.getPrevious() == null
      */
-    private void removeProgramBlockComponentsBaseOnRoot(ReadOnlyBlock root){
+    private void removeProgramBlockComponentsBaseOnRoot(Block root){
         if(root == null){
             return;
         }
@@ -120,9 +121,9 @@ public class ProgramArea extends Container {
         }
     }
 
-    private void removeProgramBlockComponentsBaseOnRoot(List<? extends ReadOnlyBlock> componentsToMove) {
+    private void removeProgramBlockComponentsBaseOnRoot(List<? extends Block> componentsToMove) {
         //TODO: not efficient but works
-        for (ReadOnlyBlock b: componentsToMove) {
+        for (Block b: componentsToMove) {
             removeProgramBlockComponentsBaseOnRoot(b);
         }
     }
@@ -135,7 +136,7 @@ public class ProgramArea extends Container {
      * @param rootPosition The Block of a BlockProgram are visually based on screen based on a position relative to the RootPosition, the
      *                     position of the 'root' Block. This position is effectively the Right Upper position of this 'root' block.
      */
-    private void buildProgramBlockComponentFromRoot(ReadOnlyBlock root, WindowPosition rootPosition){
+    private void buildProgramBlockComponentFromRoot(Block root, WindowPosition rootPosition){
         if(root == null){
             return;
         }
@@ -170,7 +171,7 @@ public class ProgramArea extends Container {
                         ((TurnBlock)copy).setDirection(((TurnBlock) paletteSelection.getBlockType().getSource()).getDirection());
                     }
 
-                    mediator.send(new AddBlock((StatementBlock)copy));
+                    mediator.send(new AddBlock(copy));
                    // var rootBlock = mediator.send(new GetRootBlock(copy));
                     var rootBlock = copy;
 
@@ -255,7 +256,7 @@ public class ProgramArea extends Container {
         }
     }
 
-    private WindowPosition positionFromBlock(ReadOnlyBlock disconnectionRoot) {
+    private WindowPosition positionFromBlock(Block disconnectionRoot) {
         for (var pbc: programBlockComponents) {
             if(pbc.getSource() == disconnectionRoot){
                 return pbc.getUpperLeft();
@@ -284,7 +285,7 @@ public class ProgramArea extends Container {
      * 4) Redraw the visuals
      * @param newRoot The 'root' of the BlockProgram to update.
      */
-    public void updateBlockProgram(ReadOnlyBlock newRoot) {
+    public void updateBlockProgram(Block newRoot) {
         //TODO: keep this for testing purposes for now
         if(newRoot == null || ((ReadOnlyStatementBlock)newRoot).getPrevious() != null){
             System.out.println();
@@ -322,7 +323,7 @@ public class ProgramArea extends Container {
      *            currently in the Program Area
      * @return A generated snapshot of the Game Area components and locations
      */
-    public static ProgramAreaState generateProgramAreaState(ReadOnlyBlockProgram rbp){
+    public static ProgramAreaState generateProgramAreaState(BlockProgram rbp){
         return new ProgramAreaState(mainProgramArea, rbp);
     }
 
@@ -346,11 +347,11 @@ public class ProgramArea extends Container {
     /**
      * Returns the upper left position of the visual component of a certain block if it's present in the
      * Game Area.
-     * @param rob a ReadOnlyBlock that is or is not pressent in the game Area
+     * @param rob a Block that is or is not pressent in the game Area
      * @return returns the upper left location of the given block if it's in the Game Area,
      *          Returns null if the block isn't available.
      */
-    public WindowPosition locationOf(ReadOnlyBlock rob) {
+    public WindowPosition locationOf(Block rob) {
         for (ProgramBlockComponent pbc: programBlockComponents) {
             if(pbc.getSource() == rob){
                 return pbc.getUpperLeft();

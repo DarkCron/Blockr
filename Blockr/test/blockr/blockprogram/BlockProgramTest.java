@@ -69,7 +69,7 @@ public class BlockProgramTest {
 
         blockProgram.addBlock(socketBlock);
         blockProgram.addBlock(whileBlock);
-        blockProgram.connectControlFlowBody(whileBlock, plugBlock);
+        blockProgram.connectContainedBlockBody(whileBlock, plugBlock);
 
         blockProgram.connectStatementBlock(socketBlock, plugBlock);
 
@@ -167,7 +167,7 @@ public class BlockProgramTest {
         var plugBlock = new MoveForwardBlock();
 
         blockProgram.addBlock(whileBlock);
-        blockProgram.connectControlFlowBody(whileBlock, plugBlock);
+        blockProgram.connectContainedBlockBody(whileBlock, plugBlock);
 
         blockProgram.disconnectStatementBlock(plugBlock);
 
@@ -250,7 +250,7 @@ public class BlockProgramTest {
 
         blockProgram.addBlock(whileBlock);
 
-        blockProgram.connectControlFlowBody(whileBlock, plugBlock);
+        blockProgram.connectContainedBlockBody(whileBlock, plugBlock);
 
         Assertions.assertEquals(2, blockProgram.getBlockCount());
         Assertions.assertEquals(1, blockProgram.getComponents().size());
@@ -266,7 +266,7 @@ public class BlockProgramTest {
         blockProgram.addBlock(whileBlock);
         blockProgram.addBlock(plugBlock);
 
-        blockProgram.connectControlFlowBody(whileBlock, plugBlock);
+        blockProgram.connectContainedBlockBody(whileBlock, plugBlock);
 
         Assertions.assertEquals(1, blockProgram.getComponents().size());
         Assertions.assertEquals(plugBlock, whileBlock.getBody());
@@ -283,7 +283,7 @@ public class BlockProgramTest {
         blockProgram.addBlock(moveForwardBlock);
         blockProgram.connectStatementBlock(moveForwardBlock, plugBlock);
 
-        blockProgram.connectControlFlowBody(whileBlock, plugBlock);
+        blockProgram.connectContainedBlockBody(whileBlock, plugBlock);
 
         Assertions.assertNull(plugBlock.getPrevious());
         Assertions.assertNull(moveForwardBlock.getNext());
@@ -299,9 +299,9 @@ public class BlockProgramTest {
 
         blockProgram.addBlock(whileBlock);
         blockProgram.addBlock(ifBlock);
-        blockProgram.connectControlFlowBody(ifBlock, plugBlock);
+        blockProgram.connectContainedBlockBody(ifBlock, plugBlock);
 
-        blockProgram.connectControlFlowBody(whileBlock, plugBlock);
+        blockProgram.connectContainedBlockBody(whileBlock, plugBlock);
 
         Assertions.assertNull(ifBlock.getBody());
         Assertions.assertEquals(plugBlock, whileBlock.getBody());
@@ -342,7 +342,7 @@ public class BlockProgramTest {
         var plugBlock = new MoveForwardBlock();
 
         blockProgram.addBlock(whileBlock);
-        blockProgram.connectControlFlowBody(whileBlock, plugBlock);
+        blockProgram.connectContainedBlockBody(whileBlock, plugBlock);
 
         blockProgram.removeBlock(plugBlock);
 
@@ -374,8 +374,8 @@ public class BlockProgramTest {
         var plugBlock = new MoveForwardBlock();
 
         blockProgram.addBlock(whileBlock);
-        blockProgram.connectControlFlowBody(whileBlock, ifBlock);
-        blockProgram.connectControlFlowBody(ifBlock, plugBlock);
+        blockProgram.connectContainedBlockBody(whileBlock, ifBlock);
+        blockProgram.connectContainedBlockBody(ifBlock, plugBlock);
         blockProgram.connectConditionBlock(ifBlock, condition);
 
         blockProgram.removeBlock(whileBlock);

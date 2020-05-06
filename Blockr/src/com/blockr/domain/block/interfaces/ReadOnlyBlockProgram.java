@@ -4,7 +4,7 @@ import java.util.List;
 
 public interface ReadOnlyBlockProgram {
 
-    List<? extends ReadOnlyBlock> getComponents();
+    List<? extends Block> getComponents();
 
     ReadOnlyStatementBlock getActive();
 }

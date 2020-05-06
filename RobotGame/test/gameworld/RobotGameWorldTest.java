@@ -14,7 +14,7 @@ import java.util.function.Function;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-public class GameWorldTest {
+public class RobotGameWorldTest {
 
     private static final TileType[][] GRID = {
             {TileType.Blocked, TileType.Blocked, TileType.Blocked, TileType.Blocked, TileType.Blocked},

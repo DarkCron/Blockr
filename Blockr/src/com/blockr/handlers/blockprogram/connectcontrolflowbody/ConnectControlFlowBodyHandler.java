@@ -12,7 +12,7 @@ public class ConnectControlFlowBodyHandler extends HandlerBase<ConnectControlFlo
 
     @Override
     public Voidy handle(ConnectControlFlowBody connectControlFlowBody) {
-        getState().getBlockProgram().connectControlFlowBody(connectControlFlowBody.getControlFlowBlock(), connectControlFlowBody.getStatementBlock());
+        getState().getBlockProgram().connectContainedBlockBody(connectControlFlowBody.getControlFlowBlock(), connectControlFlowBody.getStatementBlock());
         return new Voidy();
     }
 }

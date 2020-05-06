@@ -1,16 +1,15 @@
 package com.blockr.domain.block;
 
-import com.blockr.domain.block.interfaces.ReadOnlyBlock;
+import com.blockr.domain.block.interfaces.Block;
 import com.blockr.domain.block.interfaces.ReadOnlyBlockProgram;
 import com.blockr.domain.block.interfaces.ReadOnlyControlFlowBlock;
 import com.blockr.domain.block.interfaces.ReadOnlyStatementBlock;
 import com.blockr.domain.block.interfaces.markers.ReadOnlyConditionedBlock;
 
 import java.util.List;
-import java.util.Stack;
 
 public class BlockUtilities {
-    public static ReadOnlyBlock getRootFrom(List<? extends ReadOnlyBlock> components){
+    public static Block getRootFrom(List<? extends Block> components){
         if(components.size() == 0){
             return null;
         }
@@ -22,14 +21,14 @@ public class BlockUtilities {
         return null;
     }
 
-    public static ReadOnlyBlock getRootFrom(ReadOnlyStatementBlock readOnlyBlock) {
-        if(readOnlyBlock.getPrevious() != null){
-            return getRootFrom(readOnlyBlock.getPrevious());
+    public static Block getRootFrom(ReadOnlyStatementBlock Block) {
+        if(Block.getPrevious() != null){
+            return getRootFrom(Block.getPrevious());
         }
-        return readOnlyBlock;
+        return Block;
     }
 
-    public static ReadOnlyBlock getRootFrom(ReadOnlyBlock componentsToMove) {
+    public static Block getRootFrom(Block componentsToMove) {
         if(componentsToMove instanceof ReadOnlyStatementBlock){
             return getRootFrom((ReadOnlyStatementBlock) componentsToMove);
         }else {
@@ -37,7 +36,7 @@ public class BlockUtilities {
         }
     }
 
-    public static ReadOnlyBlock getRootFrom(ReadOnlyBlock socket, ReadOnlyBlockProgram blockProgram) {
+    public static Block getRootFrom(Block socket, ReadOnlyBlockProgram blockProgram) {
         if(socket instanceof ReadOnlyStatementBlock){
             return getRootFrom(socket);
         }else{

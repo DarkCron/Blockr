@@ -4,6 +4,7 @@ import an.awesome.pipelinr.Pipeline;
 import com.blockr.domain.block.*;
 import com.blockr.domain.block.interfaces.*;
 import com.blockr.domain.block.interfaces.markers.ReadOnlyConditionBlock;
+import com.blockr.domain.block.interfaces.markers.ReadOnlyFunctionBlock;
 import com.blockr.domain.block.interfaces.markers.ReadOnlyNotBlock;
 import com.blockr.domain.block.interfaces.markers.ReadOnlyWallInFrontBlock;
 import com.blockr.handlers.blockprogram.getblockprogram.GetBlockProgram;
@@ -20,7 +21,7 @@ import java.awt.*;
  * Visual component to represent a Block on screen
  */
 public abstract class UIBlockComponent extends Component {
-    protected ReadOnlyBlock source;
+    protected Block source;
     protected final Pipeline mediator;
     protected final WindowPosition upperLeft;
     private final String title;
@@ -28,7 +29,7 @@ public abstract class UIBlockComponent extends Component {
 
     private enum ClickLocations {PREVIOUS, NEXT, CFB_BODY, CFB_CONDITION, C_LEFT, C_RIGHT, INVALID}
 
-    public UIBlockComponent(ReadOnlyBlock source, Pipeline mediator, WindowPosition rootPosition) {
+    public UIBlockComponent(Block source, Pipeline mediator, WindowPosition rootPosition) {
         this.source = source;
         this.mediator = mediator;
         this.upperLeft = rootPosition;
@@ -37,7 +38,7 @@ public abstract class UIBlockComponent extends Component {
     }
 
     //TODO: Write some unit tests
-    public static int getHeight(ReadOnlyBlock source) {
+    public static int getHeight(Block source) {
         if(source == null){
             return 0;
         }
@@ -66,7 +67,7 @@ public abstract class UIBlockComponent extends Component {
     }
 
     //TODO: Write some unit tests
-    public static int getWidth(ReadOnlyBlock source) {
+    public static int getWidth(Block source) {
         if(source == null){
             return 0;
         }
@@ -93,7 +94,7 @@ public abstract class UIBlockComponent extends Component {
      * @param blockToAdd Information on what Block the User currently has selected and may try to add to the current block.
      * @return information based on what block is currently selected and where to connect it to.
      */
-    public ProgramBlockInsertInfo getSocketAndPlug(WindowPosition mousePosition, ReadOnlyBlock blockToAdd){
+    public ProgramBlockInsertInfo getSocketAndPlug(WindowPosition mousePosition, Block blockToAdd){
         //TODO FIX UP LEFT SOCKET OF WALLINFRONT
         if(blockToAdd == null || mousePosition == null){
             return null;
@@ -160,7 +161,7 @@ public abstract class UIBlockComponent extends Component {
      * @param blockToAdd
      * @return
      */
-    protected ClickLocations getClickLocation(WindowPosition mousePostion, ReadOnlyBlock blockToAdd){
+    protected ClickLocations getClickLocation(WindowPosition mousePostion, Block blockToAdd){
         var relativePosition = mousePostion.minus(upperLeft);
         relativePosition = relativePosition.minus(new WindowPosition(-4,7));
 
@@ -226,8 +227,8 @@ public abstract class UIBlockComponent extends Component {
         return ClickLocations.INVALID;
     }
 
-    protected void reassignSource(ReadOnlyBlock readOnlyBlock){
-        source = readOnlyBlock;
+    protected void reassignSource(Block Block){
+        source = Block;
     }
 
     @Override
@@ -370,7 +371,7 @@ public abstract class UIBlockComponent extends Component {
     /**
      * @return returns the abstract logical representation on which the visual component is based on
      */
-    public ReadOnlyBlock getSource(){return source;}
+    public Block getSource(){return source;}
 
     public WindowPosition getUpperLeft(){ return upperLeft;}
 

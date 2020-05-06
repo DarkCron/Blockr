@@ -7,13 +7,13 @@ import com.blockr.domain.block.TurnBlock;
 import com.blockr.domain.block.interfaces.*;
 import com.blockr.domain.block.interfaces.markers.ReadOnlyConditionBlock;
 import com.blockr.domain.block.interfaces.markers.ReadOnlyConditionedBlock;
+import com.blockr.domain.block.interfaces.markers.ReadOnlyFunctionBlock;
+import com.blockr.domain.block.interfaces.markers.ReadOnlyFunctionDefinitionBlock;
 import com.blockr.handlers.actions.record.DoRecord;
-import com.blockr.handlers.actions.record.DoRecordHandler;
 import com.blockr.handlers.blockprogram.addblock.AddBlock;
 import com.blockr.handlers.blockprogram.connectCFandCondition.ConnectControlFlowAndCondition;
 import com.blockr.handlers.blockprogram.connectconditionblock.ConnectConditionBlock;
 import com.blockr.handlers.blockprogram.connectcontrolflowbody.ConnectControlFlowBody;
-import com.blockr.handlers.blockprogram.connectcontrolflowbody.ConnectControlFlowBodyHandler;
 import com.blockr.handlers.blockprogram.connectfunctionblock.ConnectFunctionBlock;
 import com.blockr.handlers.blockprogram.connectfunctiondefinitionblock.ConnectFunctionDefinitionBlock;
 import com.blockr.handlers.blockprogram.connectstatementblock.ConnectStatementBlock;
@@ -34,7 +34,7 @@ public class ProgramBlockComponent extends UIBlockComponent {
 
     private final ProgramArea programArea;
 
-    public ProgramBlockComponent(ReadOnlyBlock source, Pipeline mediator, WindowPosition rootPosition, ProgramArea parent) {
+    public ProgramBlockComponent(Block source, Pipeline mediator, WindowPosition rootPosition, ProgramArea parent) {
         super(source, mediator, rootPosition);
         programArea = parent;
     }
@@ -78,15 +78,15 @@ public class ProgramBlockComponent extends UIBlockComponent {
                             }else if(info.getSocket() instanceof ReadOnlyControlFlowBlock && info.getPlug() instanceof ReadOnlyConditionBlock){
                                 mediator.send(new ConnectControlFlowAndCondition((ReadOnlyControlFlowBlock) info.getSocket(), (ReadOnlyConditionBlock) info.getPlug()));
                             }else{
-                                if((info.getSocket() instanceof ReadOnlyFunctionDefinition && !blockProgramHasFunctionDef(bp, (ReadOnlyFunctionDefinition) info.getSocket())) ||
-                                        (info.getPlug() instanceof  ReadOnlyFunctionDefinition && !blockProgramHasFunctionDef(bp, (ReadOnlyFunctionDefinition) info.getPlug()))){
+                                if((info.getSocket() instanceof ReadOnlyFunctionDefinitionBlock && !blockProgramHasFunctionDef(bp, (ReadOnlyFunctionDefinitionBlock) info.getSocket())) ||
+                                        (info.getPlug() instanceof ReadOnlyFunctionDefinitionBlock && !blockProgramHasFunctionDef(bp, (ReadOnlyFunctionDefinitionBlock) info.getPlug()))){
                                     mediator.send(new ConnectFunctionDefinitionBlock((ReadOnlyStatementBlock)info.getSocket(),(ReadOnlyStatementBlock)info.getPlug()));
                                 }else{
                                     mediator.send(new ConnectStatementBlock((ReadOnlyStatementBlock) info.getSocket(),(ReadOnlyStatementBlock) info.getPlug()));
                                 }
                             }
                         }
-                        programArea.updateBlockProgram(BlockUtilities.getRootFrom(info.getSocket(),mediator.send(new GetBlockProgram())));
+                        programArea.updateBlockProgram(BlockUtilities.getRootFrom(info.getSocket(), mediator.send(new GetBlockProgram())));
                         //mediator.send(new DoRecord());
                     }
                 }
@@ -117,7 +117,7 @@ public class ProgramBlockComponent extends UIBlockComponent {
         }
     }
 
-    private boolean blockProgramHasFunctionDef(ReadOnlyBlockProgram bp, ReadOnlyFunctionDefinition b){
+    private boolean blockProgramHasFunctionDef(ReadOnlyBlockProgram bp, ReadOnlyFunctionDefinitionBlock b){
         if(bp.getComponents().size() == 0){
             return false;
         }

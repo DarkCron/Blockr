@@ -1,10 +1,11 @@
 package com.blockr.domain.block;
 
-import com.blockr.State;
 import com.blockr.domain.Palette;
 import com.blockr.domain.block.interfaces.*;
 import com.blockr.domain.block.interfaces.markers.ReadOnlyConditionBlock;
 import com.blockr.domain.block.interfaces.markers.ReadOnlyConditionedBlock;
+import com.blockr.domain.block.interfaces.markers.ReadOnlyFunctionBlock;
+import com.blockr.domain.block.interfaces.markers.ReadOnlyFunctionDefinitionBlock;
 import com.blockr.ui.components.programblocks.ProgramArea;
 import com.gameworld.GameWorld;
 
@@ -32,7 +33,7 @@ public class BlockProgram implements ReadOnlyBlockProgram, Cloneable {
     private boolean bHasStartedExecute = false;
 
     @Override
-    public List<? extends ReadOnlyBlock> getComponents() {
+    public List<? extends Block> getComponents() {
         return Collections.unmodifiableList(components);
     }
 
@@ -126,7 +127,7 @@ public class BlockProgram implements ReadOnlyBlockProgram, Cloneable {
     /**
      * Removes the block from the program
      */
-    public void removeBlock(ReadOnlyBlock block){
+    public void removeBlock(Block block){
 
         if(!blocks.contains(block)){
             throw new IllegalArgumentException("The given block doesn't exist");
@@ -175,7 +176,7 @@ public class BlockProgram implements ReadOnlyBlockProgram, Cloneable {
     /**
      * Add a new block to the program, not connected to any other blocks
      */
-    public void addBlock(ReadOnlyBlock block){
+    public void addBlock(Block block){
 
         if(blocks.contains(block)){
             throw new IllegalArgumentException("The given block already exists");
@@ -325,32 +326,31 @@ public class BlockProgram implements ReadOnlyBlockProgram, Cloneable {
     }
 
     /**
-     * Connects a statementBlock to a controlFlowBlock as its body. This method should be called when:
-     * - A new statementBlock is connected as the body of a controlFlowBlock
-     * - An existing statementBlock is connected to a controlFlowBlock
-     * - An existing statementBlock is disconnected from a statementBlock and connected to a controlFlowBlock
-     * - An existing statementBlock is disconnected from a controlFlowBlock and connected to another controlFlowBlock
+     * Connects a statementBlock to a containerBlock as its body. This method should be called when:
+     * - A new statementBlock is connected as the body of a containerBlock
+     * - An existing statementBlock is connected to a containerBlock
+     * - An existing statementBlock is disconnected from a statementBlock and connected to a containerBlock
+     * - An existing statementBlock is disconnected from a containerBlock and connected to another containerBlock
      */
-    public void connectControlFlowBody(ReadOnlyControlFlowBlock controlFlowBlock, ReadOnlyStatementBlock statementBlock){
+    public void connectContainedBlockBody(ReadOnlyContainerBlock containerBlock, ReadOnlyStatementBlock statementBlock){
 
-        ensureValidBlock(controlFlowBlock, ControlFlowBlock.class, "controlFlowBlock");
+        ensureValidBlock(containerBlock, ContainerBlock.class, "controlFlowBlock");
         ensureValidBlock(statementBlock, StatementBlock.class, "statementBlock");
 
-        if(!blocks.contains(controlFlowBlock)){
-            //throw new IllegalArgumentException("The given controlFlowBlock does not exist");
-            addBlock(controlFlowBlock);
+        if(!blocks.contains(containerBlock)){
+            throw new IllegalArgumentException("The given controlFlowBlock does not exist");
         }
 
         reset();
 
         blocks.add(statementBlock);
 
-        var rwControlFlowBlock = (ControlFlowBlock)controlFlowBlock;
+        var rwContainerBlock = (ControlFlowBlock)containerBlock;
         var rwStatementBlock = (StatementBlock)statementBlock;
 
-        assert rwControlFlowBlock.getBody() == null;
+        assert rwContainerBlock.getBody() == null;
 
-        getBlocksOfType(ControlFlowBlock.class).stream().filter(b -> b.getBody() == rwStatementBlock).forEach(b -> b.setBody(null));
+        getBlocksOfType(ContainerBlock.class).stream().filter(b -> b.getBody() == rwStatementBlock).forEach(b -> b.setBody(null));
 
         if(rwStatementBlock.getPrevious() != null){
             rwStatementBlock.getPrevious().setNext(null);
@@ -359,7 +359,7 @@ public class BlockProgram implements ReadOnlyBlockProgram, Cloneable {
         rwStatementBlock.setPrevious(null);
 
         components.remove(rwStatementBlock);
-        rwControlFlowBlock.setBody(rwStatementBlock);
+        rwContainerBlock.setBody(rwStatementBlock);
     }
 
     /**
@@ -400,9 +400,9 @@ public class BlockProgram implements ReadOnlyBlockProgram, Cloneable {
      * @param plugBlock
      */
     public void connectFunctionDefinitionBlock(ReadOnlyStatementBlock socketBlock, ReadOnlyStatementBlock plugBlock) {
-        if(socketBlock instanceof ReadOnlyFunctionDefinition){
+        if(socketBlock instanceof ReadOnlyFunctionDefinitionBlock){
             //...
-        }else if(plugBlock instanceof ReadOnlyFunctionDefinition){
+        }else if(plugBlock instanceof ReadOnlyFunctionDefinitionBlock){
             //...
         }
 
