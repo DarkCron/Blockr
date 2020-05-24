@@ -42,19 +42,19 @@ public class KeyPressUtility {
     }
 
     /**
-     * @return true if CTRL + Z is pressed and nothing else
+     * @return true if U is pressed and nothing else
      *          false in all other cases
      */
     public boolean hasPressedUndo(){
-        return pressedKeys.size() == 2 && pressedKeys.contains(KeyEvent.VK_CONTROL) && pressedKeys.contains(KeyEvent.VK_Z) && !pressedKeys.contains(KeyEvent.VK_SHIFT);
+        return pressedKeys.size() == 1 && pressedKeys.contains(KeyEvent.VK_U);
     }
 
     /**
-     * @return true if CTRL + SHIFT + Z is pressed and nothing else
+     * @return true if R is pressed and nothing else
      *          false in all other cases
      */
     public boolean hasPressedRedo(){
-        return pressedKeys.size() == 3 && pressedKeys.contains(KeyEvent.VK_CONTROL) && pressedKeys.contains(KeyEvent.VK_Z) && pressedKeys.contains(KeyEvent.VK_SHIFT);
+        return pressedKeys.size() == 1 && pressedKeys.contains(KeyEvent.VK_R);
     }
 
     public void Reset() {
