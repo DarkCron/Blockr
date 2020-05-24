@@ -421,46 +421,15 @@ public class BlockProgram implements ReadOnlyBlockProgram, Cloneable {
         rwContainerBlock.setBody(rwStatementBlock);
     }
 
-<<<<<<< HEAD
-    private static <T> void ensureValidBlock(Block block, Class<T> type, String argName){
+    private static <T> void ensureValidBlock(Block block, Class<T> type, String argName) {
 
-        if(block == null){
+        if (block == null) {
             throw new IllegalArgumentException(String.format("The given %s must be effective", argName));
         }
 
-        if(!type.isInstance(block)){
+        if (!type.isInstance(block)) {
             throw new IllegalArgumentException(String.format("The given %s must be an instance of %s", argName, type.getSimpleName()));
         }
-=======
-    /**
-     * Connects a statementBlock to a controlFlowBlock as its body. This method should be called when:
-     * - A new statementBlock is connected as the body of a controlFlowBlock
-     * - An existing statementBlock is connected to a controlFlowBlock
-     * - An existing statementBlock is disconnected from a statementBlock and connected to a controlFlowBlock
-     * - An existing statementBlock is disconnected from a controlFlowBlock and connected to another controlFlowBlock
-     */
-    public void connectControlFlowBodyAndCondition(ReadOnlyControlFlowBlock controlFlowBlock, ReadOnlyConditionBlock conditionBlock){
-
-        ensureValidBlock(controlFlowBlock, ControlFlowBlock.class, "controlFlowBlock");
-        ensureValidBlock(conditionBlock, ConditionBlock.class, "statementBlock");
-
-        if(!blocks.contains(controlFlowBlock)){
-            throw new IllegalArgumentException("The given controlFlowBlock does not exist");
-        }
-
-        reset();
-
-        blocks.add(conditionBlock);
-
-        var rwControlFlowBlock = (ControlFlowBlock)controlFlowBlock;
-        var rwConditionBlock = (ConditionBlock)conditionBlock;
-
-        assert rwControlFlowBlock.getBody() == null;
-
-        getBlocksOfType(ControlFlowBlock.class).stream().filter(b -> b.getCondition() == rwConditionBlock).forEach(b -> b.setCondition(null));
-
-        rwControlFlowBlock.setCondition(rwConditionBlock);
->>>>>>> eebb32afa425d4a3120bad9db5460d65e144d471
     }
 
     @Override

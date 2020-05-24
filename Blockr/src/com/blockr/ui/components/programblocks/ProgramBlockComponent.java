@@ -128,9 +128,9 @@ public class ProgramBlockComponent extends UIBlockComponent {
             case MOUSE_DOWN:
                 System.out.println(BlockData.getName(source));
                 mediator.send(new DoRecord());
-                if(! (this.getSource() instanceof FunctionBodyBlock)){
+               // if(! (this.getSource() instanceof FunctionBodyBlock)){
                     mediator.send(new SetProgramSelection(mouseEvent.getWindowPosition(),this));
-                }
+             //   }
                 break;
         }
 
