@@ -4,7 +4,6 @@ import com.blockr.domain.Palette;
 import com.blockr.domain.block.interfaces.*;
 import com.blockr.domain.block.interfaces.markers.ReadOnlyConditionBlock;
 import com.blockr.domain.block.interfaces.markers.ReadOnlyConditionedBlock;
-import com.blockr.domain.block.interfaces.markers.ReadOnlyFunctionBlock;
 import com.blockr.domain.block.interfaces.markers.ReadOnlyFunctionDefinitionBlock;
 import com.blockr.ui.components.programblocks.ProgramArea;
 import com.gameworld.GameWorld;
@@ -67,6 +66,18 @@ public class BlockProgram implements ReadOnlyBlockProgram, Cloneable {
 
     private StatementBlock currentBlock;
 
+    private void addToBlockSet(Block block){
+        if(block instanceof ReadOnlyFunctionDefinitionBlock){
+            //Only allow 1 Function block
+            if (blocks.stream().anyMatch(b -> b instanceof  ReadOnlyFunctionDefinitionBlock))
+                return;
+
+            ((FunctionDefinitionBlock)block).setFunctionBody(new FunctionBodyBlock());
+        }
+
+        blocks.add(block);
+    }
+
     /**
      * Returns whether or not the program is in a valid state and can be started
      */
@@ -117,7 +128,7 @@ public class BlockProgram implements ReadOnlyBlockProgram, Cloneable {
         getBlocksOfType(ControlFlowBlock.class).forEach(ControlFlowBlock::reset);
         currentBlock = null;
         bHasStartedExecute = false;
-        //gameWorld.resetWorldSnapshot();
+        gameWorld.resetWorldSnapshot();
     }
 
     private <T> Set<T> getBlocksOfType(Class<T> clazz){
@@ -170,6 +181,15 @@ public class BlockProgram implements ReadOnlyBlockProgram, Cloneable {
             blocks.addAll(getBlocksToRemove(statementBlock.getNext()));
         }
 
+        if(block instanceof FunctionDefinitionBlock){
+            var functionDefBlock = (FunctionDefinitionBlock)block;
+            blocks.addAll(getBlocksToRemove(functionDefBlock.getFunctionBody()));
+        }
+
+        if(block instanceof FunctionBodyBlock){
+            blocks.addAll(getBlocksToRemove(((FunctionBodyBlock) block).getBody()));
+        }
+
         return blocks;
     }
 
@@ -182,9 +202,18 @@ public class BlockProgram implements ReadOnlyBlockProgram, Cloneable {
             throw new IllegalArgumentException("The given block already exists");
         }
 
+        if(block instanceof ReadOnlyFunctionDefinitionBlock){
+            //Only allow 1 Function block
+            if (blocks.stream().anyMatch(b -> b instanceof  ReadOnlyFunctionDefinitionBlock))
+                    return;
+
+            ((FunctionDefinitionBlock)block).setFunctionBody(new FunctionBodyBlock());
+        }
+
         reset();
 
-        blocks.add((Block)block);
+        //blocks.add((Block)block);
+        addToBlockSet(block);
         components.add((Block)block);
     }
 
@@ -202,13 +231,16 @@ public class BlockProgram implements ReadOnlyBlockProgram, Cloneable {
 
         if(!blocks.contains(socketBlock)){
             //throw new IllegalArgumentException("The given socketBlock does not exist");
-            addBlock(socketBlock);
+           // if(plugBlock.getPrevious() == null){
+                addBlock(socketBlock);
+            //}
         }
 
         reset();
 
         components.remove(plugBlock);
-        blocks.add(plugBlock);
+        //blocks.add(plugBlock);
+        addToBlockSet(plugBlock);
 
         var rwSocketBlock = (StatementBlock)socketBlock;
         var rwPlugBlock = (StatementBlock)plugBlock;
@@ -248,7 +280,9 @@ public class BlockProgram implements ReadOnlyBlockProgram, Cloneable {
 
         ensureValidBlock(plugBlock, StatementBlock.class, "plugBlock");
 
-        var socketBlock = blocks.stream().filter(b -> (b instanceof StatementBlock && ((StatementBlock)b).getNext() == plugBlock) || (b instanceof ControlFlowBlock && ((ControlFlowBlock)b).getBody() == plugBlock)).findFirst();
+        var socketBlock = blocks.stream().filter(b -> (b instanceof StatementBlock && ((StatementBlock)b).getNext() == plugBlock)
+                || (b instanceof ControlFlowBlock && ((ControlFlowBlock)b).getBody() == plugBlock)
+                || (b instanceof FunctionDefinitionBlock && ((FunctionDefinitionBlock)b).getFunctionBody().getBody() == plugBlock)).findFirst();
 
         if(socketBlock.isEmpty()){
             throw new IllegalArgumentException("The given plugBlock is not connected to any block");
@@ -256,11 +290,23 @@ public class BlockProgram implements ReadOnlyBlockProgram, Cloneable {
 
         reset();
 
-        if(socketBlock.get() instanceof ControlFlowBlock){
+        if(socketBlock.get() instanceof FunctionDefinitionBlock && ((FunctionDefinitionBlock) socketBlock.get()).getFunctionBody().getBody() == plugBlock){
+            var cfBlock = (FunctionDefinitionBlock)socketBlock.get();
+
+            cfBlock.getFunctionBody().setBody(null);
+            components.add(plugBlock);
+            var rwPlugBlock = (StatementBlock)plugBlock;
+            rwPlugBlock.setPrevious(null);
+            return;
+        }
+
+        if(socketBlock.get() instanceof ControlFlowBlock && ((ControlFlowBlock) socketBlock.get()).getBody() == plugBlock){
             var cfBlock = (ControlFlowBlock)socketBlock.get();
 
             cfBlock.setBody(null);
             components.add(plugBlock);
+            var rwPlugBlock = (StatementBlock)plugBlock;
+            rwPlugBlock.setPrevious(null);
             return;
         }
 
@@ -291,7 +337,8 @@ public class BlockProgram implements ReadOnlyBlockProgram, Cloneable {
         reset();
 
         components.remove(conditionBlock);
-        blocks.add(conditionBlock);
+        //blocks.add(conditionBlock);
+        addToBlockSet(conditionBlock);
 
         //disconnect the condition block
         getBlocksOfType(ConditionedBlock.class).stream().filter(b -> b.getCondition() == conditionBlock).forEach(b -> b.setCondition(null));
@@ -338,16 +385,26 @@ public class BlockProgram implements ReadOnlyBlockProgram, Cloneable {
         ensureValidBlock(statementBlock, StatementBlock.class, "statementBlock");
 
         if(!blocks.contains(containerBlock)){
-            throw new IllegalArgumentException("The given controlFlowBlock does not exist");
+            if(blocks.stream().anyMatch(b -> b instanceof FunctionDefinitionBlock && ((FunctionDefinitionBlock) b).getFunctionBody() == containerBlock)){
+
+            }else{
+                throw new IllegalArgumentException("The given controlFlowBlock does not exist");
+            }
         }
 
         reset();
 
-        blocks.add(statementBlock);
+        //blocks.add(statementBlock);
+        addToBlockSet(statementBlock);
 
-        var rwContainerBlock = (ControlFlowBlock)containerBlock;
+        var rwContainerBlock = (ContainerBlock)containerBlock;
         var rwStatementBlock = (StatementBlock)statementBlock;
 
+        if(rwContainerBlock.getBody() != null){
+            rwStatementBlock.setNext(rwContainerBlock.getBody());
+            rwContainerBlock.getBody().setPrevious(rwStatementBlock);
+            rwContainerBlock.setBody(null);
+        }
         assert rwContainerBlock.getBody() == null;
 
         getBlocksOfType(ContainerBlock.class).stream().filter(b -> b.getBody() == rwStatementBlock).forEach(b -> b.setBody(null));
@@ -356,7 +413,9 @@ public class BlockProgram implements ReadOnlyBlockProgram, Cloneable {
             rwStatementBlock.getPrevious().setNext(null);
         }
 
-        rwStatementBlock.setPrevious(null);
+        if(rwContainerBlock instanceof ControlFlowBlock){
+            rwStatementBlock.setPrevious((ControlFlowBlock) rwContainerBlock);
+        }
 
         components.remove(rwStatementBlock);
         rwContainerBlock.setBody(rwStatementBlock);
@@ -437,6 +496,32 @@ public class BlockProgram implements ReadOnlyBlockProgram, Cloneable {
             ((TurnBlock)clone).setDirection(((TurnBlock)block).getDirection());
         }
 
+        if(block instanceof FunctionDefinitionBlock){
+            var funcDefBlock = (FunctionDefinitionBlock)block;
+            var newFuncDefBlock = (FunctionDefinitionBlock)clone;
+
+            {
+                var functionBodyBlock = funcDefBlock.getFunctionBody();
+                var newFunctionBodyBlock = (FunctionBodyBlock)Palette.createInstance(functionBodyBlock);
+
+                if(functionBodyBlock.getBody() != null){
+                    var copy = (StatementBlock)copyComponent(functionBodyBlock.getBody(), allBlocks);
+                    newFunctionBodyBlock.setBody(copy);
+
+                    ProgramArea.CarryOverCopy(functionBodyBlock.getBody(),copy);
+                }
+                ProgramArea.CarryOverCopy(funcDefBlock.getFunctionBody(),newFunctionBodyBlock);
+
+                newFuncDefBlock.setFunctionBody(newFunctionBodyBlock);
+            }
+            if(funcDefBlock.getCurrent() != null){
+                newFuncDefBlock.setCurrent((StatementBlock)allBlocks.get(funcDefBlock.getCurrent()));
+            }
+
+            ProgramArea.CarryOverCopy(funcDefBlock,newFuncDefBlock);
+
+        }
+
         if(block instanceof ControlFlowBlock){
 
             var cfBlock = (ControlFlowBlock)block;
@@ -445,6 +530,7 @@ public class BlockProgram implements ReadOnlyBlockProgram, Cloneable {
             if(cfBlock.getBody() != null){
                 var copy = (StatementBlock)copyComponent(cfBlock.getBody(), allBlocks);
                 newCfBlock.setBody(copy);
+                copy.setPrevious(newCfBlock);
                 ProgramArea.CarryOverCopy(cfBlock.getBody(),copy);
             }
 

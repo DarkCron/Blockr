@@ -15,7 +15,8 @@ public class Palette {
             WhileBlock.class,
             IfBlock.class,
             NotBlock.class,
-            WallInFrontBlock.class
+            WallInFrontBlock.class,
+            FunctionDefinitionBlock.class
     );
 
     public static List<? extends Block> getAvailableBlocks(BlockProgram blockProgram){

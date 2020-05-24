@@ -63,6 +63,10 @@ public class PaletteArea extends Container {
         rootPos = rootPos.plus(new WindowPosition(0,spaceBetween/2 + block_height));
         programBlockComponents.add(new PaletteBlockComponent(new WallInFrontBlock(), mediator, rootPos));
         regionPositions.add(rootPos);
+
+        rootPos = rootPos.plus(new WindowPosition(0,spaceBetween + block_height));
+        programBlockComponents.add(new PaletteBlockComponent(new FunctionDefinitionBlock(), mediator, rootPos));
+        regionPositions.add(rootPos);
     }
 
     public PaletteArea(Pipeline mediator) {

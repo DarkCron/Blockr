@@ -1,7 +1,8 @@
 package com.blockr.domain.block.interfaces.markers;
 
-import com.blockr.domain.block.interfaces.ContainerBlock;
+import com.blockr.domain.block.FunctionBodyBlock;
+import com.blockr.domain.block.interfaces.ReadOnlyStatementBlock;
 
-public interface ReadOnlyFunctionDefinitionBlock extends ContainerBlock {
+public interface ReadOnlyFunctionDefinitionBlock extends ReadOnlyStatementBlock {
 
 }

@@ -37,6 +37,9 @@ public class BlockUtilities {
     }
 
     public static Block getRootFrom(Block socket, ReadOnlyBlockProgram blockProgram) {
+        if(socket instanceof FunctionBodyBlock){
+            return socket;
+        }
         if(socket instanceof ReadOnlyStatementBlock){
             return getRootFrom(socket);
         }else{

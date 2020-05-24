@@ -1,5 +1,6 @@
 package com.ui;
 
+import com.blockr.ui.components.programblocks.ProgramArea;
 import com.kul.CanvasWindow;
 import com.ui.mouseevent.MouseEvent;
 
@@ -9,6 +10,8 @@ public class MyCanvasWindow extends CanvasWindow {
     private final Component rootComponent;
     private final ViewContext viewContext;
     private final KeyPressUtility keyPressUtility = new KeyPressUtility();
+    public static WindowPosition mousePos = new WindowPosition(0,0);
+    public static WindowPosition mouseInProgramAreaPosition = new WindowPosition(0,0);
 
     public MyCanvasWindow(String title, Component rootComponent) {
         super(title);
@@ -58,6 +61,10 @@ public class MyCanvasWindow extends CanvasWindow {
 
             var container = (Container)component;
 
+            if(component instanceof ProgramArea){
+                mouseInProgramAreaPosition = mousePos.minus(new WindowPosition(windowRegion.getMinX(),windowRegion.getMinY()));
+            }
+
             for(var child : container.getChildren()){
                 var childRegion = container.getChildRegion(windowRegion, child);
                 traverseComponentTree(child, childRegion, componentAction);
@@ -66,7 +73,7 @@ public class MyCanvasWindow extends CanvasWindow {
     }
 
     private Component getComponentAt(WindowPosition position){
-
+        //System.out.println("Painting...");
         var region = new WindowRegion(0, 0, getWidth(), getHeight());
 
         Component component = rootComponent;
@@ -101,6 +108,7 @@ public class MyCanvasWindow extends CanvasWindow {
 
     @Override
     protected void handleMouseEvent(int id, int x, int y, int clickCount) {
+        mousePos = new WindowPosition(x,y);
         keyPressUtility.ConsumeInput();
         viewContext.setMousePosition(new WindowPosition(x,y));
 

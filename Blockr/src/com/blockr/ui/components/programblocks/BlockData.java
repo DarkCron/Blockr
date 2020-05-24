@@ -41,6 +41,8 @@ public class BlockData {
             return "If";
         }else if(block instanceof ReadOnlyWhileBlock){
             return "While";
+        }else if(block instanceof ReadOnlyFunctionDefinitionBlock){
+            return "Function";
         }
         return "";
     }

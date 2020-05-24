@@ -4,7 +4,7 @@ import an.awesome.pipelinr.Pipeline;
 import com.blockr.domain.block.*;
 import com.blockr.domain.block.interfaces.*;
 import com.blockr.domain.block.interfaces.markers.ReadOnlyConditionBlock;
-import com.blockr.domain.block.interfaces.markers.ReadOnlyFunctionBlock;
+import com.blockr.domain.block.FunctionBodyBlock;
 import com.blockr.domain.block.interfaces.markers.ReadOnlyNotBlock;
 import com.blockr.domain.block.interfaces.markers.ReadOnlyWallInFrontBlock;
 import com.blockr.handlers.blockprogram.getblockprogram.GetBlockProgram;
@@ -54,9 +54,9 @@ public abstract class UIBlockComponent extends Component {
             return BlockData.BLOCK_HEIGHT;
         }else if(source instanceof ReadOnlyConditionBlock){
             return BlockData.CONDITION_BLOCK_HEIGHT;
-        }else if(source instanceof ReadOnlyFunctionBlock){
+        }else if(source instanceof FunctionBodyBlock){
             int bodyheight = 0;
-            var body = ((ReadOnlyFunctionBlock) source).getBody();
+            var body = ((FunctionBodyBlock) source).getBody();
             while (body != null) {
                 bodyheight += getHeight(body);
                 body = body.getNext();
@@ -82,8 +82,34 @@ public abstract class UIBlockComponent extends Component {
             }else if(source instanceof ReadOnlyNotBlock){
                 return BlockData.CONDITION_BLOCK_WIDTH;
             }
-        }else if(source instanceof ReadOnlyFunctionBlock){
+        }else if(source instanceof FunctionBodyBlock){
             return BlockData.BLOCK_WIDTH;
+        }
+        return BlockData.BLOCK_WIDTH;
+    }
+
+    public static int getTotalWidth(Block source) {
+        if(source == null){
+            return 0;
+        }
+        if(true)
+            return BlockData.BLOCK_WIDTH*2;
+
+        if(source instanceof ReadOnlyControlFlowBlock){
+            return BlockData.BLOCK_WIDTH + getTotalWidth(((ReadOnlyControlFlowBlock) source).getBody());
+            //return Math.max(BlockData.BLOCK_WIDTH + getWidth(((ControlFlowBlock) source).getCondition()), BlockData.CONTROL_FLOW_INNER_START + getWidth(((ControlFlowBlock) source).getBody()));
+        }else if(source instanceof ReadOnlyStatementBlock){
+            return BlockData.BLOCK_WIDTH;
+        }else if(source instanceof ReadOnlyConditionBlock){
+            if(source instanceof ReadOnlyWallInFrontBlock){
+                return BlockData.CONDITION_BLOCK_WIDTH;
+            }else if(source instanceof ReadOnlyNotBlock){
+                return BlockData.CONDITION_BLOCK_WIDTH;
+            }
+        }else if(source instanceof FunctionBodyBlock){
+            if(((FunctionBodyBlock) source).getBody() == null)
+                return BlockData.BLOCK_WIDTH;
+            return BlockData.BLOCK_WIDTH + getTotalWidth(((FunctionBodyBlock) source).getBody());
         }
         return BlockData.BLOCK_WIDTH;
     }
@@ -120,9 +146,9 @@ public abstract class UIBlockComponent extends Component {
                         }
 
                     }
-                }else if(source instanceof ReadOnlyFunctionBlock){
-                    if (((ReadOnlyFunctionBlock) source).getBody() != null){
-                        var body = ((ReadOnlyControlFlowBlock) source).getBody();
+                }else if(source instanceof FunctionBodyBlock){
+                    if (((FunctionBodyBlock) source).getBody() != null){
+                        var body = ((ContainerBlock) source).getBody();
                         while (body!=null){
                             for (var pbc: ProgramArea.programBlockComponents) {
                                 if(pbc.getSource() == body){
@@ -140,7 +166,17 @@ public abstract class UIBlockComponent extends Component {
             case NEXT:
                 return new ProgramBlockInsertInfo(source,blockToAdd, ProgramBlockInsertInfo.PlugLocation.OTHER);
             case PREVIOUS:
-                return new ProgramBlockInsertInfo(blockToAdd, source, ProgramBlockInsertInfo.PlugLocation.OTHER);
+                //Try to turn a previous in a next.
+                if(((StatementBlock)source).getPrevious() == null){
+                    return new ProgramBlockInsertInfo(blockToAdd, source, ProgramBlockInsertInfo.PlugLocation.OTHER);
+                }else{
+                    if(((StatementBlock) source).getPrevious() instanceof ContainerBlock){
+                        if(((ContainerBlock) ((StatementBlock) source).getPrevious()).getBody() == (source)){
+                            return new ProgramBlockInsertInfo(((StatementBlock) source).getPrevious(), blockToAdd, ProgramBlockInsertInfo.PlugLocation.BODY);
+                        }
+                    }
+                    return new ProgramBlockInsertInfo(((StatementBlock) source).getPrevious(), blockToAdd, ProgramBlockInsertInfo.PlugLocation.OTHER);
+                }
             case C_RIGHT:
                 return new ProgramBlockInsertInfo(source,blockToAdd, ProgramBlockInsertInfo.PlugLocation.OTHER);
             case C_LEFT:
@@ -165,7 +201,7 @@ public abstract class UIBlockComponent extends Component {
         var relativePosition = mousePostion.minus(upperLeft);
         relativePosition = relativePosition.minus(new WindowPosition(-4,7));
 
-        if(source instanceof ReadOnlyFunctionBlock){
+        if(source instanceof FunctionBodyBlock){
             if(blockToAdd instanceof ReadOnlyStatementBlock){
                 var region = new WindowRegion(BlockData.CONTROL_FLOW_INNER_START,BlockData.CONDITION_BLOCK_HEIGHT/2,BlockData.BLOCK_WIDTH,BlockData.CONDITION_BLOCK_HEIGHT);
                 if(region.contains(relativePosition)){
@@ -191,7 +227,7 @@ public abstract class UIBlockComponent extends Component {
                 if(region.contains(relativePosition)){
                     return ClickLocations.PREVIOUS;
                 }
-                region = new WindowRegion(0,getHeight(source) - (BlockData.BLOCK_HEIGHT - BlockData.CONDITION_BLOCK_HEIGHT),BlockData.BLOCK_WIDTH,getHeight(source));
+                region = new WindowRegion(0,BlockData.CONDITION_BLOCK_HEIGHT/2,BlockData.BLOCK_WIDTH,getHeight(source));
                 if(region.contains(relativePosition)){
                     return ClickLocations.NEXT;
                 }
@@ -233,7 +269,7 @@ public abstract class UIBlockComponent extends Component {
 
     @Override
     protected void draw(Graphics graphics) {
-        if(source instanceof ReadOnlyFunctionBlock){
+        if(source instanceof FunctionBodyBlock){
             drawControlFlow(graphics);
             //drawControlFlow should work otherwise use drawFunction
         }else if(source instanceof ReadOnlyControlFlowBlock){
