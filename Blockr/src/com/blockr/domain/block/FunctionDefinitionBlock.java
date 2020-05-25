@@ -6,7 +6,7 @@ import com.gameworld.GameWorld;
 public class FunctionDefinitionBlock extends StatementBlock implements ReadOnlyFunctionDefinitionBlock {
     private FunctionBodyBlock functionBody;
 
-    StatementBlock getCurrent(){
+    public StatementBlock getCurrent(){
         return current;
     }
 
@@ -46,5 +46,9 @@ public class FunctionDefinitionBlock extends StatementBlock implements ReadOnlyF
 
     public void setFunctionBody(FunctionBodyBlock functionBody) {
         this.functionBody = functionBody;
+    }
+
+    public static void reset(FunctionDefinitionBlock functionDefinitionBlock) {
+        functionDefinitionBlock.current = null;
     }
 }

@@ -126,6 +126,7 @@ public class BlockProgram implements ReadOnlyBlockProgram, Cloneable {
      */
     public void reset(){
         getBlocksOfType(ControlFlowBlock.class).forEach(ControlFlowBlock::reset);
+        getBlocksOfType(FunctionDefinitionBlock.class).forEach(FunctionDefinitionBlock::reset);
         currentBlock = null;
         bHasStartedExecute = false;
         gameWorld.resetWorldSnapshot();
