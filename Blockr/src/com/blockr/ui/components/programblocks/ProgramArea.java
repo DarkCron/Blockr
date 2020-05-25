@@ -438,4 +438,8 @@ public class ProgramArea extends Container {
         }
         keyPressUtility.Reset();
     }
+
+    protected static boolean programHasFunction(){
+        return programBlockComponents.stream().anyMatch(pbc -> pbc.getSource() instanceof FunctionDefinitionBlock);
+    }
 }

@@ -252,6 +252,11 @@ public class BlockProgram implements ReadOnlyBlockProgram, Cloneable {
         var previous = rwPlugBlock.getPrevious();
         if(previous != null){
             previous.setNext(null);
+        }else{
+            if(blocks.stream().anyMatch(b -> b instanceof FunctionDefinitionBlock)){
+                if(getBlocksOfType(FunctionDefinitionBlock.class).stream().findFirst().get().getFunctionBody().getBody() == rwPlugBlock)
+                    getBlocksOfType(FunctionDefinitionBlock.class).stream().findFirst().get().getFunctionBody().setBody(rwSocketBlock);
+            }
         }
 
         //the (chain) of statementBlock(s) might be inserted between rwSocketBlock and rwSocketBlock.getNext()
