@@ -366,7 +366,7 @@ public abstract class CanvasWindow {
 
 		@Override
 		protected void paintComponent(Graphics g) {
-			System.out.println("Painting...");
+			//System.out.println("Painting...");
 			super.paintComponent(g);
 
 			if (recording != null) {

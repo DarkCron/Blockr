@@ -1,4 +1,4 @@
-package test;
+package  blockr.uiblockcomponent;
 
 import an.awesome.pipelinr.Pipeline;
 import an.awesome.pipelinr.Pipelinr;

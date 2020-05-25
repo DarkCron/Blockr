@@ -2,7 +2,6 @@ package com.blockr.ui.components.programblocks;
 
 import com.blockr.domain.block.*;
 import com.blockr.domain.block.interfaces.Block;
-import com.blockr.domain.block.interfaces.ReadOnlyBlock;
 import com.blockr.domain.block.interfaces.markers.*;
 
 import java.awt.*;
@@ -29,7 +28,7 @@ public class BlockData {
     static final Color FONT_COLOR = Color.BLACK;
 
 
-    public static String getName(ReadOnlyBlock block){
+    public static String getName(Block block){
         if(block instanceof ReadOnlyNotBlock){
             return "Not";
         }else if(block instanceof ReadOnlyWallInFrontBlock){
@@ -42,6 +41,8 @@ public class BlockData {
             return "If";
         }else if(block instanceof ReadOnlyWhileBlock){
             return "While";
+        }else if(block instanceof ReadOnlyFunctionDefinitionBlock){
+            return "Function";
         }
         return "";
     }

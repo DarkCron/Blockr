@@ -2,9 +2,7 @@ package com.blockr.ui.components.programblocks;
 
 import an.awesome.pipelinr.Pipeline;
 import com.blockr.domain.Palette;
-import com.blockr.domain.block.BlockUtilities;
-import com.blockr.domain.block.StatementBlock;
-import com.blockr.domain.block.TurnBlock;
+import com.blockr.domain.block.*;
 import com.blockr.domain.block.interfaces.*;
 import com.blockr.domain.block.interfaces.markers.ReadOnlyConditionBlock;
 import com.blockr.domain.block.interfaces.markers.ReadOnlyConditionedBlock;
@@ -34,6 +32,7 @@ import com.ui.mouseevent.MouseEvent;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -58,6 +57,7 @@ public class ProgramArea extends Container {
         for (var pbc: programBlockComponents) {
             if(pbc.getSource() == block){
                 pbc.reassignSource(copy);
+                break;
             }
         }
 
@@ -98,7 +98,7 @@ public class ProgramArea extends Container {
      * @param root The 'root' of a BlockProgram is the first (highest visually) Statement Block of a BlockProgram.
      *             A Block is a root if root.getPrevious() == null
      */
-    private void removeProgramBlockComponentsBaseOnRoot(ReadOnlyBlock root){
+    private void removeProgramBlockComponentsBaseOnRoot(Block root){
         if(root == null){
             return;
         }
@@ -107,7 +107,12 @@ public class ProgramArea extends Container {
             removeProgramBlockComponentsBaseOnRoot(((ReadOnlyControlFlowBlock) root).getCondition());
             removeProgramBlockComponentsBaseOnRoot(((ReadOnlyControlFlowBlock) root).getBody());
             removeProgramBlockComponentsBaseOnRoot(((ReadOnlyControlFlowBlock) root).getNext());
-        }else if(root instanceof ReadOnlyStatementBlock){
+        }else if(root instanceof FunctionDefinitionBlock){
+            programBlockComponents.removeIf(pbc -> pbc.getSource() == root);
+            removeProgramBlockComponentsBaseOnRoot(((ReadOnlyStatementBlock) root).getNext());
+            removeProgramBlockComponentsBaseOnRoot(((FunctionDefinitionBlock) root).getFunctionBody());
+        }
+        else if(root instanceof ReadOnlyStatementBlock){
             programBlockComponents.removeIf(pbc -> pbc.getSource() == root);
             removeProgramBlockComponentsBaseOnRoot(((ReadOnlyStatementBlock) root).getNext());
         }else if(root instanceof ReadOnlyConditionBlock){
@@ -117,12 +122,15 @@ public class ProgramArea extends Container {
                 programBlockComponents.removeIf(pbc -> pbc.getSource() == root);
                 removeProgramBlockComponentsBaseOnRoot(((ReadOnlyNotBlock) root).getCondition());
             }
+        }else if(root instanceof FunctionBodyBlock){
+            programBlockComponents.removeIf(pbc -> pbc.getSource() == root);
+            removeProgramBlockComponentsBaseOnRoot(((FunctionBodyBlock) root).getBody());
         }
     }
 
-    private void removeProgramBlockComponentsBaseOnRoot(List<? extends ReadOnlyBlock> componentsToMove) {
+    private void removeProgramBlockComponentsBaseOnRoot(List<? extends Block> componentsToMove) {
         //TODO: not efficient but works
-        for (ReadOnlyBlock b: componentsToMove) {
+        for (Block b: componentsToMove) {
             removeProgramBlockComponentsBaseOnRoot(b);
         }
     }
@@ -135,7 +143,7 @@ public class ProgramArea extends Container {
      * @param rootPosition The Block of a BlockProgram are visually based on screen based on a position relative to the RootPosition, the
      *                     position of the 'root' Block. This position is effectively the Right Upper position of this 'root' block.
      */
-    private void buildProgramBlockComponentFromRoot(ReadOnlyBlock root, WindowPosition rootPosition){
+    private void buildProgramBlockComponentFromRoot(Block root, WindowPosition rootPosition){
         if(root == null){
             return;
         }
@@ -144,7 +152,13 @@ public class ProgramArea extends Container {
             buildProgramBlockComponentFromRoot(((ReadOnlyControlFlowBlock) root).getCondition(),rootPosition.plus(new WindowPosition(BlockData.BLOCK_WIDTH,0)));
             buildProgramBlockComponentFromRoot(((ReadOnlyControlFlowBlock) root).getNext(),rootPosition.plus(new WindowPosition(0,ProgramBlockComponent.getHeight(root))));
             programBlockComponents.add(new ProgramBlockComponent(root,mediator,rootPosition,this));
-        }else if(root instanceof ReadOnlyStatementBlock){
+        }else if(root instanceof FunctionDefinitionBlock){
+            programBlockComponents.add(new ProgramBlockComponent(root,mediator,rootPosition,this));
+            buildProgramBlockComponentFromRoot(((ReadOnlyStatementBlock)root).getNext(),rootPosition.plus(new WindowPosition(0,ProgramBlockComponent.getHeight(root))));
+            buildProgramBlockComponentFromRoot(((FunctionDefinitionBlock) root).getFunctionBody(),rootPosition.minus(new WindowPosition(ProgramBlockComponent.getTotalWidth(((FunctionDefinitionBlock) root).getFunctionBody()),0)));
+            //programBlockComponents.add(new ProgramBlockComponent(((FunctionDefinitionBlock) root).getFunctionBody(),mediator,rootPosition.minus(new WindowPosition(100,0)),this));
+        }
+        else if(root instanceof ReadOnlyStatementBlock){
             programBlockComponents.add(new ProgramBlockComponent(root,mediator,rootPosition,this));
             buildProgramBlockComponentFromRoot(((ReadOnlyStatementBlock)root).getNext(),rootPosition.plus(new WindowPosition(0,ProgramBlockComponent.getHeight(root))));
         }else if(root instanceof ReadOnlyConditionBlock){
@@ -154,6 +168,9 @@ public class ProgramArea extends Container {
                 programBlockComponents.add(new ProgramBlockComponent(root,mediator,rootPosition,this));
                 buildProgramBlockComponentFromRoot(((ReadOnlyNotBlock) root).getCondition(),rootPosition.plus(new WindowPosition(BlockData.CONDITION_BLOCK_WIDTH,0)));
             }
+        }else if(root instanceof FunctionBodyBlock){
+            buildProgramBlockComponentFromRoot(((FunctionBodyBlock) root).getBody(),rootPosition.plus(new WindowPosition(BlockData.CONTROL_FLOW_INNER_START,BlockData.CONDITION_BLOCK_HEIGHT)));
+            programBlockComponents.add(new ProgramBlockComponent(root,mediator,rootPosition,this));
         }
     }
 
@@ -170,8 +187,9 @@ public class ProgramArea extends Container {
                         ((TurnBlock)copy).setDirection(((TurnBlock) paletteSelection.getBlockType().getSource()).getDirection());
                     }
 
-                    mediator.send(new AddBlock((StatementBlock)copy));
+                    mediator.send(new AddBlock(copy));
                    // var rootBlock = mediator.send(new GetRootBlock(copy));
+
                     var rootBlock = copy;
 
                     var recordedMouse = mediator.send(new GetMouseRecord());
@@ -180,7 +198,10 @@ public class ProgramArea extends Container {
                     }else{
                         recordedMouse = (mouseEvent.getWindowPosition().minus(recordedMouse));
                     }
+
                     programBlockComponents.add(new ProgramBlockComponent(rootBlock,mediator, recordedMouse,this));
+                    buildProgramBlockComponentFromBP(mediator.send(new GetBlockProgram()));
+
 
                     this.getViewContext().repaint();
                 }
@@ -208,6 +229,21 @@ public class ProgramArea extends Container {
         }
     }
 
+    private void buildProgramBlockComponentFromBP(ReadOnlyBlockProgram bp) {
+        var elements = new HashMap<Block, WindowPosition>();
+        for (var c: bp.getComponents()) {
+            if (programBlockComponents.stream().anyMatch(pbc -> pbc.getSource() == c)) {
+                elements.put(c, programBlockComponents.stream().filter(pbc -> pbc.getSource() == c).findFirst().get().getUpperLeft());
+            }
+
+        }
+
+        programBlockComponents.clear();
+        for (var entry : elements.keySet()){
+                buildProgramBlockComponentFromRoot(entry,elements.get(entry));
+        }
+    }
+
     /**
      * Handles the movement of a selected BlockProgram to a new position based on a new position contained in mouseEvent.
      * The ProgramArea does this by effectively removing the BlockProgram from its old position and adding it back into
@@ -225,6 +261,7 @@ public class ProgramArea extends Container {
             }else{
                 recordedMouse = (mouseEvent.getWindowPosition().minus(recordedMouse));
             }
+            recordedMouse = MyCanvasWindow.mouseInProgramAreaPosition;
             var bp = mediator.send(new GetBlockProgram());
             //var selectionRoot = bp.getRootBlock(programSelection.getBlockType().getSource());
             var componentsToMove = programSelection.getBlockType().getSource();
@@ -232,12 +269,23 @@ public class ProgramArea extends Container {
             var disconnectionRootPosition = programSelection.getBlockType().getUpperLeft();
             disconnectionRootPosition = positionFromBlock(disconnectionRoot) == null? disconnectionRootPosition : positionFromBlock(disconnectionRoot);
 
+            if(disconnectionRoot == null){
+                if(componentsToMove instanceof FunctionBodyBlock){
+                    disconnectionRoot = componentsToMove;
+                }
+            }
             removeProgramBlockComponentsBaseOnRoot(disconnectionRoot);
 
             if(componentsToMove instanceof ReadOnlyStatementBlock){
                 if(((ReadOnlyStatementBlock)componentsToMove).getPrevious() != null){
                     mediator.send(new DisconnectStatementBlock((ReadOnlyStatementBlock) programSelection.getBlockType().getSource()));
                     buildProgramBlockComponentFromRoot(disconnectionRoot,disconnectionRootPosition);
+                }else{
+                    if(programBlockComponents.stream().anyMatch(b -> b.getSource() instanceof FunctionBodyBlock)){
+                        if(((FunctionBodyBlock)programBlockComponents.stream().filter(b -> b.getSource() instanceof FunctionBodyBlock).findFirst().get().getSource()).getBody() == componentsToMove){
+                            mediator.send(new DisconnectStatementBlock((ReadOnlyStatementBlock) componentsToMove));
+                        }
+                    }
                 }
             }else if(programSelection.getBlockType().getSource() instanceof ReadOnlyConditionedBlock){
                 mediator.send(new DisconnectConditionBlock((ReadOnlyConditionBlock) programSelection.getBlockType().getSource()));
@@ -249,13 +297,22 @@ public class ProgramArea extends Container {
 
             //buildProgramBlockComponentFromRoot(programSelection.getBlockType().getSource(),recordedMouse);
             buildProgramBlockComponentFromRoot(programSelection.getBlockType().getSource(),recordedMouse);
+            //buildProgramBlockComponentFromBP(mediator.send(new GetBlockProgram()));
 
             var temp = programBlockComponents.stream().filter(pbc -> pbc.getSource() == programSelection.getBlockType().getSource()).findFirst().orElse(null);
             mediator.send(new SetProgramSelection(recordedMouse,temp));
         }
     }
 
-    private WindowPosition positionFromBlock(ReadOnlyBlock disconnectionRoot) {
+    public void handleTryAttach(MouseEvent mouseEvent) {
+        var programSelection = mediator.send(new GetProgramSelection());
+        if(programSelection != null){
+            var recordedMouse = MyCanvasWindow.mouseInProgramAreaPosition;
+
+        }
+    }
+
+    private WindowPosition positionFromBlock(Block disconnectionRoot) {
         for (var pbc: programBlockComponents) {
             if(pbc.getSource() == disconnectionRoot){
                 return pbc.getUpperLeft();
@@ -284,14 +341,14 @@ public class ProgramArea extends Container {
      * 4) Redraw the visuals
      * @param newRoot The 'root' of the BlockProgram to update.
      */
-    public void updateBlockProgram(ReadOnlyBlock newRoot) {
+    public void updateBlockProgram(Block newRoot) {
         //TODO: keep this for testing purposes for now
-        if(newRoot == null || ((ReadOnlyStatementBlock)newRoot).getPrevious() != null){
+        if(!(newRoot instanceof FunctionBodyBlock) && (newRoot == null || ((ReadOnlyStatementBlock)newRoot).getPrevious() != null)){
             System.out.println();
         }
         var programBlockComponent = programBlockComponents.stream().filter(pbc -> pbc.getSource() == newRoot).findFirst().orElse(null);
         var pos = programBlockComponent == null? null : programBlockComponent.getUpperLeft();
-        var temp = ((StatementBlock) newRoot).getNext();
+        var temp = newRoot instanceof FunctionBodyBlock ? ((FunctionBodyBlock) newRoot).getBody() : ((StatementBlock) newRoot).getNext();
         while (pos == null && temp != null){
             programBlockComponent = programBlockComponents.stream().filter(pbc -> pbc.getSource() == temp).findFirst().orElse(null);
             pos = programBlockComponent == null? null : programBlockComponent.getUpperLeft();
@@ -322,7 +379,7 @@ public class ProgramArea extends Container {
      *            currently in the Program Area
      * @return A generated snapshot of the Game Area components and locations
      */
-    public static ProgramAreaState generateProgramAreaState(ReadOnlyBlockProgram rbp){
+    public static ProgramAreaState generateProgramAreaState(BlockProgram rbp){
         return new ProgramAreaState(mainProgramArea, rbp);
     }
 
@@ -346,11 +403,11 @@ public class ProgramArea extends Container {
     /**
      * Returns the upper left position of the visual component of a certain block if it's present in the
      * Game Area.
-     * @param rob a ReadOnlyBlock that is or is not pressent in the game Area
+     * @param rob a Block that is or is not pressent in the game Area
      * @return returns the upper left location of the given block if it's in the Game Area,
      *          Returns null if the block isn't available.
      */
-    public WindowPosition locationOf(ReadOnlyBlock rob) {
+    public WindowPosition locationOf(Block rob) {
         for (ProgramBlockComponent pbc: programBlockComponents) {
             if(pbc.getSource() == rob){
                 return pbc.getUpperLeft();

@@ -1,10 +1,10 @@
 package com.blockr.domain.block;
 
-import com.blockr.State;
 import com.blockr.domain.Palette;
 import com.blockr.domain.block.interfaces.*;
 import com.blockr.domain.block.interfaces.markers.ReadOnlyConditionBlock;
 import com.blockr.domain.block.interfaces.markers.ReadOnlyConditionedBlock;
+import com.blockr.domain.block.interfaces.markers.ReadOnlyFunctionDefinitionBlock;
 import com.blockr.ui.components.programblocks.ProgramArea;
 import com.gameworld.GameWorld;
 
@@ -32,7 +32,7 @@ public class BlockProgram implements ReadOnlyBlockProgram, Cloneable {
     private boolean bHasStartedExecute = false;
 
     @Override
-    public List<? extends ReadOnlyBlock> getComponents() {
+    public List<? extends Block> getComponents() {
         return Collections.unmodifiableList(components);
     }
 
@@ -65,6 +65,18 @@ public class BlockProgram implements ReadOnlyBlockProgram, Cloneable {
     private final Set<Block> blocks;
 
     private StatementBlock currentBlock;
+
+    private void addToBlockSet(Block block){
+        if(block instanceof ReadOnlyFunctionDefinitionBlock){
+            //Only allow 1 Function block
+            if (blocks.stream().anyMatch(b -> b instanceof  ReadOnlyFunctionDefinitionBlock))
+                return;
+
+            ((FunctionDefinitionBlock)block).setFunctionBody(new FunctionBodyBlock());
+        }
+
+        blocks.add(block);
+    }
 
     /**
      * Returns whether or not the program is in a valid state and can be started
@@ -114,6 +126,7 @@ public class BlockProgram implements ReadOnlyBlockProgram, Cloneable {
      */
     public void reset(){
         getBlocksOfType(ControlFlowBlock.class).forEach(ControlFlowBlock::reset);
+        getBlocksOfType(FunctionDefinitionBlock.class).forEach(FunctionDefinitionBlock::reset);
         currentBlock = null;
         bHasStartedExecute = false;
         gameWorld.resetWorldSnapshot();
@@ -126,7 +139,7 @@ public class BlockProgram implements ReadOnlyBlockProgram, Cloneable {
     /**
      * Removes the block from the program
      */
-    public void removeBlock(ReadOnlyBlock block){
+    public void removeBlock(Block block){
 
         if(!blocks.contains(block)){
             throw new IllegalArgumentException("The given block doesn't exist");
@@ -169,21 +182,39 @@ public class BlockProgram implements ReadOnlyBlockProgram, Cloneable {
             blocks.addAll(getBlocksToRemove(statementBlock.getNext()));
         }
 
+        if(block instanceof FunctionDefinitionBlock){
+            var functionDefBlock = (FunctionDefinitionBlock)block;
+            blocks.addAll(getBlocksToRemove(functionDefBlock.getFunctionBody()));
+        }
+
+        if(block instanceof FunctionBodyBlock){
+            blocks.addAll(getBlocksToRemove(((FunctionBodyBlock) block).getBody()));
+        }
+
         return blocks;
     }
 
     /**
      * Add a new block to the program, not connected to any other blocks
      */
-    public void addBlock(ReadOnlyBlock block){
+    public void addBlock(Block block){
 
         if(blocks.contains(block)){
             throw new IllegalArgumentException("The given block already exists");
         }
 
+        if(block instanceof ReadOnlyFunctionDefinitionBlock){
+            //Only allow 1 Function block
+            if (blocks.stream().anyMatch(b -> b instanceof  ReadOnlyFunctionDefinitionBlock))
+                    return;
+
+            ((FunctionDefinitionBlock)block).setFunctionBody(new FunctionBodyBlock());
+        }
+
         reset();
 
-        blocks.add((Block)block);
+        //blocks.add((Block)block);
+        addToBlockSet(block);
         components.add((Block)block);
     }
 
@@ -201,13 +232,16 @@ public class BlockProgram implements ReadOnlyBlockProgram, Cloneable {
 
         if(!blocks.contains(socketBlock)){
             //throw new IllegalArgumentException("The given socketBlock does not exist");
-            addBlock(socketBlock);
+           // if(plugBlock.getPrevious() == null){
+                addBlock(socketBlock);
+            //}
         }
 
         reset();
 
         components.remove(plugBlock);
-        blocks.add(plugBlock);
+        //blocks.add(plugBlock);
+        addToBlockSet(plugBlock);
 
         var rwSocketBlock = (StatementBlock)socketBlock;
         var rwPlugBlock = (StatementBlock)plugBlock;
@@ -247,7 +281,9 @@ public class BlockProgram implements ReadOnlyBlockProgram, Cloneable {
 
         ensureValidBlock(plugBlock, StatementBlock.class, "plugBlock");
 
-        var socketBlock = blocks.stream().filter(b -> (b instanceof StatementBlock && ((StatementBlock)b).getNext() == plugBlock) || (b instanceof ControlFlowBlock && ((ControlFlowBlock)b).getBody() == plugBlock)).findFirst();
+        var socketBlock = blocks.stream().filter(b -> (b instanceof StatementBlock && ((StatementBlock)b).getNext() == plugBlock)
+                || (b instanceof ControlFlowBlock && ((ControlFlowBlock)b).getBody() == plugBlock)
+                || (b instanceof FunctionDefinitionBlock && ((FunctionDefinitionBlock)b).getFunctionBody().getBody() == plugBlock)).findFirst();
 
         if(socketBlock.isEmpty()){
             throw new IllegalArgumentException("The given plugBlock is not connected to any block");
@@ -255,11 +291,23 @@ public class BlockProgram implements ReadOnlyBlockProgram, Cloneable {
 
         reset();
 
-        if(socketBlock.get() instanceof ControlFlowBlock){
+        if(socketBlock.get() instanceof FunctionDefinitionBlock && ((FunctionDefinitionBlock) socketBlock.get()).getFunctionBody().getBody() == plugBlock){
+            var cfBlock = (FunctionDefinitionBlock)socketBlock.get();
+
+            cfBlock.getFunctionBody().setBody(null);
+            components.add(plugBlock);
+            var rwPlugBlock = (StatementBlock)plugBlock;
+            rwPlugBlock.setPrevious(null);
+            return;
+        }
+
+        if(socketBlock.get() instanceof ControlFlowBlock && ((ControlFlowBlock) socketBlock.get()).getBody() == plugBlock){
             var cfBlock = (ControlFlowBlock)socketBlock.get();
 
             cfBlock.setBody(null);
             components.add(plugBlock);
+            var rwPlugBlock = (StatementBlock)plugBlock;
+            rwPlugBlock.setPrevious(null);
             return;
         }
 
@@ -290,7 +338,8 @@ public class BlockProgram implements ReadOnlyBlockProgram, Cloneable {
         reset();
 
         components.remove(conditionBlock);
-        blocks.add(conditionBlock);
+        //blocks.add(conditionBlock);
+        addToBlockSet(conditionBlock);
 
         //disconnect the condition block
         getBlocksOfType(ConditionedBlock.class).stream().filter(b -> b.getCondition() == conditionBlock).forEach(b -> b.setCondition(null));
@@ -325,81 +374,61 @@ public class BlockProgram implements ReadOnlyBlockProgram, Cloneable {
     }
 
     /**
-     * Connects a statementBlock to a controlFlowBlock as its body. This method should be called when:
-     * - A new statementBlock is connected as the body of a controlFlowBlock
-     * - An existing statementBlock is connected to a controlFlowBlock
-     * - An existing statementBlock is disconnected from a statementBlock and connected to a controlFlowBlock
-     * - An existing statementBlock is disconnected from a controlFlowBlock and connected to another controlFlowBlock
+     * Connects a statementBlock to a containerBlock as its body. This method should be called when:
+     * - A new statementBlock is connected as the body of a containerBlock
+     * - An existing statementBlock is connected to a containerBlock
+     * - An existing statementBlock is disconnected from a statementBlock and connected to a containerBlock
+     * - An existing statementBlock is disconnected from a containerBlock and connected to another containerBlock
      */
-    public void connectControlFlowBody(ReadOnlyControlFlowBlock controlFlowBlock, ReadOnlyStatementBlock statementBlock){
+    public void connectContainerBlockBody(ReadOnlyContainerBlock containerBlock, ReadOnlyStatementBlock statementBlock){
 
-        ensureValidBlock(controlFlowBlock, ControlFlowBlock.class, "controlFlowBlock");
+        ensureValidBlock(containerBlock, ContainerBlock.class, "containerBlock");
         ensureValidBlock(statementBlock, StatementBlock.class, "statementBlock");
 
-        if(!blocks.contains(controlFlowBlock)){
-            //throw new IllegalArgumentException("The given controlFlowBlock does not exist");
-            addBlock(controlFlowBlock);
+        if(!blocks.contains(containerBlock)){
+            if(blocks.stream().anyMatch(b -> b instanceof FunctionDefinitionBlock && ((FunctionDefinitionBlock) b).getFunctionBody() == containerBlock)){
+
+            }else{
+                throw new IllegalArgumentException("The given controlFlowBlock does not exist");
+            }
         }
 
         reset();
 
-        blocks.add(statementBlock);
+        //blocks.add(statementBlock);
+        addToBlockSet(statementBlock);
 
-        var rwControlFlowBlock = (ControlFlowBlock)controlFlowBlock;
+        var rwContainerBlock = (ContainerBlock)containerBlock;
         var rwStatementBlock = (StatementBlock)statementBlock;
 
-        assert rwControlFlowBlock.getBody() == null;
+        if(rwContainerBlock.getBody() != null){
+            rwStatementBlock.setNext(rwContainerBlock.getBody());
+            rwContainerBlock.getBody().setPrevious(rwStatementBlock);
+            rwContainerBlock.setBody(null);
+        }
+        assert rwContainerBlock.getBody() == null;
 
-        getBlocksOfType(ControlFlowBlock.class).stream().filter(b -> b.getBody() == rwStatementBlock).forEach(b -> b.setBody(null));
+        getBlocksOfType(ContainerBlock.class).stream().filter(b -> b.getBody() == rwStatementBlock).forEach(b -> b.setBody(null));
 
         if(rwStatementBlock.getPrevious() != null){
             rwStatementBlock.getPrevious().setNext(null);
         }
 
-        rwStatementBlock.setPrevious(null);
-
-        components.remove(rwStatementBlock);
-        rwControlFlowBlock.setBody(rwStatementBlock);
-    }
-
-    /**
-     * Connects a statementBlock to a controlFlowBlock as its body. This method should be called when:
-     * - A new statementBlock is connected as the body of a controlFlowBlock
-     * - An existing statementBlock is connected to a controlFlowBlock
-     * - An existing statementBlock is disconnected from a statementBlock and connected to a controlFlowBlock
-     * - An existing statementBlock is disconnected from a controlFlowBlock and connected to another controlFlowBlock
-     */
-    public void connectControlFlowBodyAndCondition(ReadOnlyControlFlowBlock controlFlowBlock, ReadOnlyConditionBlock conditionBlock){
-
-        ensureValidBlock(controlFlowBlock, ControlFlowBlock.class, "controlFlowBlock");
-        ensureValidBlock(conditionBlock, ConditionBlock.class, "statementBlock");
-
-        if(!blocks.contains(controlFlowBlock)){
-            throw new IllegalArgumentException("The given controlFlowBlock does not exist");
+        if(rwContainerBlock instanceof ControlFlowBlock){
+            rwStatementBlock.setPrevious((ControlFlowBlock) rwContainerBlock);
         }
 
-        reset();
-
-        blocks.add(conditionBlock);
-
-        var rwControlFlowBlock = (ControlFlowBlock)controlFlowBlock;
-        var rwConditionBlock = (ConditionBlock)conditionBlock;
-
-        assert rwControlFlowBlock.getBody() == null;
-
-        getBlocksOfType(ControlFlowBlock.class).stream().filter(b -> b.getCondition() == rwConditionBlock).forEach(b -> b.setCondition(null));
-
-        rwControlFlowBlock.setCondition(rwConditionBlock);
+        components.remove(rwStatementBlock);
+        rwContainerBlock.setBody(rwStatementBlock);
     }
 
+    private static <T> void ensureValidBlock(Block block, Class<T> type, String argName) {
 
-    private static <T> void ensureValidBlock(Block block, Class<T> type, String argName){
-
-        if(block == null){
+        if (block == null) {
             throw new IllegalArgumentException(String.format("The given %s must be effective", argName));
         }
 
-        if(!type.isInstance(block)){
+        if (!type.isInstance(block)) {
             throw new IllegalArgumentException(String.format("The given %s must be an instance of %s", argName, type.getSimpleName()));
         }
     }
@@ -437,6 +466,32 @@ public class BlockProgram implements ReadOnlyBlockProgram, Cloneable {
             ((TurnBlock)clone).setDirection(((TurnBlock)block).getDirection());
         }
 
+        if(block instanceof FunctionDefinitionBlock){
+            var funcDefBlock = (FunctionDefinitionBlock)block;
+            var newFuncDefBlock = (FunctionDefinitionBlock)clone;
+
+            {
+                var functionBodyBlock = funcDefBlock.getFunctionBody();
+                var newFunctionBodyBlock = (FunctionBodyBlock)Palette.createInstance(functionBodyBlock);
+
+                if(functionBodyBlock.getBody() != null){
+                    var copy = (StatementBlock)copyComponent(functionBodyBlock.getBody(), allBlocks);
+                    newFunctionBodyBlock.setBody(copy);
+
+                    ProgramArea.CarryOverCopy(functionBodyBlock.getBody(),copy);
+                }
+                ProgramArea.CarryOverCopy(funcDefBlock.getFunctionBody(),newFunctionBodyBlock);
+
+                newFuncDefBlock.setFunctionBody(newFunctionBodyBlock);
+            }
+            if(funcDefBlock.getCurrent() != null){
+                newFuncDefBlock.setCurrent((StatementBlock)allBlocks.get(funcDefBlock.getCurrent()));
+            }
+
+            ProgramArea.CarryOverCopy(funcDefBlock,newFuncDefBlock);
+
+        }
+
         if(block instanceof ControlFlowBlock){
 
             var cfBlock = (ControlFlowBlock)block;
@@ -445,6 +500,7 @@ public class BlockProgram implements ReadOnlyBlockProgram, Cloneable {
             if(cfBlock.getBody() != null){
                 var copy = (StatementBlock)copyComponent(cfBlock.getBody(), allBlocks);
                 newCfBlock.setBody(copy);
+                copy.setPrevious(newCfBlock);
                 ProgramArea.CarryOverCopy(cfBlock.getBody(),copy);
             }
 
@@ -479,9 +535,9 @@ public class BlockProgram implements ReadOnlyBlockProgram, Cloneable {
         var next = (StatementBlock)copyComponent(statementBlock.getNext(), allBlocks);
         newStatementBlock.setNext(next);
         next.setPrevious(newStatementBlock);
+
         ProgramArea.CarryOverCopy(statementBlock.getNext(),next);
 
         return clone;
     }
-
 }

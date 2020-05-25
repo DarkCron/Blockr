@@ -2,10 +2,8 @@ package com.blockr.domain;
 
 import com.blockr.domain.block.*;
 import com.blockr.domain.block.interfaces.Block;
-import com.blockr.domain.block.interfaces.ReadOnlyBlock;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -17,10 +15,11 @@ public class Palette {
             WhileBlock.class,
             IfBlock.class,
             NotBlock.class,
-            WallInFrontBlock.class
+            WallInFrontBlock.class,
+            FunctionDefinitionBlock.class
     );
 
-    public static List<? extends ReadOnlyBlock> getAvailableBlocks(BlockProgram blockProgram){
+    public static List<? extends Block> getAvailableBlocks(BlockProgram blockProgram){
 
         var blocks = new LinkedList<Block>();
 
@@ -39,8 +38,7 @@ public class Palette {
         try{
             return block.getClass().getDeclaredConstructor().newInstance();
         }catch(Exception ex){
-            // ignored
-            return null;
+            return new MoveForwardBlock();
         }
     }
 }

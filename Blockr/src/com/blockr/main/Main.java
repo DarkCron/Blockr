@@ -10,9 +10,8 @@ import com.blockr.handlers.actions.reset.DoResetHandler;
 import com.blockr.handlers.actions.undo.DoUndoHandler;
 import com.blockr.handlers.blockprogram.addblock.AddBlockHandler;
 import com.blockr.handlers.blockprogram.canstart.CanStartHandler;
-import com.blockr.handlers.blockprogram.connectCFandCondition.ConnectControlFlowAndConditionHandler;
 import com.blockr.handlers.blockprogram.connectconditionblock.ConnectConditionBlockHandler;
-import com.blockr.handlers.blockprogram.connectcontrolflowbody.ConnectControlFlowBodyHandler;
+import com.blockr.handlers.blockprogram.connectcontainerblockbody.ConnectContainerBlockBodyHandler;
 import com.blockr.handlers.blockprogram.connectstatementblock.ConnectStatementBlockHandler;
 import com.blockr.handlers.blockprogram.disconnectconditionblock.DisconnectConditionBlockHandler;
 import com.blockr.handlers.blockprogram.disconnectstatementblock.DisconnectStatementBlockHandler;
@@ -75,9 +74,8 @@ public class Main {
                         , new DoResetHandler(state)
                         , new ConnectStatementBlockHandler(state)
                         , new DisconnectStatementBlockHandler(state)
-                        , new ConnectControlFlowBodyHandler(state)
+                        , new ConnectContainerBlockBodyHandler(state)
                         , new DisconnectConditionBlockHandler(state)
-                        , new ConnectControlFlowAndConditionHandler(state)
                         , new DoRecordHandler(state)
                         )
                 )

@@ -1,10 +1,11 @@
 package com.blockr.domain.block;
 
 import com.blockr.domain.block.interfaces.ConditionedBlock;
+import com.blockr.domain.block.interfaces.ContainerBlock;
 import com.blockr.domain.block.interfaces.ReadOnlyControlFlowBlock;
 import com.blockr.domain.block.interfaces.ReadOnlyStatementBlock;
 
-public abstract class ControlFlowBlock extends StatementBlock implements ReadOnlyControlFlowBlock, ConditionedBlock {
+public abstract class ControlFlowBlock extends StatementBlock implements ReadOnlyControlFlowBlock, ConditionedBlock, ContainerBlock {
 
     @Override
     public ConditionBlock getCondition() {
