@@ -368,7 +368,9 @@ public abstract class UIBlockComponent extends Component {
         }
 
         if(mediator.send(new GetBlockProgram()).getActive() instanceof FunctionDefinitionBlock){
-            if(((FunctionDefinitionBlock) mediator.send(new GetBlockProgram()).getActive()).getCurrent() == source){
+            if(((FunctionDefinitionBlock) mediator.send(new GetBlockProgram()).getActive()).getCurrent() == source
+            || (((FunctionDefinitionBlock) mediator.send(new GetBlockProgram()).getActive()).getCurrent() == null
+            && ((FunctionDefinitionBlock) mediator.send(new GetBlockProgram()).getActive()).getFunctionBody().getBody() == this.source) ){
                 graphics.setColor(Color.PINK);
                 graphics.fillRect(0, 0, getWidth(source), getHeight(source));
                 graphics.setColor(Color.yellow);

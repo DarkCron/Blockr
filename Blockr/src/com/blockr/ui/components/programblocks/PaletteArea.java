@@ -3,6 +3,7 @@ package com.blockr.ui.components.programblocks;
 import an.awesome.pipelinr.Pipeline;
 import com.blockr.domain.block.*;
 import com.blockr.handlers.actions.record.DoRecord;
+import com.blockr.handlers.blockprogram.getblockprogram.GetBlockProgram;
 import com.blockr.handlers.ui.input.GetProgramSelection;
 import com.blockr.handlers.ui.input.resetuistate.ResetUIState;
 import com.ui.Component;
@@ -24,6 +25,7 @@ public class PaletteArea extends Container {
 
     private static final List<PaletteBlockComponent> programBlockComponents = new ArrayList<>();
     private static final List<WindowPosition> regionPositions = new ArrayList<>();
+    private static PaletteBlockComponent functionComponent;
 
     private final Pipeline mediator;
 
@@ -67,6 +69,7 @@ public class PaletteArea extends Container {
         rootPos = rootPos.plus(new WindowPosition(0,spaceBetween + block_height));
         programBlockComponents.add(new PaletteBlockComponent(new FunctionDefinitionBlock(), mediator, rootPos));
         regionPositions.add(rootPos);
+        functionComponent = programBlockComponents.get(programBlockComponents.size()-1);
     }
 
     public PaletteArea(Pipeline mediator) {
@@ -133,6 +136,10 @@ public class PaletteArea extends Container {
 
     @Override
     protected void draw(Graphics graphics) {
-
+        if(ProgramArea.programHasFunction()){
+            programBlockComponents.remove(functionComponent);
+        }else if(!programBlockComponents.stream().anyMatch(pbc -> pbc.getSource() instanceof FunctionDefinitionBlock)){
+            programBlockComponents.add(functionComponent);
+        }
     }
 }
